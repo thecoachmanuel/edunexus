@@ -1,21 +1,17 @@
 "use client";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import useSWR from "swr";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ExpenseDialog } from "@/components/finance/ExpenseDialog";
 import { ExportButtons } from "@/components/finance/ExportButtons";
 import { Expense } from "@/types";
 
 export default function ExpensesPage() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const { data, mutate } = useSWR("/finance/expenses");
+  const expenses: Expense[] = data?.expenses || [];
 
   const loadData = () => {
-    api.get("/finance/expenses").then(res => setExpenses(res.data.expenses));
+    mutate();
   };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">

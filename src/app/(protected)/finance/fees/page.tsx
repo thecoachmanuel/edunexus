@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { api } from "@/lib/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,18 +9,23 @@ import { RecordPaymentDialog } from "@/components/finance/RecordPaymentDialog";
 import { ExportButtons } from "@/components/finance/ExportButtons";
 import { FeeStructure, StudentFee } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function FeeManagement() {
-  const [structures, setStructures] = useState<FeeStructure[]>([]);
-  const [fees, setFees] = useState<StudentFee[]>([]);
+  const { data: structuresData, mutate: mutateStructures, isLoading: loadingStructures } = useSWR("/finance/fee-structures");
+  const { data: feesData, mutate: mutateFees, isLoading: loadingFees } = useSWR("/finance/student-fees");
+
   const [editStructure, setEditStructure] = useState<FeeStructure | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  const structures: FeeStructure[] = structuresData?.feeStructures || [];
+  const fees: StudentFee[] = feesData?.studentFees || [];
+
   const loadData = () => {
-    api.get("/finance/fee-structures").then(res => setStructures(res.data.feeStructures));
-    api.get("/finance/student-fees").then(res => setFees(res.data.studentFees));
+    mutateStructures();
+    mutateFees();
   };
 
   const handleDeleteStructure = async (id: string) => {
@@ -28,15 +33,11 @@ export default function FeeManagement() {
     try {
       await api.delete(`/finance/fee-structures/${id}`);
       toast.success("Fee structure deleted");
-      loadData();
+      mutateStructures();
     } catch (error) {
       toast.error("Failed to delete fee structure");
     }
   };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">

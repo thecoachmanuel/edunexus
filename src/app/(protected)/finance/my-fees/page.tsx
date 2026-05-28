@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import useSWR from "swr";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,11 +8,8 @@ import { StudentFee } from "@/types";
 import jsPDF from "jspdf";
 
 export default function MyFees() {
-  const [fees, setFees] = useState<StudentFee[]>([]);
-
-  useEffect(() => {
-    api.get("/finance/student-fees").then(res => setFees(res.data.studentFees));
-  }, []);
+  const { data } = useSWR("/finance/student-fees");
+  const fees: StudentFee[] = data?.studentFees || [];
 
   const downloadReceipt = (fee: StudentFee) => {
     const doc = new jsPDF();

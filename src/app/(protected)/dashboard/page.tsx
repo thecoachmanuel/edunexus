@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthProvider";
-import { api } from "@/lib/api";
+import useSWR from "swr";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -25,26 +25,7 @@ import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 export default function Dashboard() {
   const { user } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [statsData, setStatsData] = useState<any>({});
-
-  // 1. Fetch Data Logic
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        // THE REAL CALL
-        const { data } = await api.get("/dashboard/stats");
-        setStatsData(data);
-      } catch (error) {
-        console.error("Failed to load dashboard", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) fetchDashboardData();
-  }, [user]);
+  const { data: statsData, isLoading: loading } = useSWR(user ? "/dashboard/stats" : null);
 
   // 2. Loading State
   if (loading) {

@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/AuthProvider";
 
 export function ExpenseDialog({ onSave }: { onSave: () => void }) {
+  const { year } = useAuth();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "", amount: "", category: "supplies", date: new Date().toISOString().split('T')[0], paymentMethod: "cash"
@@ -17,7 +19,7 @@ export function ExpenseDialog({ onSave }: { onSave: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post("/finance/expenses", { ...formData, amount: Number(formData.amount), academicYear: "664684a22b79a9bd12345678" });
+      await api.post("/finance/expenses", { ...formData, amount: Number(formData.amount), academicYear: year?._id });
       toast.success("Expense recorded");
       setOpen(false);
       onSave();

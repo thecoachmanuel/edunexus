@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { api } from "@/lib/api";
 import { Plus, FileText, Clock, Users, Loader2, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/AuthProvider";
@@ -22,37 +23,18 @@ import QuizGenerator from "@/components/lms/QuizGenerator";
 const Quizzes = () => {
   const { user } = useAuth();
   const isTeacher = user?.role === "teacher" || user?.role === "admin";
-  const [exams, setQuizzes] = useState<exam[]>([]);
   const [isGenOpen, setIsGenOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // fetch exams
-  const fetchQuizzes = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get("/exams");
-      setQuizzes(data.exams || []);
-      setLoading(false);
-    } catch (error) {
-      toast.error("failed to load exams");
-      console.log(error);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!user) return;
-    fetchQuizzes();
-  }, [user]);
-
+  const { data, mutate, isLoading: loading } = useSWR(user ? "/exams" : null);
+  const exams: exam[] = data?.exams || [];
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this quiz?")) return;
     try {
       await api.delete(`/exams/${id}`);
       toast.success("Quiz deleted");
-      fetchQuizzes();
+      mutate();
     } catch (error) {
       toast.error("Failed to delete quiz");
     }
@@ -145,7 +127,7 @@ const Quizzes = () => {
       <QuizGenerator
         open={isGenOpen}
         onOpenChange={setIsGenOpen}
-        onSuccess={fetchQuizzes}
+        onSuccess={() => mutate()}
       />
     </div>
   );

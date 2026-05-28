@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/provider/theme";
 import { AuthProvider } from "@/hooks/AuthProvider";
+import { SWRProvider } from "@/components/provider/swr-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
@@ -21,10 +22,12 @@ export default function RootLayout({
           defaultTheme="system"
           storageKey="vite-ui-theme"
         >
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
+          <SWRProvider>
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </SWRProvider>
         </ThemeProvider>
       </body>
     </html>

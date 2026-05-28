@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect, useMemo } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/AuthProvider";
 
 export function SalaryDialog({ onSave }: { onSave: () => void }) {
+  const { year } = useAuth();
   const [open, setOpen] = useState(false);
   const [employees, setEmployees] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -19,14 +21,15 @@ export function SalaryDialog({ onSave }: { onSave: () => void }) {
   useEffect(() => {
     if (open) {
       Promise.all([
-        api.get("/users?role=teacher"),
-        api.get("/users?role=admin")
+        api.get("/users?role=teacher&limit=1000"),
+        api.get("/users?role=admin&limit=1000")
       ]).then(([teachersRes, adminsRes]) => {
         const teachers = teachersRes.data.users || [];
         const admins = adminsRes.data.users || [];
         setEmployees([...teachers, ...admins]);
       }).catch(err => {
-        toast.error("Failed to load employees");
+        console.error("SalaryDialog load error:", err);
+        toast.error("Failed to load employees: " + err?.message);
       });
     }
   }, [open]);
@@ -39,7 +42,7 @@ export function SalaryDialog({ onSave }: { onSave: () => void }) {
         basicSalary: Number(formData.basicSalary),
         allowances: Number(formData.allowances),
         deductions: Number(formData.deductions),
-        academicYear: "664684a22b79a9bd12345678"
+        academicYear: year?._id
       });
       toast.success("Salary recorded");
       setOpen(false);

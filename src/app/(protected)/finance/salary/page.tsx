@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import useSWR from "swr";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { SalaryDialog } from "@/components/finance/SalaryDialog";
@@ -9,15 +8,12 @@ import { ExportButtons } from "@/components/finance/ExportButtons";
 import { SalaryRecord } from "@/types";
 
 export default function SalaryPage() {
-  const [salaries, setSalaries] = useState<SalaryRecord[]>([]);
+  const { data, mutate } = useSWR("/finance/salary");
+  const salaries: SalaryRecord[] = data?.salaries || [];
 
   const loadData = () => {
-    api.get("/finance/salary").then(res => setSalaries(res.data.salaries));
+    mutate();
   };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/AuthProvider";
 import { Class } from "@/types";
 
 export function FeeStructureDialog({ onSave, initialData, open: controlledOpen, onOpenChange }: { onSave: () => void, initialData?: any, open?: boolean, onOpenChange?: (open: boolean) => void }) {
@@ -44,7 +45,7 @@ export function FeeStructureDialog({ onSave, initialData, open: controlledOpen, 
       return;
     }
     try {
-      const payload = { ...formData, amount: Number(formData.amount), academicYear: "664684a22b79a9bd12345678" };
+      const payload = { ...formData, amount: Number(formData.amount), academicYear: year?._id };
       if (initialData && initialData._id) {
         await api.put(`/finance/fee-structures/${initialData._id}`, payload);
         toast.success("Fee structure updated");

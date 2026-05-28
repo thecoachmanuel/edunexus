@@ -6,6 +6,7 @@ import CustomAlert from "@/components/global/CustomAlert";
 import Search from "@/components/global/Search";
 
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { api } from "@/lib/api";
@@ -23,11 +24,8 @@ export default function UserManagementPage({
   title,
   description,
 }: Props) {
-  const [users, setUsers] = useState<user[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // Form States
@@ -48,33 +46,17 @@ export default function UserManagementPage({
     return () => clearTimeout(handler);
   }, [search]);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      // Construct Query
-      const searchParam = debouncedSearch ? `&search=${debouncedSearch}` : "";
-      const roleParam = `&role=${role}`;
-      const { data } = (await api.get(
-        `/users?page=${page}&limit=10${roleParam}${searchParam}`
-      )) as { data: { users: user[]; pagination: pagination } };
-      
-      if (data.users) {
-        setUsers(data.users);
-        setTotalPages(data.pagination.pages);
-      } else {
-        setUsers([]);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(`Failed to load ${role}s`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const searchParam = debouncedSearch ? `&search=${debouncedSearch}` : "";
+  const roleParam = `&role=${role}`;
+  const url = `/users?page=${page}&limit=10${roleParam}${searchParam}`;
 
-  useEffect(() => {
-    fetchUsers();
-  }, [role, page, debouncedSearch]); // Re-fetch if role changes
+  const { data, mutate, isLoading: loading } = useSWR(url);
+  const users: user[] = data?.users || [];
+  const totalPages = data?.pagination?.pages || 1;
+
+  const fetchUsers = () => {
+    mutate();
+  };
 
   const handleCreate = () => {
     setEditingUser(null);

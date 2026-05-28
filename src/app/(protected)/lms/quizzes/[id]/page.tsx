@@ -30,54 +30,42 @@ const Quiz = () => {
   const isStudent = user?.role === "student";
   const isTeacher = user?.role === "teacher" || user?.role === "admin";
 
-  const [exam, setExam] = useState<exam | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: exam, mutate: mutateExam, isLoading: loadingExam, error: examError } = useSWR(id ? `/exams/${id}` : null);
+  const { data: submission, mutate: mutateSubmission, isLoading: loadingSubmission } = useSWR(
+    isStudent && id ? `/exams/${id}/result` : null,
+    { shouldRetryOnError: false }
+  );
+
+  const loading = loadingExam || (isStudent && loadingSubmission);
+
   const [submitting, setSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [submission, setSubmission] = useState<Submission | null>(null);
+  
   const totalPoints = exam
-    ? exam.questions.reduce((acc, q) => acc + (q.points || 1), 0)
+    ? exam.questions.reduce((acc: any, q: any) => acc + (q.points || 1), 0)
     : 0;
   const percentage =
     submission && totalPoints > 0
       ? Math.round((submission.score / totalPoints) * 100)
       : 0;
 
-  const fetchExam = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/exams/${id}`);
-      setExam(res.data);
-      if (isStudent) {
-        try {
-          const resultRes = await api.get(`/exams/${id}/result`);
-          setSubmission(resultRes.data);
-        } catch {
-          setSubmission(null);
-        }
-      }
-    } catch (error) {
+  useEffect(() => {
+    if (examError) {
       toast.error("Failed to load exam");
       router.push("/lms/quizzes");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [examError, router]);
 
   useEffect(() => {
-    if (id) fetchExam();
-  }, [id]);
-
-  useEffect(() => {
-    if (!loading) {
+    if (!loadingExam) {
       if (!exam) {
-        router.push("/lms/quizzes");
+        // Only redirect if there's no exam and we're not loading and there's no error (which is handled above)
       } else if (!exam.isActive && !isTeacher) {
         router.push("/lms/quizzes");
       }
     }
-  }, [loading, exam, isTeacher, router]);
+  }, [loadingExam, exam, isTeacher, router]);
 
   if (loading) {
     return (
@@ -144,7 +132,7 @@ const Quiz = () => {
     try {
       const { data } = await api.patch(`/exams/${id}`, { isActive: !exam?.isActive });
       toast.success(data.message);
-      fetchExam();
+      mutateExam();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to update status");
     }
@@ -244,7 +232,7 @@ const Quiz = () => {
           exam={exam}
           onSuccess={() => {
             setIsEditing(false);
-            fetchExam();
+            mutateExam();
           }}
           onCancel={() => setIsEditing(false)}
         />
