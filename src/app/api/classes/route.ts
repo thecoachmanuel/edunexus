@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Class from "@/lib/models/class";
 import User from "@/lib/models/user";
-import AcademicYear from "@/lib/models/academicyear";
+import AcademicYear from "@/lib/models/academicYear";
 import { getAuthUser } from "@/middleware/auth";
 import { logActivity } from "@/lib/utils/activitieslog";
 
