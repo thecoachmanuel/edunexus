@@ -48,13 +48,13 @@ const Quizzes = () => {
 
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this assignment?")) return;
+    if (!confirm("Are you sure you want to delete this quiz?")) return;
     try {
       await api.delete(`/exams/${id}`);
       toast.success("Quiz deleted");
       fetchQuizzes();
     } catch (error) {
-      toast.error("Failed to delete assignment");
+      toast.error("Failed to delete quiz");
     }
   };
 
@@ -85,7 +85,7 @@ const Quizzes = () => {
       </div>
       {exams.length === 0 && (
         <div className="flex items-center justify-center h-full">
-          <p>No assignments found</p>
+          <p>No quizzes found</p>
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

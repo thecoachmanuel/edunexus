@@ -59,12 +59,12 @@ export async function GET(req: NextRequest) {
       stats = { myClassesCount, pendingGrading, nextClass: "Mathematics - Grade 10", nextClassTime: "10:00 AM", recentActivity: formattedActivity };
     } else if (user.role === "student") {
       const nextExam = await Exam.findOne({ class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 }).lean();
-      const pendingAssignments = await Exam.countDocuments({ class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });
+      const pendingQuizzes = await Exam.countDocuments({ class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });
 
       const studentAttendance = await Attendance.find({ "records.student": user._id }).lean();
       let totalMyRecords = 0;
       let myPresentRecords = 0;
-      studentAttendance.forEach((att) => {
+      studentAttendance.forEach((att: any) => {
         const rec = att.records.find((r: any) => r.student.toString() === user._id.toString());
         if (rec) {
           totalMyRecords++;
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
       });
       const myAttendance = totalMyRecords === 0 ? "100%" : `${Math.round((myPresentRecords / totalMyRecords) * 100)}%`;
 
-      stats = { myAttendance, pendingAssignments, nextExam: nextExam?.title || "No upcoming exams", nextExamDate: nextExam ? new Date(nextExam.dueDate).toLocaleDateString() : "", recentActivity: formattedActivity };
+      stats = { myAttendance, pendingQuizzes, nextExam: nextExam?.title || "No upcoming exams", nextExamDate: nextExam ? new Date(nextExam.dueDate).toLocaleDateString() : "", recentActivity: formattedActivity };
     }
     return NextResponse.json(stats);
   } catch (error) {

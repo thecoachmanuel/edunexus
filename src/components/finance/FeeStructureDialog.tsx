@@ -11,8 +11,8 @@ import { Class } from "@/types";
 
 export function FeeStructureDialog({ onSave, initialData, open: controlledOpen, onOpenChange }: { onSave: () => void, initialData?: any, open?: boolean, onOpenChange?: (open: boolean) => void }) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const isControlled = open !== undefined && onOpenChange !== undefined;
-  const isOpen = isControlled ? open : internalOpen;
+  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
   const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
 
   const [classes, setClasses] = useState<Class[]>([]);
