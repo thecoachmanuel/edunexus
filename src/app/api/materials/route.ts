@@ -32,7 +32,8 @@ export async function GET(req: NextRequest) {
         .populate("uploader", "name email")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
     ]);
 
     return NextResponse.json({

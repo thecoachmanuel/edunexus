@@ -42,7 +42,8 @@ export async function GET(req: NextRequest) {
       .populate("class", "name")
       .populate("academicYear", "name")
       .populate("grades.subject", "name code")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json({ reports });
   } catch (error) {
@@ -63,14 +64,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get all students in the class
-    const students = await User.find({ role: "student", studentClass: classId });
+    const students = await User.find({ role: "student", studentClass: classId }).lean();
 
     if (students.length === 0) {
       return NextResponse.json({ message: "No students found in this class" }, { status: 404 });
     }
 
     // 2. Fetch all exams for this class to map submissions to subjects
-    const classExams = await Exam.find({ class: classId });
+    const classExams = await Exam.find({ class: classId }).lean();
     const examMap = new Map();
     classExams.forEach((exam) => {
       examMap.set(exam._id.toString(), exam.subject.toString());
@@ -92,7 +93,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Find submissions for this student
-      const submissions = await Submission.find({ student: student._id });
+      const submissions = await Submission.find({ student: student._id }).lean();
 
       // Group scores by subject
       const subjectScores: Record<string, { totalScore: number; count: number }> = {};

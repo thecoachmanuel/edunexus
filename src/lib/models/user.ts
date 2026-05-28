@@ -43,6 +43,10 @@ const userSchema: Schema<IUser> = new Schema(
   }
 );
 
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ role: 1 });
+userSchema.index({ studentClass: 1, role: 1 });
+
 // pre-save middleware to hash password
 userSchema.pre<IUser>("save", async function () {
   if (!this.isModified("password")) return;

@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ISubmission extends Document {
   exam: mongoose.Types.ObjectId;
   student: mongoose.Types.ObjectId;
-  answers: { questionId: string; answer: string }[];
+  answers: { questionId: string; answer: string; feedback?: string }[];
   score: number;
   submittedAt: Date;
 }
@@ -15,6 +15,7 @@ const submissionSchema = new Schema({
     {
       questionId: String,
       answer: String,
+      feedback: String,
     },
   ],
   score: { type: Number, default: 0 },
@@ -23,5 +24,7 @@ const submissionSchema = new Schema({
 
 // Prevent duplicate submissions
 submissionSchema.index({ exam: 1, student: 1 }, { unique: true });
+// Optimize searching by student
+submissionSchema.index({ student: 1 });
 
 export default (mongoose.models.Submission || mongoose.model<ISubmission>("Submission", submissionSchema));

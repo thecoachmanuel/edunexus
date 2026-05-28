@@ -52,7 +52,8 @@ export async function GET(req: NextRequest) {
         .populate("children", "name email")
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
     ]);
 
     return NextResponse.json({

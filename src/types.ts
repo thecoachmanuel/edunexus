@@ -68,7 +68,7 @@ export interface Submission {
   _id: string;
   score: number;
   exam: exam; // The populated exam with answers
-  answers: { questionId: string; answer: string }[];
+  answers: { questionId: string; answer: string; feedback?: string }[];
 }
 
 export interface period {

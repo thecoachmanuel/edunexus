@@ -4,6 +4,9 @@ import Exam from "@/lib/models/exam";
 import Submission from "@/lib/models/submission";
 import { getAuthUser } from "@/middleware/auth";
 import { logActivity } from "@/lib/utils/activitieslog";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
 
 export async function POST(
   req: NextRequest,
@@ -36,15 +39,65 @@ export async function POST(
       if (isCorrect) score += question.points || 1;
       return {
         questionId: ans.questionId,
+        questionText: question?.questionText,
+        correctAnswer: question?.correctAnswer,
         answer: ans.answer,
-        isCorrect
+        isCorrect,
+        feedback: "",
       };
     });
+
+    const incorrectAnswers = gradedAnswers.filter((a: any) => !a.isCorrect && a.questionText);
+
+    if (incorrectAnswers.length > 0 && process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      try {
+        const prompt = `
+          You are an AI teacher. A student took an exam and got the following questions wrong.
+          Provide a very brief 1-2 sentence explanation for each question on why their answer was wrong, and why the correct answer is right.
+          
+          Questions:
+          ${JSON.stringify(incorrectAnswers.map((a: any) => ({
+            id: a.questionId,
+            question: a.questionText,
+            studentAnswer: a.answer,
+            correctAnswer: a.correctAnswer
+          })))}
+          
+          Output STRICT JSON only. Schema:
+          [
+            { "id": "questionId", "feedback": "Your brief explanation here" }
+          ]
+        `;
+
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent(prompt);
+        const textResponse = result.response.text();
+        const cleanJSON = textResponse.replace(/```json/g, "").replace(/```/g, "").trim();
+        const feedbackData = JSON.parse(cleanJSON);
+
+        feedbackData.forEach((fb: any) => {
+          const ans = gradedAnswers.find((a: any) => a.questionId === fb.id);
+          if (ans) {
+            ans.feedback = fb.feedback;
+          }
+        });
+      } catch (aiError) {
+        console.error("AI FEEDBACK ERROR", aiError);
+        // Continue submission even if AI feedback fails
+      }
+    }
+
+    // Clean up temporary fields before saving
+    const finalAnswers = gradedAnswers.map((a: any) => ({
+      questionId: a.questionId,
+      answer: a.answer,
+      feedback: a.feedback
+    }));
 
     const submission = await Submission.create({
       exam: id,
       student: authUser._id,
-      answers: gradedAnswers,
+      answers: finalAnswers,
       score,
     });
 
@@ -60,3 +113,4 @@ export async function POST(
     return NextResponse.json({ message: "Server Error", error }, { status: 500 });
   }
 }
+

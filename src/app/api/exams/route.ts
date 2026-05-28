@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
+        .lean(),
     ]);
 
     return NextResponse.json({ exams, pagination: { total, page, pages: Math.ceil(total / limit) } });

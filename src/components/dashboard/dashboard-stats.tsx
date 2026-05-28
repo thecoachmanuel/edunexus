@@ -126,7 +126,7 @@ export function DashboardStats({ role, data }: StatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{data.myAttendance || "0%"}</div>
-          <p className="text-xs text-muted-foreground">This semester</p>
+          <p className="text-xs text-muted-foreground">This term</p>
         </CardContent>
       </Card>
       <Card>

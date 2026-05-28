@@ -39,6 +39,10 @@ const attendanceSchema = new Schema<IAttendance>(
 
 // Ensure only one attendance record per class per day
 attendanceSchema.index({ date: 1, class: 1 }, { unique: true });
+// Optimize searching attendance by specific student
+attendanceSchema.index({ "records.student": 1 });
+// Optimize fetching session-wide stats
+attendanceSchema.index({ academicYear: 1, class: 1 });
 
 export default mongoose.models.Attendance ||
   mongoose.model<IAttendance>("Attendance", attendanceSchema);

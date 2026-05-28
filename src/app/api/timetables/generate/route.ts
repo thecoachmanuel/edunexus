@@ -5,8 +5,7 @@ import User from "@/lib/models/user";
 import Timetable from "@/lib/models/timetable";
 import { getAuthUser } from "@/middleware/auth";
 import { logActivity } from "@/lib/utils/activitieslog";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,7 +39,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Class not found" }, { status: 404 });
     }
 
-    const allTeachers = await User.find({ role: "teacher" });
+    const allTeachers = await User.find({ role: "teacher" }).lean();
     const classSubjectIds = classData.subjects.map((sub: any) =>
       sub._id.toString()
     );
@@ -72,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     // --- Step 2: Fetch existing timetables to avoid teacher clashes ---
-    const allTimetables = await Timetable.find({ academicYear: academicYearId });
+    const allTimetables = await Timetable.find({ academicYear: academicYearId }).lean();
 
     // --- Step 3: Generate timetable with AI ---
     const prompt = `
@@ -105,10 +104,11 @@ export async function POST(req: NextRequest) {
          }
     `;
 
-    const google = createGoogleGenerativeAI({ apiKey });
-    const activeModel = google("gemini-1.5-flash");
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
+    const activeModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const { text } = await generateText({ prompt, model: activeModel });
+    const result = await activeModel.generateContent(prompt);
+    const text = result.response.text();
 
     const cleanJSON = text.replace(/```json/g, "").replace(/```/g, "").trim();
     const aiSchedule = JSON.parse(cleanJSON);

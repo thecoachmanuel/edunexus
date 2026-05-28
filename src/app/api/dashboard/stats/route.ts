@@ -24,7 +24,8 @@ export async function GET(req: NextRequest) {
     const recentActivities = await ActivityLog.find(activityQuery)
       .sort({ createdAt: -1 })
       .limit(10)
-      .populate("user", "name");
+      .populate("user", "name")
+      .lean();
 
     const formattedActivity = recentActivities.map(
       (log) =>
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
       const totalTeachers = await User.countDocuments({ role: "teacher" });
       const activeExams = await Exam.countDocuments({ isActive: true });
       
-      const allAttendance = await Attendance.find({});
+      const allAttendance = await Attendance.find({}).lean();
       let totalRecords = 0;
       let presentRecords = 0;
       allAttendance.forEach((att) => {
@@ -52,15 +53,15 @@ export async function GET(req: NextRequest) {
       stats = { totalStudents, totalTeachers, activeExams, avgAttendance, recentActivity: formattedActivity };
     } else if (user.role === "teacher") {
       const myClassesCount = await Class.countDocuments({ classTeacher: user._id });
-      const myExams = await Exam.find({ teacher: user._id }).select("_id");
+      const myExams = await Exam.find({ teacher: user._id }).select("_id").lean();
       const myExamIds = myExams.map((exam) => exam._id);
       const pendingGrading = await Submission.countDocuments({ exam: { $in: myExamIds }, score: 0 });
       stats = { myClassesCount, pendingGrading, nextClass: "Mathematics - Grade 10", nextClassTime: "10:00 AM", recentActivity: formattedActivity };
     } else if (user.role === "student") {
-      const nextExam = await Exam.findOne({ class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 });
+      const nextExam = await Exam.findOne({ class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 }).lean();
       const pendingAssignments = await Exam.countDocuments({ class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });
 
-      const studentAttendance = await Attendance.find({ "records.student": user._id });
+      const studentAttendance = await Attendance.find({ "records.student": user._id }).lean();
       let totalMyRecords = 0;
       let myPresentRecords = 0;
       studentAttendance.forEach((att) => {

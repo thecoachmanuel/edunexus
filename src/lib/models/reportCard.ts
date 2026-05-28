@@ -39,6 +39,8 @@ const reportCardSchema = new Schema<IReportCard>(
 
 // Ensure a student only has one report card per term per year
 reportCardSchema.index({ student: 1, academicYear: 1, term: 1 }, { unique: true });
+// Optimize searching by class
+reportCardSchema.index({ class: 1 });
 
 export default mongoose.models.ReportCard ||
   mongoose.model<IReportCard>("ReportCard", reportCardSchema);

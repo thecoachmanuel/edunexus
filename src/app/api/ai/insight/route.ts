@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       
       Generate a single, brief, professional, and highly insightful academic tip or observation based on their role. 
       Do not say "As an AI" or give generic robotic responses. Make it sound like a helpful, proactive human advisor.
+      IMPORTANT: When giving advice to students about their instructors, ALWAYS refer to them as "teachers", never as "professors" or "lecturers".
       Keep it to 2-3 sentences maximum.
     `;
 

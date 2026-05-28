@@ -17,7 +17,8 @@ export async function GET(req: NextRequest) {
       .populate("class", "name")
       .populate("academicYear", "name")
       .populate("schedule.subject", "name code")
-      .populate("schedule.teacher", "name email");
+      .populate("schedule.teacher", "name email")
+      .lean();
 
     return NextResponse.json(timetables);
   } catch (error) {
