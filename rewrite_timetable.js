@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+const fs = require('fs');
+
+const content = `import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User as UserIcon, CalendarDays } from "lucide-react";
 import type { schedule } from "@/types";
@@ -52,7 +54,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
     for (const day of schedule) {
       const found = day.periods.find((p) => p.startTime === startTime);
       if (found) {
-        return `${found.startTime} - ${found.endTime}`;
+        return \`\${found.startTime} - \${found.endTime}\`;
       }
     }
     return startTime;
@@ -151,7 +153,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
 
                   return (
                     <div
-                      key={`${day}-${time}`}
+                      key={\`\${day}-\${time}\`}
                       className="flex-1 min-w-[200px] border-r p-3 last:border-r-0 hover:bg-muted/10 transition-colors"
                     >
                       {period && period.subject && period.teacher ? (
@@ -191,3 +193,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
 };
 
 export default TimetableGrid;
+`;
+
+fs.writeFileSync('src/components/timetable/TimetableGrid.tsx', content, 'utf8');
+console.log('TimetableGrid.tsx rewritten successfully!');

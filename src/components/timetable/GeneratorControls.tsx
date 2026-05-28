@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Loader2 } from "lucide-react"; // Added Search icon
+import { Sparkles, Loader2, PlusCircle, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -25,10 +25,18 @@ import { Label } from "@/components/ui/label";
 import type { academicYear, Class } from "@/types";
 import { useAuth } from "@/hooks/AuthProvider";
 
+export interface BreakSetting {
+  name: string;
+  startTime: string;
+  duration: number;
+}
+
 export interface GenSettings {
   startTime: string;
   endTime: string;
   periods: number;
+  periodDuration: number;
+  breaks: BreakSetting[];
 }
 
 interface Props {
@@ -59,6 +67,8 @@ const GeneratorControls = ({
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("14:00");
   const [periods, setPeriods] = useState("5");
+  const [periodDuration, setPeriodDuration] = useState("45");
+  const [breaks, setBreaks] = useState<BreakSetting[]>([]);
 
   useEffect(() => {
     if (!user) return; // Wait for auth to resolve
@@ -93,6 +103,20 @@ const GeneratorControls = ({
   }, [user]); // re-run when auth resolves
 
 
+  const addBreak = () => {
+    setBreaks((prev) => [...prev, { name: "Break", startTime: "10:00", duration: 15 }]);
+  };
+
+  const removeBreak = (index: number) => {
+    setBreaks((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateBreak = (index: number, field: keyof BreakSetting, value: string | number) => {
+    setBreaks((prev) =>
+      prev.map((b, i) => (i === index ? { ...b, [field]: value } : b))
+    );
+  };
+
   const handleGenerateClick = () => {
     if (!selectedClass || !selectedYear) {
       toast.error("Please select both a Class and Academic Year");
@@ -102,6 +126,8 @@ const GeneratorControls = ({
       startTime,
       endTime,
       periods: parseInt(periods, 10) || 5,
+      periodDuration: parseInt(periodDuration, 10) || 45,
+      breaks,
     });
   };
 
@@ -174,7 +200,8 @@ const GeneratorControls = ({
         </div>
         {!hideGenerate && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4 mt-4">
+            {/* Row 1: Time range and counts */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t pt-4 mt-4">
               <div className="space-y-2">
                 <Label>Start Time</Label>
                 <Input
@@ -198,12 +225,98 @@ const GeneratorControls = ({
                 <Input
                   type="number"
                   min={1}
-                  max={10}
+                  max={12}
                   value={periods}
                   onChange={(e) => setPeriods(e.target.value)}
                   disabled={isGenerating}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Period Duration (mins)</Label>
+                <Input
+                  type="number"
+                  min={10}
+                  max={120}
+                  value={periodDuration}
+                  onChange={(e) => setPeriodDuration(e.target.value)}
+                  disabled={isGenerating}
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Breaks */}
+            <div className="border-t pt-4 mt-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-semibold">Break Times</Label>
+                  <p className="text-xs text-muted-foreground">Add one or more breaks with custom start time and duration.</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addBreak}
+                  disabled={isGenerating}
+                  className="flex items-center gap-1.5"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  Add Break
+                </Button>
+              </div>
+
+              {breaks.length === 0 && (
+                <p className="text-xs text-muted-foreground italic">
+                  No breaks added. The AI will use default spacing.
+                </p>
+              )}
+
+              {breaks.map((br, idx) => (
+                <div
+                  key={idx}
+                  className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end p-3 border rounded-lg bg-muted/30"
+                >
+                  <div className="space-y-1">
+                    <Label className="text-xs">Name</Label>
+                    <Input
+                      value={br.name}
+                      onChange={(e) => updateBreak(idx, "name", e.target.value)}
+                      placeholder="e.g. Short Break"
+                      disabled={isGenerating}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Start Time</Label>
+                    <Input
+                      type="time"
+                      value={br.startTime}
+                      onChange={(e) => updateBreak(idx, "startTime", e.target.value)}
+                      disabled={isGenerating}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Duration (mins)</Label>
+                    <Input
+                      type="number"
+                      min={5}
+                      max={120}
+                      value={br.duration}
+                      onChange={(e) => updateBreak(idx, "duration", parseInt(e.target.value, 10) || 15)}
+                      disabled={isGenerating}
+                      className="w-24"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeBreak(idx)}
+                    disabled={isGenerating}
+                    className="text-destructive hover:text-destructive mb-0.5"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
 
             <Button

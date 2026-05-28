@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import useSWR from "swr";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import {
@@ -318,85 +319,43 @@ export default function AttendanceTrackingPage() {
   const isAdmin = user?.role === "admin";
   const isTeacher = user?.role === "teacher";
 
-  // Class list
-  const [classes, setClasses] = useState<any[]>([]);
+  // Local UI state
   const [selectedClassId, setSelectedClassId] = useState("");
-
-  // Class overview state
-  const [students, setStudents] = useState<StudentSummary[]>([]);
-  const [loadingOverview, setLoadingOverview] = useState(false);
   const [overviewSearch, setOverviewSearch] = useState("");
-
-  // Individual search state
-  const [allStudents, setAllStudents] = useState<any[]>([]);
   const [individualSearch, setIndividualSearch] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState("");
-
-  // Detail sheet
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetDetail, setSheetDetail] = useState<StudentDetail | null>(null);
   const [sheetLoading, setSheetLoading] = useState(false);
 
-  // ── Load classes ────────────────────────────────────────
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const { data } = await api.get("/classes?limit=1000");
-        let availableClasses = data.classes || [];
-        if (isTeacher) {
-          availableClasses = availableClasses.filter(
-            (c: any) => c.classTeacher?._id === user?._id
-          );
-        }
-        setClasses(availableClasses);
-        if (availableClasses.length > 0) {
-          setSelectedClassId(availableClasses[0]._id);
-        }
-      } catch {
-        toast.error("Failed to load classes");
-      }
-    };
-    if (isAdmin || isTeacher) init();
-  }, [isAdmin, isTeacher, user]);
+  // Class list via SWR
+  const { data: classesData } = useSWR(user ? "/classes?limit=1000" : null);
+  const allClasses = classesData?.classes || [];
+  const classes = isTeacher
+    ? allClasses.filter((c: any) => c.classTeacher?._id === user?._id)
+    : allClasses;
 
-  // ── Load all students for individual-search tab ─────────
+  // Auto-select first class
   useEffect(() => {
-    const loadStudents = async () => {
-      try {
-        const { data } = await api.get("/users?role=student&limit=1000");
-        let list = data.users || [];
-        if (isTeacher && selectedClassId) {
-          list = list.filter(
-            (s: any) => s.studentClass?._id === selectedClassId
-          );
-        }
-        setAllStudents(list);
-      } catch {
-        toast.error("Failed to load students");
-      }
-    };
-    loadStudents();
-  }, [isTeacher, selectedClassId]);
+    if (classes.length > 0 && !selectedClassId) {
+      setSelectedClassId(classes[0]._id);
+    }
+  }, [classes.length, selectedClassId]);
 
-  // ── Fetch class overview ─────────────────────────────────
-  useEffect(() => {
-    if (!selectedClassId || !year?._id) return;
-    const fetchOverview = async () => {
-      setLoadingOverview(true);
-      setStudents([]);
-      try {
-        const { data } = await api.get(
-          `/attendance/session?classId=${selectedClassId}&academicYearId=${year._id}`
-        );
-        setStudents(data.students || []);
-      } catch {
-        toast.error("Failed to load class attendance data");
-      } finally {
-        setLoadingOverview(false);
-      }
-    };
-    fetchOverview();
-  }, [selectedClassId, year]);
+  // All students via SWR (for individual-search tab)
+  const { data: allStudentsData } = useSWR(user ? "/users?role=student&limit=1000" : null);
+  const rawStudents = allStudentsData?.users || [];
+  const allStudents = isTeacher && selectedClassId
+    ? rawStudents.filter((s: any) => s.studentClass?._id === selectedClassId)
+    : rawStudents;
+
+  // Class overview via SWR
+  const { data: overviewData, isLoading: loadingOverview } = useSWR(
+    selectedClassId && year?._id
+      ? `/attendance/session?classId=${selectedClassId}&academicYearId=${year._id}`
+      : null
+  );
+  const students: StudentSummary[] = overviewData?.students || [];
 
   // ── Open student detail sheet ────────────────────────────
   const openDetail = useCallback(

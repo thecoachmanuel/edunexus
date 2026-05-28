@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, Save } from "lucide-react";
@@ -35,83 +36,65 @@ export default function AttendancePage() {
   const isTeacher = user?.role === "teacher";
 
   const [date, setDate] = useState<Date>(new Date());
-  const [classes, setClasses] = useState<any[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
-
-  const [students, setStudents] = useState<any[]>([]);
   const [records, setRecords] = useState<Record<string, { status: string; remarks: string }>>({});
-  
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Initialize — wait until user object is resolved
+  // Fetch classes via SWR
+  const { data: classesData, isLoading: loadingClasses } = useSWR(
+    user ? "/classes?limit=1000" : null
+  );
+
+  const allClasses = classesData?.classes || [];
+  const classes = isTeacher
+    ? allClasses.filter((c: any) => c.classTeacher?._id === user?._id)
+    : allClasses;
+
+  // Auto-select first class when loaded
   useEffect(() => {
-    if (!user) return; // Auth not ready yet
-    const init = async () => {
-      try {
-        const { data } = await api.get("/classes?limit=1000");
-        let availableClasses = data.classes || [];
-        
-        if (isTeacher) {
-          availableClasses = availableClasses.filter((c: any) => c.classTeacher?._id === user?._id);
-        }
-        
-        setClasses(availableClasses);
-        
-        if (availableClasses.length > 0) {
-          setSelectedClassId(availableClasses[0]._id);
-        }
-      } catch (error) {
-        toast.error("Failed to load classes");
-      }
-    };
-    if (isAdmin || isTeacher) {
-      init();
+    if (classes.length > 0 && !selectedClassId) {
+      setSelectedClassId(classes[0]._id);
     }
-  }, [user]); // re-run when user resolves
+  }, [classes, selectedClassId]);
 
-  // Fetch Attendance & Students
+  // Fetch students for selected class via SWR
+  const { data: studentsData, isLoading: loadingStudents } = useSWR(
+    selectedClassId ? `/users?role=student&limit=1000` : null
+  );
+  const students = (studentsData?.users || []).filter(
+    (s: any) => s.studentClass?._id === selectedClassId
+  );
+
+  // Fetch existing attendance record via SWR
+  const dateString = format(date, "yyyy-MM-dd");
+  const { data: attendanceData, isLoading: loadingAttendance } = useSWR(
+    selectedClassId ? `/attendance?classId=${selectedClassId}&date=${dateString}` : null
+  );
+
+  const loading = loadingStudents || loadingAttendance;
+
+  // Sync records whenever students or attendance changes
   useEffect(() => {
-    if (!user) return; // Auth not ready yet — prevent 401 on mount
-    const fetchAttendanceData = async () => {
-      if (!selectedClassId || !date) return;
-      
-      setLoading(true);
-      try {
-        const dateString = format(date, "yyyy-MM-dd");
-        
-        // 1. Fetch Students for the class
-        const studentsRes = await api.get(`/users?role=student&limit=1000`);
-        const classStudents = studentsRes.data.users.filter((s: any) => s.studentClass?._id === selectedClassId);
-        setStudents(classStudents);
-
-        // 2. Fetch existing attendance
-        const attendanceRes = await api.get(`/attendance?classId=${selectedClassId}&date=${dateString}`);
-        const existingRecord = attendanceRes.data.attendance;
-
-        const newRecords: Record<string, { status: string; remarks: string }> = {};
-        
-        classStudents.forEach((student: any) => {
-          if (existingRecord) {
-            const existingStudent = existingRecord.records.find((r: any) => r.student._id === student._id);
-            if (existingStudent) {
-              newRecords[student._id] = { status: existingStudent.status, remarks: existingStudent.remarks || "" };
-              return;
-            }
-          }
-          newRecords[student._id] = { status: "Present", remarks: "" };
-        });
-
-        setRecords(newRecords);
-      } catch (error) {
-        toast.error("Failed to load attendance data");
-      } finally {
-        setLoading(false);
+    if (students.length === 0) return;
+    const existingRecord = attendanceData?.attendance;
+    const newRecords: Record<string, { status: string; remarks: string }> = {};
+    students.forEach((student: any) => {
+      if (existingRecord) {
+        const existingStudent = existingRecord.records.find(
+          (r: any) => r.student._id === student._id
+        );
+        if (existingStudent) {
+          newRecords[student._id] = {
+            status: existingStudent.status,
+            remarks: existingStudent.remarks || "",
+          };
+          return;
+        }
       }
-    };
-
-    fetchAttendanceData();
-  }, [selectedClassId, date, user]);
+      newRecords[student._id] = { status: "Present", remarks: "" };
+    });
+    setRecords(newRecords);
+  }, [students.length, attendanceData, selectedClassId, dateString]);
 
   const handleStatusChange = (studentId: string, status: string) => {
     setRecords((prev) => ({
@@ -135,8 +118,6 @@ export default function AttendancePage() {
 
     try {
       setSaving(true);
-      const dateString = format(date, "yyyy-MM-dd");
-      
       const payloadRecords = Object.keys(records).map((studentId) => ({
         student: studentId,
         status: records[studentId].status,
@@ -199,12 +180,12 @@ export default function AttendancePage() {
 
         <div className="w-full sm:w-64">
           <label className="text-xs font-semibold text-muted-foreground mb-1 block">Class</label>
-          <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+          <Select value={selectedClassId} onValueChange={setSelectedClassId} disabled={loadingClasses}>
             <SelectTrigger>
-              <SelectValue placeholder="Select Class" />
+              <SelectValue placeholder={loadingClasses ? "Loading..." : "Select Class"} />
             </SelectTrigger>
             <SelectContent>
-              {classes.map((c) => (
+              {classes.map((c: any) => (
                 <SelectItem key={c._id} value={c._id}>
                   {c.name}
                 </SelectItem>
@@ -237,14 +218,14 @@ export default function AttendancePage() {
                 </TableCell>
               </TableRow>
             ) : (
-              students.map((student) => (
+              students.map((student: any) => (
                 <TableRow key={student._id}>
                   <TableCell className="font-medium">{student.name}</TableCell>
                   <TableCell>
                     <RadioGroup
                       value={records[student._id]?.status || "Present"}
                       onValueChange={(val) => handleStatusChange(student._id, val)}
-                      className="flex items-center space-x-4"
+                      className="flex flex-wrap items-center gap-4"
                     >
                       <div className="flex items-center space-x-1">
                         <RadioGroupItem value="Present" id={`p-${student._id}`} />

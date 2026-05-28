@@ -85,28 +85,37 @@ export async function POST(req: NextRequest) {
 
     console.log("[Timetable] Subjects:", subjectsPayload.length, "Teachers:", qualifiedTeachers.length);
     // --- Step 3: Generate timetable with AI ---
+    const breaksDescription = settings.breaks && settings.breaks.length > 0
+      ? settings.breaks
+          .map((b: any) => `"${b.name}" at ${b.startTime} for ${b.duration} minutes`)
+          .join(", ")
+      : "No custom breaks specified. Use your judgment to place one short break (10 min) and one lunch break (30 min) at sensible times.";
+
     const prompt = `
       You are a school scheduler. Generate a weekly timetable (Monday to Friday).
 
       CONTEXT:
       - Class: ${classData.name}
-      - Hours: ${settings.startTime} to ${settings.endTime} (${settings.periods} periods/day).
+      - School Hours: ${settings.startTime} to ${settings.endTime}
+      - Periods per Day: ${settings.periods}
+      - Each Period Duration: ${settings.periodDuration || 45} minutes
 
       RESOURCES:
       - Subjects: ${JSON.stringify(subjectsPayload)}
       - Teachers: ${JSON.stringify(qualifiedTeachers)}
-      - Other Timetables: ${JSON.stringify(allTimetables)}
+      - Other Timetables (for clash detection): ${JSON.stringify(allTimetables)}
 
       STRICT RULES:
-      1. You MUST use ALL of the subjects provided in the RESOURCES. Every single subject listed must appear at least once in the weekly timetable. Try to distribute them evenly across the week.
+      1. You MUST use ALL of the subjects provided in the RESOURCES. Every subject listed must appear at least once across the week, distributed evenly.
       2. Assign a valid Teacher to every Subject period.
-      ${isUsingFallbackTeachers ? "3. Since there are no teachers specifically mapped to these subjects, you may assign any of the listed teachers to any subject." : "3. Teacher MUST have the subject ID in their list if possible."}
-      4. Break Time/Free Period after every 2 periods (10 minutes), Lunch Time after 5 periods (at 12:00) (30 minutes).
-      5. Avoid clashes with other classes (teacher can't be in two classes at the same time).
-      6. Output strict JSON only.
-         - The value of "subject" and "teacher" MUST be the exact 24-character hexadecimal ObjectId string from the resources provided.
-         - For Break, Lunch, or Free Periods, set "subject" to null and "teacher" to null.
-         - Do not invent, hallucinate, or use plain text names (like "Mathematics" or "Break" or "None") for the subject or teacher fields.
+      ${isUsingFallbackTeachers ? "3. Since no teachers are specifically mapped to these subjects, you may assign any listed teacher to any subject." : "3. Prefer assigning teachers whose subject list includes the subject being scheduled."}
+      4. Schedule the following breaks EXACTLY as defined: ${breaksDescription}. Set "subject" and "teacher" to null for break periods.
+      5. Each teaching period must be exactly ${settings.periodDuration || 45} minutes long (unless interrupted by a break).
+      6. Avoid teacher clashes (a teacher cannot appear in two classes at the same time).
+      7. Output strict JSON only.
+         - "subject" and "teacher" MUST be the exact 24-character hexadecimal ObjectId strings from the resources.
+         - For Break, Lunch, or Free Periods: set "subject" to null and "teacher" to null.
+         - Do NOT use plain text names for subject or teacher fields.
          Schema:
          {
            "schedule": [
