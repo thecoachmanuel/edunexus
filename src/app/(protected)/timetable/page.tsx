@@ -56,21 +56,15 @@ const Timetable = () => {
   ) => {
     try {
       setIsGenerating(true);
-      // sorry about that, we should be passing classId instead of selectedClass, now that won't work coz class is not assigned teachers and subjects
       const { data } = await api.post("/timetables/generate", {
         classId: selectedClass,
         academicYearId: yearId,
         settings,
       });
 
-      toast.success(data.message || "AI Generation Started");
-
-      // Poll for updates (simple version)
-      setTimeout(() => {
-        fetchTimetable(selectedClass);
-        setIsGenerating(false);
-        toast.success("Schedule refreshed!");
-      }, 5000);
+      toast.success(data.message || "Timetable generated successfully!");
+      setScheduleData(data.timetable?.schedule || []);
+      setIsGenerating(false);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Generation failed");
       setIsGenerating(false);

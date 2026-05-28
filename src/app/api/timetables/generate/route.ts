@@ -152,11 +152,17 @@ export async function POST(req: NextRequest) {
 
     // --- Step 4: Save the timetable ---
     await Timetable.findOneAndDelete({ class: classId, academicYear: academicYearId });
-    const newTimetable = await Timetable.create({
+    const createdTimetable = await Timetable.create({
       class: classId,
       academicYear: academicYearId,
       schedule: aiSchedule.schedule,
     });
+
+    // Populate all details so the frontend receives a ready-to-render structure on success!
+    const newTimetable = await Timetable.findById(createdTimetable._id)
+      .populate("academicYear")
+      .populate("schedule.periods.subject")
+      .populate("schedule.periods.teacher");
 
     await logActivity({
       userId: authUser._id.toString(),

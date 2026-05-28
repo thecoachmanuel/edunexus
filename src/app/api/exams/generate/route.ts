@@ -44,13 +44,17 @@ export async function POST(req: NextRequest) {
       Make sure the options are clear, and the correctAnswer EXACTLY MATCHES one of the strings in the options array.
     `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    });
     const result = await model.generateContent(prompt);
     let textResponse = result.response.text();
     
     // Clean up response if it contains markdown formatting
+    textResponse = textResponse.trim();
     if (textResponse.startsWith("```json")) {
-      textResponse = textResponse.replace(/```json\n?/, "").replace(/```\n?$/, "");
+      textResponse = textResponse.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
     }
     
     let generatedQuestions = [];

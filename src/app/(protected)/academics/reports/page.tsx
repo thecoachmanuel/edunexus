@@ -168,7 +168,7 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 space-y-6 p-8 pt-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Report Cards</h1>

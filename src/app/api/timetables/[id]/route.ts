@@ -18,7 +18,9 @@ export async function GET(
     // but the frontend simply passes classId. We'll fetch the most recent one for the class.
     const timetable = await Timetable.findOne({ class: classId })
       .sort({ createdAt: -1 })
-      .populate("academicYear");
+      .populate("academicYear")
+      .populate("schedule.periods.subject")
+      .populate("schedule.periods.teacher");
 
     if (!timetable) {
       return NextResponse.json({ message: "Timetable not found" }, { status: 404 });

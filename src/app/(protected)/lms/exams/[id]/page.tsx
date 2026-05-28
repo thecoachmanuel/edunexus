@@ -36,7 +36,9 @@ const Exam = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submission, setSubmission] = useState<Submission | null>(null);
-  const totalPoints = submission && exam ? exam.questions.length : 0;
+  const totalPoints = exam
+    ? exam.questions.reduce((acc, q) => acc + (q.points || 1), 0)
+    : 0;
   const percentage =
     submission && totalPoints > 0
       ? Math.round((submission.score / totalPoints) * 100)

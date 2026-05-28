@@ -1,0 +1,8 @@
+Scoring repair engine started.
+Connecting to MongoDB...
+MongoDB Connected successfully!
+Exam model name: Exam
+Fetching submissions and populating exams...
+Found 1 submissions in database.
+Fixing submission 6a185c9e5feb901c34904fcb. Old Score: 0, New Score: 3
+Finished fixing scores. 1 submissions updated.
