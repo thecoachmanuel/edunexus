@@ -68,6 +68,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Defensive sanitization of generated questions to prevent validation/schema errors
+    const sanitizedQuestions = (Array.isArray(generatedQuestions) ? generatedQuestions : []).map((q: any) => ({
+      questionText: q.questionText || q.question || "Untitled Question",
+      type: q.type || "MCQ",
+      options: Array.isArray(q.options) ? q.options.map(String) : [],
+      correctAnswer: String(q.correctAnswer || q.answer || ""),
+      points: Number(q.points) || 1,
+    }));
+
     // Now save to the database
     const newExam = await Exam.create({
       title,
@@ -77,7 +86,7 @@ export async function POST(req: NextRequest) {
       duration: count * 2, // 2 mins per question default
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
       isActive: false,
-      questions: generatedQuestions,
+      questions: sanitizedQuestions,
     });
 
     await logActivity({

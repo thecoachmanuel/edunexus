@@ -101,13 +101,17 @@ export async function POST(req: NextRequest) {
       ${isUsingFallbackTeachers ? "2. Since there are no teachers specifically mapped to these subjects, you may assign any of the listed teachers to any subject." : "2. Teacher MUST have the subject ID in their list if possible."}
       3. Break Time/Free Period after every 2 periods (10 minutes), Lunch Time after 5 periods (at 12:00) (30 minutes).
       4. Avoid clashes with other classes (teacher can't be in two classes at the same time).
-      5. Output strict JSON only. Schema:
+      5. Output strict JSON only.
+         - The value of "subject" and "teacher" MUST be the exact 24-character hexadecimal ObjectId string from the resources provided.
+         - For Break, Lunch, or Free Periods, set "subject" to null and "teacher" to null.
+         - Do not invent, hallucinate, or use plain text names (like "Mathematics" or "Break" or "None") for the subject or teacher fields.
+         Schema:
          {
            "schedule": [
              {
                "day": "Monday",
                "periods": [
-                 { "subject": "SUBJECT_ID", "teacher": "TEACHER_ID", "startTime": "HH:MM", "endTime": "HH:MM" }
+                 { "subject": "24_CHAR_SUBJECT_OBJECTID_OR_NULL", "teacher": "24_CHAR_TEACHER_OBJECTID_OR_NULL", "startTime": "HH:MM", "endTime": "HH:MM" }
                ]
              }
            ]
@@ -150,12 +154,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Sanitize AI schedule to prevent Cast/Validation Errors on non-ObjectId values (like "Break", "Lunch", "None", or empty strings)
+    const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+
+    const sanitizedSchedule = aiSchedule.schedule.map((day: any) => ({
+      day: day.day,
+      periods: (day.periods || []).map((period: any) => ({
+        subject: period.subject && isValidObjectId(period.subject) ? period.subject : null,
+        teacher: period.teacher && isValidObjectId(period.teacher) ? period.teacher : null,
+        startTime: period.startTime,
+        endTime: period.endTime,
+      })),
+    }));
+
     // --- Step 4: Save the timetable ---
     await Timetable.findOneAndDelete({ class: classId, academicYear: academicYearId });
     const createdTimetable = await Timetable.create({
       class: classId,
       academicYear: academicYearId,
-      schedule: aiSchedule.schedule,
+      schedule: sanitizedSchedule,
     });
 
     // Populate all details so the frontend receives a ready-to-render structure on success!
