@@ -21,7 +21,7 @@ export default function SalaryPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Salary Management</h1>
         <div className="flex items-center gap-4">
           <ExportButtons 
@@ -38,7 +38,7 @@ export default function SalaryPage() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -55,8 +55,8 @@ export default function SalaryPage() {
               <TableRow key={s._id}>
                 <TableCell>{typeof s.employee === "object" ? s.employee.name : ""}</TableCell>
                 <TableCell>{s.month}/{s.year}</TableCell>
-                <TableCell>${s.basicSalary}</TableCell>
-                <TableCell className="font-bold">${s.netSalary}</TableCell>
+                <TableCell>₦{s.basicSalary}</TableCell>
+                <TableCell className="font-bold">₦{s.netSalary}</TableCell>
                 <TableCell>
                   <Badge variant={s.status === "paid" ? "default" : "secondary"}>
                     {s.status}

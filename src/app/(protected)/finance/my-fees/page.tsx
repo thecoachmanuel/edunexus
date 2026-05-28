@@ -20,9 +20,9 @@ export default function MyFees() {
     doc.text("Fee Receipt", 105, 20, { align: "center" });
     doc.text(`Student: ${typeof fee.student === "object" ? fee.student.name : ""}`, 14, 40);
     doc.text(`Fee Type: ${typeof fee.feeStructure === "object" ? fee.feeStructure.name : ""}`, 14, 50);
-    doc.text(`Total Amount: $${fee.totalAmount}`, 14, 60);
-    doc.text(`Amount Paid: $${fee.amountPaid}`, 14, 70);
-    doc.text(`Balance: $${fee.balance}`, 14, 80);
+    doc.text(`Total Amount: ₦${fee.totalAmount}`, 14, 60);
+    doc.text(`Amount Paid: ₦${fee.amountPaid}`, 14, 70);
+    doc.text(`Balance: ₦${fee.balance}`, 14, 80);
     doc.text(`Status: ${fee.status.toUpperCase()}`, 14, 90);
     doc.save(`Receipt_${fee._id}.pdf`);
   };
@@ -31,7 +31,7 @@ export default function MyFees() {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">My Fees</h1>
       
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -49,9 +49,9 @@ export default function MyFees() {
               <TableRow key={f._id}>
                 <TableCell>{typeof f.feeStructure === "object" ? f.feeStructure.name : ""}</TableCell>
                 <TableCell>{typeof f.feeStructure === "object" ? new Date(f.feeStructure.dueDate).toLocaleDateString() : ""}</TableCell>
-                <TableCell>${f.totalAmount}</TableCell>
-                <TableCell>${f.amountPaid}</TableCell>
-                <TableCell>${f.balance}</TableCell>
+                <TableCell>₦{f.totalAmount}</TableCell>
+                <TableCell>₦{f.amountPaid}</TableCell>
+                <TableCell>₦{f.balance}</TableCell>
                 <TableCell>
                   <Badge variant={f.status === "paid" ? "default" : f.status === "partial" ? "secondary" : "destructive"}>
                     {f.status}

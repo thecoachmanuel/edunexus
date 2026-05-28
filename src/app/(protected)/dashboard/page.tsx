@@ -70,14 +70,14 @@ export default function Dashboard() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
       {/* --- HEADER --- */}
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 space-y-2 sm:space-y-0">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground">
             Welcome back, {user?.name}! Here is your daily academic overview.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Role specific actions */}
           {user?.role === "admin" && (
             <Button onClick={() => router.push("/users/students")}>

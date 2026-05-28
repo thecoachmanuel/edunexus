@@ -18,10 +18,10 @@ export function PayslipView({ record }: { record: SalaryRecord }) {
       startY: 60,
       head: [["Description", "Amount"]],
       body: [
-        ["Basic Salary", `$${record.basicSalary}`],
-        ["Allowances", `$${record.allowances}`],
-        ["Deductions", `$${record.deductions}`],
-        ["Net Salary", `$${record.netSalary}`],
+        ["Basic Salary", `₦${record.basicSalary}`],
+        ["Allowances", `₦${record.allowances}`],
+        ["Deductions", `₦${record.deductions}`],
+        ["Net Salary", `₦${record.netSalary}`],
       ]
     });
     
@@ -49,19 +49,19 @@ export function PayslipView({ record }: { record: SalaryRecord }) {
           <div className="border-t pt-4">
             <div className="flex justify-between py-1">
               <span>Basic Salary</span>
-              <span>${record.basicSalary}</span>
+              <span>₦{record.basicSalary}</span>
             </div>
             <div className="flex justify-between py-1">
               <span>Allowances</span>
-              <span className="text-emerald-500">+${record.allowances}</span>
+              <span className="text-emerald-500">+₦{record.allowances}</span>
             </div>
             <div className="flex justify-between py-1">
               <span>Deductions</span>
-              <span className="text-rose-500">-${record.deductions}</span>
+              <span className="text-rose-500">-₦{record.deductions}</span>
             </div>
             <div className="flex justify-between py-2 border-t font-bold text-base mt-2">
               <span>Net Salary</span>
-              <span>${record.netSalary}</span>
+              <span>₦{record.netSalary}</span>
             </div>
           </div>
         </div>

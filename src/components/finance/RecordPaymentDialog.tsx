@@ -44,7 +44,7 @@ export function RecordPaymentDialog({ fee, onSave }: { fee: StudentFee, onSave: 
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Amount (Max: ${fee.balance})</Label>
+            <Label>Amount (Max: ₦{fee.balance})</Label>
             <Input required type="number" max={fee.balance} value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} />
           </div>
           <div className="space-y-2">

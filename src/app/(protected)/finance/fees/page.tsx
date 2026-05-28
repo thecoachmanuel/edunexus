@@ -24,7 +24,7 @@ export default function FeeManagement() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Fee Management</h1>
         <FeeStructureDialog onSave={loadData} />
       </div>
@@ -49,7 +49,7 @@ export default function FeeManagement() {
               ]} 
             />
           </div>
-          <div className="border rounded-lg">
+          <div className="border rounded-lg overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -67,9 +67,9 @@ export default function FeeManagement() {
                   <TableRow key={f._id}>
                     <TableCell>{typeof f.student === "object" ? f.student.name : ""}</TableCell>
                     <TableCell>{typeof f.feeStructure === "object" ? f.feeStructure.name : ""}</TableCell>
-                    <TableCell>${f.totalAmount}</TableCell>
-                    <TableCell>${f.amountPaid}</TableCell>
-                    <TableCell>${f.balance}</TableCell>
+                    <TableCell>₦{f.totalAmount}</TableCell>
+                    <TableCell>₦{f.amountPaid}</TableCell>
+                    <TableCell>₦{f.balance}</TableCell>
                     <TableCell>
                       <Badge variant={f.status === "paid" ? "default" : f.status === "partial" ? "secondary" : "destructive"}>
                         {f.status}
@@ -85,7 +85,7 @@ export default function FeeManagement() {
           </div>
         </TabsContent>
         <TabsContent value="structures" className="space-y-4 pt-4">
-          <div className="border rounded-lg">
+          <div className="border rounded-lg overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -102,7 +102,7 @@ export default function FeeManagement() {
                     <TableCell>{s.name}</TableCell>
                     <TableCell>{typeof s.class === "object" ? s.class.name : ""}</TableCell>
                     <TableCell className="capitalize">{s.category}</TableCell>
-                    <TableCell>${s.amount}</TableCell>
+                    <TableCell>₦{s.amount}</TableCell>
                     <TableCell>{new Date(s.dueDate).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}

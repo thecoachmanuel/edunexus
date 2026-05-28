@@ -18,7 +18,7 @@ export function FinanceOverviewCards({ totalFeesCollected, pendingFees, totalExp
           <ArrowUpRight className="h-4 w-4 text-emerald-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${totalFeesCollected.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₦{totalFeesCollected.toLocaleString()}</div>
         </CardContent>
       </Card>
       
@@ -28,7 +28,7 @@ export function FinanceOverviewCards({ totalFeesCollected, pendingFees, totalExp
           <ArrowDownRight className="h-4 w-4 text-rose-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${totalExpenses.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₦{totalExpenses.toLocaleString()}</div>
         </CardContent>
       </Card>
 
@@ -38,7 +38,7 @@ export function FinanceOverviewCards({ totalFeesCollected, pendingFees, totalExp
           <DollarSign className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${netBalance.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₦{netBalance.toLocaleString()}</div>
         </CardContent>
       </Card>
       
@@ -48,7 +48,7 @@ export function FinanceOverviewCards({ totalFeesCollected, pendingFees, totalExp
           <Activity className="h-4 w-4 text-amber-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${pendingFees.toLocaleString()}</div>
+          <div className="text-2xl font-bold">₦{pendingFees.toLocaleString()}</div>
         </CardContent>
       </Card>
     </div>

@@ -19,7 +19,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
         <div className="flex items-center gap-4">
           <ExportButtons 
@@ -37,7 +37,7 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -54,7 +54,7 @@ export default function ExpensesPage() {
                 <TableCell>{new Date(e.date).toLocaleDateString()}</TableCell>
                 <TableCell>{e.title}</TableCell>
                 <TableCell className="capitalize">{e.category}</TableCell>
-                <TableCell>${e.amount}</TableCell>
+                <TableCell>₦{e.amount}</TableCell>
                 <TableCell>{typeof e.recordedBy === "object" ? e.recordedBy.name : "Admin"}</TableCell>
               </TableRow>
             ))}

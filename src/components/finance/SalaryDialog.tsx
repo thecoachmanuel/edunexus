@@ -18,7 +18,16 @@ export function SalaryDialog({ onSave }: { onSave: () => void }) {
 
   useEffect(() => {
     if (open) {
-      api.get("/users?role=teacher").then(res => setEmployees(res.data.users || []));
+      Promise.all([
+        api.get("/users?role=teacher"),
+        api.get("/users?role=admin")
+      ]).then(([teachersRes, adminsRes]) => {
+        const teachers = teachersRes.data.users || [];
+        const admins = adminsRes.data.users || [];
+        setEmployees([...teachers, ...admins]);
+      }).catch(err => {
+        toast.error("Failed to load employees");
+      });
     }
   }, [open]);
 
@@ -88,7 +97,7 @@ export function SalaryDialog({ onSave }: { onSave: () => void }) {
             </div>
           </div>
           <div className="space-y-2 pt-2 border-t font-semibold">
-            <Label>Net Salary: ${netSalary}</Label>
+            <Label>Net Salary: ₦{netSalary}</Label>
           </div>
           <DialogFooter>
             <Button type="submit">Save</Button>

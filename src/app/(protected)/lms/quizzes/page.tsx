@@ -17,22 +17,22 @@ import {
 import { useRouter } from "next/navigation";
 import type { exam } from "@/types";
 import { toast } from "sonner";
-import ExamGenerator from "@/components/lms/ExamGenerator";
+import QuizGenerator from "@/components/lms/QuizGenerator";
 
-const Exams = () => {
+const Quizzes = () => {
   const { user } = useAuth();
   const isTeacher = user?.role === "teacher" || user?.role === "admin";
-  const [exams, setExams] = useState<exam[]>([]);
+  const [exams, setQuizzes] = useState<exam[]>([]);
   const [isGenOpen, setIsGenOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   // fetch exams
-  const fetchExams = async () => {
+  const fetchQuizzes = async () => {
     try {
       setLoading(true);
       const { data } = await api.get("/exams");
-      setExams(data.exams || []);
+      setQuizzes(data.exams || []);
       setLoading(false);
     } catch (error) {
       toast.error("failed to load exams");
@@ -43,7 +43,7 @@ const Exams = () => {
 
   useEffect(() => {
     if (!user) return;
-    fetchExams();
+    fetchQuizzes();
   }, [user]);
 
 
@@ -51,8 +51,8 @@ const Exams = () => {
     if (!confirm("Are you sure you want to delete this assignment?")) return;
     try {
       await api.delete(`/exams/${id}`);
-      toast.success("Assignment deleted");
-      fetchExams();
+      toast.success("Quiz deleted");
+      fetchQuizzes();
     } catch (error) {
       toast.error("Failed to delete assignment");
     }
@@ -72,14 +72,14 @@ const Exams = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Assignments</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Quizzes</h1>
           <p className="text-muted-foreground">
             Manage assessments and view results.
           </p>
         </div>
         {isTeacher && (
           <Button onClick={() => setIsGenOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New AI Assignment
+            <Plus className="mr-2 h-4 w-4" /> New AI Quiz
           </Button>
         )}
       </div>
@@ -134,21 +134,21 @@ const Exams = () => {
               <Button
                 variant={!isTeacher && exam.hasSubmitted ? "secondary" : "outline"}
                 className="w-full"
-                onClick={() => router.push(`/lms/exams/${exam._id}`)}
+                onClick={() => router.push(`/lms/quizzes/${exam._id}`)}
               >
-                {isTeacher ? "Manage Questions" : exam.hasSubmitted ? "View Results" : "Start Assignment"}
+                {isTeacher ? "Manage Questions" : exam.hasSubmitted ? "View Results" : "Start Quiz"}
               </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
-      <ExamGenerator
+      <QuizGenerator
         open={isGenOpen}
         onOpenChange={setIsGenOpen}
-        onSuccess={fetchExams}
+        onSuccess={fetchQuizzes}
       />
     </div>
   );
 };
 
-export default Exams;
+export default Quizzes;

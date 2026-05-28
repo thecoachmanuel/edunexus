@@ -117,8 +117,8 @@ export const sidebardata = {
       icon: GraduationCap,
       roles: ["teacher", "student", "admin"],
       items: [
-        // { title: "Assignments", url: "/lms/assignments" },
-        { title: "Assignments", url: "/lms/exams" },
+        // { title: "Quizzes", url: "/lms/assignments" },
+        { title: "Quizzes", url: "/lms/quizzes" },
         { title: "Study Materials", url: "/lms/materials" },
       ],
     },

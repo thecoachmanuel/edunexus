@@ -18,7 +18,7 @@ export function FeeStructureDialog({ onSave }: { onSave: () => void }) {
 
   useEffect(() => {
     if (open) {
-      api.get("/classes").then(res => setClasses(res.data.classes));
+      api.get("/classes?limit=1000").then(res => setClasses(res.data.classes));
     }
   }, [open]);
 

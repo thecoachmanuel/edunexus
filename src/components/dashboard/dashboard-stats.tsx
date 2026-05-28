@@ -58,11 +58,11 @@ export function DashboardStats({ role, data }: StatsProps) {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Exams</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Quizzes</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.activeExams || 0}</div>
+            <div className="text-2xl font-bold">{data.activeQuizzes || 0}</div>
             <p className="text-xs text-muted-foreground">Currently ongoing</p>
           </CardContent>
         </Card>
@@ -131,19 +131,19 @@ export function DashboardStats({ role, data }: StatsProps) {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Assignments</CardTitle>
+          <CardTitle className="text-sm font-medium">Quizzes</CardTitle>
           <BookOpen className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {data.pendingAssignments || 0}
+            {data.pendingQuizzes || 0}
           </div>
           <p className="text-xs text-muted-foreground">Due this week</p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Next Exam</CardTitle>
+          <CardTitle className="text-sm font-medium">Next Quiz</CardTitle>
           <CalendarDays className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle, Sparkles } from "lucide-react";
 
-const ExamRadio = ({
+const QuizRadio = ({
   question: q,
   setAnswers,
   submission,
@@ -128,5 +128,5 @@ const ExamRadio = ({
   );
 };
 
-export default ExamRadio;
+export default QuizRadio;
 

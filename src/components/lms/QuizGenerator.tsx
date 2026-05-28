@@ -48,7 +48,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-const ExamGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
+const QuizGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
   const [subjects, setSubjects] = useState<subject[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(false);
@@ -84,7 +84,7 @@ const ExamGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
         title: `${values.topic} Quiz`, // Auto-generate title
       });
 
-      toast.success("AI is generating the exam! Check back in a moment.");
+      toast.success("AI is generating the quiz! Check back in a moment.");
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -223,4 +223,4 @@ const ExamGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
   );
 };
 // let try again
-export default ExamGenerator;
+export default QuizGenerator;
