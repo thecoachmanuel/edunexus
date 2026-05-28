@@ -20,7 +20,7 @@ export async function POST(
     const { id } = await params;
     const { answers } = await req.json();
 
-    const exam = await Exam.findById(id);
+    const exam = await Exam.findById(id).select("+questions.correctAnswer");
     if (!exam) return NextResponse.json({ message: "Exam not found" }, { status: 404 });
 
     if (!exam.isActive || new Date() > new Date(exam.dueDate)) {
@@ -47,42 +47,65 @@ export async function POST(
 
     let score = 0;
     const gradedAnswers = examQuestions.map((q: any) => {
-      const isCorrect = q.expectedAnswer === q.studentAnswer;
-      if (isCorrect) score += q.points;
+      const expected = q.expectedAnswer || "";
+      const student = q.studentAnswer || "";
+      // Robust normalized deterministic comparison
+      const isCorrect = expected.trim().toLowerCase() === student.trim().toLowerCase();
+      if (isCorrect) {
+        score += q.points;
+      }
       return {
         questionId: q.questionId,
         questionText: q.questionText,
-        expectedAnswer: q.expectedAnswer,
-        studentAnswer: q.studentAnswer,
+        type: q.options && q.options.length > 0 ? "MCQ" : "SHORT_ANSWER",
+        options: q.options,
+        expectedAnswer: expected,
+        studentAnswer: student,
         isCorrect,
+        points: q.points,
         feedback: "",
       };
     });
 
-    const incorrectAnswers = gradedAnswers.filter((a: any) => !a.isCorrect && a.questionText);
+    const candidatesForAIEval = gradedAnswers.filter((a: any) => !a.isCorrect && a.questionText);
 
-    // 2. Delegate explanation generation to AI
-    if (incorrectAnswers.length > 0 && process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    // 2. Delegate explanation and smart grading to AI
+    if (candidatesForAIEval.length > 0 && process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       try {
         const prompt = `
-          You are an expert AI teacher. A student took an exam and got the following questions wrong.
-          Provide a very brief 1-2 sentence explanation for each question on why their answer was wrong, and explicitly state what the right option is.
+          You are an expert AI teacher grading an exam.
+          Here are questions that the student did not answer with a direct string match to the expected answer.
           
+          For each question:
+          1. Evaluate if their answer is semantically correct and deserves full marks.
+             - For Multiple Choice Questions (MCQ), they MUST have matched the correct option, so their "isCorrect" must remain false.
+             - For Short Answer Questions, if their answer is semantically equivalent, correct, or highly accurate compared to the expected answer (rubric), mark them "isCorrect": true. Otherwise, false.
+          2. If "isCorrect" is false, you MUST provide a brief 1-2 sentence explanation ("feedback") on why their answer was wrong and explicitly state what the right option/answer is. Do not mark anyone wrong without providing the right option and reason.
+          3. If "isCorrect" is true, set "feedback" to empty string ("").
+
           Questions:
-          ${JSON.stringify(incorrectAnswers.map((a: any) => ({
+          ${JSON.stringify(candidatesForAIEval.map((a: any) => ({
             id: a.questionId,
-            question: a.questionText,
+            questionText: a.questionText,
+            type: a.type,
+            options: a.options,
             studentAnswer: a.studentAnswer,
             correctAnswer: a.expectedAnswer
           })))}
           
           Output STRICT JSON ONLY. Schema:
           [
-            { "id": "questionId", "feedback": "Your brief explanation here" }
+            { "id": "questionId", "isCorrect": true, "feedback": "" },
+            { "id": "questionId", "isCorrect": false, "feedback": "Your brief explanation here, explaining why they are wrong, and stating the correct option/answer." }
           ]
         `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ 
+          model: "gemini-1.5-flash",
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        });
         const result = await model.generateContent(prompt);
         const textResponse = result.response.text();
         const cleanJSON = textResponse.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -91,11 +114,22 @@ export async function POST(
         feedbackData.forEach((fb: any) => {
           const ans = gradedAnswers.find((a: any) => a.questionId === fb.id);
           if (ans) {
-            ans.feedback = fb.feedback;
+            // If the AI determined it is correct (e.g., semantic short answer match)
+            if (fb.isCorrect === true && !ans.isCorrect) {
+              ans.isCorrect = true;
+              score += ans.points; // Add the points for this question since they are now marked correct!
+            }
+            ans.feedback = fb.feedback || "";
           }
         });
       } catch (aiError) {
-        console.error("AI FEEDBACK ERROR", aiError);
+        console.error("AI FEEDBACK/GRADING ERROR", aiError);
+        // Fallback: supply a basic explanation if Gemini fails
+        gradedAnswers.forEach((ans: any) => {
+          if (!ans.isCorrect && !ans.feedback) {
+            ans.feedback = `Incorrect. Expected: "${ans.expectedAnswer}".`;
+          }
+        });
       }
     }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Exam from "@/lib/models/exam";
+import Submission from "@/lib/models/submission";
 import { getAuthUser } from "@/middleware/auth";
 import { logActivity } from "@/lib/utils/activitieslog";
 
@@ -12,11 +13,30 @@ export async function GET(
     await connectDB();
     const { id } = await params;
 
-    const exam = await Exam.findById(id)
+    const authUser = await getAuthUser(req);
+    let shouldShowCorrectAnswers = false;
+
+    if (authUser) {
+      if (authUser.role === "admin" || authUser.role === "teacher") {
+        shouldShowCorrectAnswers = true;
+      } else if (authUser.role === "student") {
+        const hasSubmitted = await Submission.exists({ exam: id, student: authUser._id });
+        if (hasSubmitted) {
+          shouldShowCorrectAnswers = true;
+        }
+      }
+    }
+
+    const query = Exam.findById(id)
       .populate("class", "name")
       .populate("subject", "name code")
-      .populate("teacher", "name")
-      .lean();
+      .populate("teacher", "name");
+
+    if (shouldShowCorrectAnswers) {
+      query.select("+questions.correctAnswer");
+    }
+
+    const exam = await query.lean();
 
     if (!exam) {
       return NextResponse.json({ message: "Exam not found" }, { status: 404 });

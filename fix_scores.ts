@@ -5,7 +5,14 @@ import Exam from "./src/lib/models/exam";
 
 async function fixScores() {
   await connectDB();
-  const submissions = await Submission.find({}).populate("exam");
+  
+  // Explicitly reference Exam to prevent ESModule tree-shaking
+  console.log(`Initializing scoring repair engine with model: ${Exam.modelName}`);
+
+  const submissions = await Submission.find({}).populate({
+    path: "exam",
+    select: "+questions.correctAnswer"
+  });
   let fixedCount = 0;
 
   for (const sub of submissions) {
@@ -17,8 +24,12 @@ async function fixScores() {
     // Check all answers against the exam rubric
     sub.answers.forEach((ans: any) => {
       const q = exam.questions.find((q: any) => q._id.toString() === ans.questionId);
-      if (q && q.correctAnswer === ans.answer) {
-        correctScore += q.points || 1;
+      if (q) {
+        const expected = q.correctAnswer || "";
+        const student = ans.answer || "";
+        if (expected.trim().toLowerCase() === student.trim().toLowerCase()) {
+          correctScore += q.points || 1;
+        }
       }
     });
 

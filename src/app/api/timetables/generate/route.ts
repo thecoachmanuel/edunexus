@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       sub._id.toString()
     );
 
-    const qualifiedTeachers = allTeachers
+    let qualifiedTeachers = allTeachers
       .filter((teacher) => {
         if (!teacher.teacherSubject) return false;
         return teacher.teacherSubject.some((subId: any) =>
@@ -52,13 +52,23 @@ export async function POST(req: NextRequest) {
         );
       })
       .map((tea) => ({
-        id: tea._id,
+        id: tea._id.toString(),
         name: tea.name,
-        subjects: tea.teacherSubject,
+        subjects: tea.teacherSubject ? tea.teacherSubject.map((s: any) => s.toString()) : [],
       }));
 
+    let isUsingFallbackTeachers = false;
+    if (qualifiedTeachers.length === 0) {
+      isUsingFallbackTeachers = true;
+      qualifiedTeachers = allTeachers.map((tea) => ({
+        id: tea._id.toString(),
+        name: tea.name,
+        subjects: tea.teacherSubject ? tea.teacherSubject.map((s: any) => s.toString()) : [],
+      }));
+    }
+
     const subjectsPayload = classData.subjects.map((sub: any) => ({
-      id: sub._id,
+      id: sub._id.toString(),
       name: sub.name,
       code: sub.code,
     }));
@@ -88,7 +98,7 @@ export async function POST(req: NextRequest) {
 
       STRICT RULES:
       1. Assign a Teacher to every Subject period.
-      2. Teacher MUST have the subject ID in their list.
+      ${isUsingFallbackTeachers ? "2. Since there are no teachers specifically mapped to these subjects, you may assign any of the listed teachers to any subject." : "2. Teacher MUST have the subject ID in their list if possible."}
       3. Break Time/Free Period after every 2 periods (10 minutes), Lunch Time after 5 periods (at 12:00) (30 minutes).
       4. Avoid clashes with other classes (teacher can't be in two classes at the same time).
       5. Output strict JSON only. Schema:
@@ -105,13 +115,40 @@ export async function POST(req: NextRequest) {
     `;
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
-    const activeModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const activeModel = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
 
     const result = await activeModel.generateContent(prompt);
     const text = result.response.text();
 
-    const cleanJSON = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    const aiSchedule = JSON.parse(cleanJSON);
+    let aiSchedule: any;
+    try {
+      const jsonStart = text.indexOf("{");
+      const jsonEnd = text.lastIndexOf("}");
+      let jsonString = text;
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        jsonString = text.substring(jsonStart, jsonEnd + 1);
+      }
+      aiSchedule = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error("AI response JSON parsing failed:", text, parseError);
+      return NextResponse.json(
+        { message: "Failed to generate a valid JSON timetable structure from AI. Please try again.", error: parseError },
+        { status: 500 }
+      );
+    }
+
+    if (!aiSchedule || !Array.isArray(aiSchedule.schedule)) {
+      console.error("AI Response lacks schedule array:", aiSchedule);
+      return NextResponse.json(
+        { message: "AI response did not match the expected timetable format." },
+        { status: 500 }
+      );
+    }
 
     // --- Step 4: Save the timetable ---
     await Timetable.findOneAndDelete({ class: classId, academicYear: academicYearId });
