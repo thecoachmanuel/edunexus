@@ -195,7 +195,6 @@ export default function AttendancePage() {
                 selected={date}
                 onSelect={(d) => d && setDate(d)}
                 disabled={isWeekend}
-                initialFocus
               />
             </PopoverContent>
           </Popover>
