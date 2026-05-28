@@ -98,11 +98,12 @@ export async function POST(req: NextRequest) {
       - Other Timetables: ${JSON.stringify(allTimetables)}
 
       STRICT RULES:
-      1. Assign a Teacher to every Subject period.
-      ${isUsingFallbackTeachers ? "2. Since there are no teachers specifically mapped to these subjects, you may assign any of the listed teachers to any subject." : "2. Teacher MUST have the subject ID in their list if possible."}
-      3. Break Time/Free Period after every 2 periods (10 minutes), Lunch Time after 5 periods (at 12:00) (30 minutes).
-      4. Avoid clashes with other classes (teacher can't be in two classes at the same time).
-      5. Output strict JSON only.
+      1. You MUST use ALL of the subjects provided in the RESOURCES. Every single subject listed must appear at least once in the weekly timetable. Try to distribute them evenly across the week.
+      2. Assign a valid Teacher to every Subject period.
+      ${isUsingFallbackTeachers ? "3. Since there are no teachers specifically mapped to these subjects, you may assign any of the listed teachers to any subject." : "3. Teacher MUST have the subject ID in their list if possible."}
+      4. Break Time/Free Period after every 2 periods (10 minutes), Lunch Time after 5 periods (at 12:00) (30 minutes).
+      5. Avoid clashes with other classes (teacher can't be in two classes at the same time).
+      6. Output strict JSON only.
          - The value of "subject" and "teacher" MUST be the exact 24-character hexadecimal ObjectId string from the resources provided.
          - For Break, Lunch, or Free Periods, set "subject" to null and "teacher" to null.
          - Do not invent, hallucinate, or use plain text names (like "Mathematics" or "Break" or "None") for the subject or teacher fields.

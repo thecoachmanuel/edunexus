@@ -21,6 +21,7 @@ import { Calendar, FileText, CheckCircle2 } from "lucide-react";
 // Custom Components
 import { AiInsightWidget } from "@/components/dashboard/ai-insight-widget";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
+import { AttendanceWidget } from "@/components/dashboard/attendance-widget";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -155,6 +156,9 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+          
+          {/* ATTENDANCE WIDGET */}
+          <AttendanceWidget role={user?.role} />
         </div>
       </div>
     </div>
