@@ -132,11 +132,11 @@ const Exams = () => {
             </CardContent>
             <CardFooter>
               <Button
-                variant="outline"
+                variant={!isTeacher && exam.hasSubmitted ? "secondary" : "outline"}
                 className="w-full"
                 onClick={() => router.push(`/lms/exams/${exam._id}`)}
               >
-                {isTeacher ? "Manage Questions" : "Start Assignment"}
+                {isTeacher ? "Manage Questions" : exam.hasSubmitted ? "View Results" : "Start Assignment"}
               </Button>
             </CardFooter>
           </Card>

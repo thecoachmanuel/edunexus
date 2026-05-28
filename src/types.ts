@@ -62,6 +62,7 @@ export interface exam {
   questions: question[];
   dueDate: Date;
   isActive: boolean;
+  hasSubmitted?: boolean;
 }
 
 export interface Submission {
