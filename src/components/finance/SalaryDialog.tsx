@@ -72,7 +72,7 @@ export function SalaryDialog({ onSave }: { onSave: () => void }) {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Month</Label>
               <Input required type="number" min="1" max="12" value={formData.month} onChange={e => setFormData({ ...formData, month: Number(e.target.value) })} />
@@ -86,7 +86,7 @@ export function SalaryDialog({ onSave }: { onSave: () => void }) {
             <Label>Basic Salary</Label>
             <Input required type="number" value={formData.basicSalary} onChange={e => setFormData({ ...formData, basicSalary: e.target.value })} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Allowances</Label>
               <Input type="number" value={formData.allowances} onChange={e => setFormData({ ...formData, allowances: e.target.value })} />

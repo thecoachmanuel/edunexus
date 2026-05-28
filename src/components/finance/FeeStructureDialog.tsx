@@ -9,39 +9,66 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Class } from "@/types";
 
-export function FeeStructureDialog({ onSave }: { onSave: () => void }) {
-  const [open, setOpen] = useState(false);
+export function FeeStructureDialog({ onSave, initialData, open: controlledOpen, onOpenChange }: { onSave: () => void, initialData?: any, open?: boolean, onOpenChange?: (open: boolean) => void }) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined && onOpenChange !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+  const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
+
   const [classes, setClasses] = useState<Class[]>([]);
   const [formData, setFormData] = useState({
     name: "", amount: "", class: "", category: "tuition", dueDate: ""
   });
 
   useEffect(() => {
-    if (open) {
+    if (isOpen) {
       api.get("/classes?limit=1000").then(res => setClasses(res.data.classes));
+      if (initialData) {
+        setFormData({
+          name: initialData.name || "",
+          amount: initialData.amount ? String(initialData.amount) : "",
+          class: typeof initialData.class === 'object' ? initialData.class._id : initialData.class || "",
+          category: initialData.category || "tuition",
+          dueDate: initialData.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : ""
+        });
+      } else {
+        setFormData({ name: "", amount: "", class: "", category: "tuition", dueDate: "" });
+      }
     }
-  }, [open]);
+  }, [isOpen, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.class) {
+      toast.error("Please select a class");
+      return;
+    }
     try {
-      await api.post("/finance/fee-structures", { ...formData, amount: Number(formData.amount), academicYear: "664684a22b79a9bd12345678" }); // Replace with actual current year logic if available
-      toast.success("Fee structure created");
-      setOpen(false);
+      const payload = { ...formData, amount: Number(formData.amount), academicYear: "664684a22b79a9bd12345678" };
+      if (initialData && initialData._id) {
+        await api.put(`/finance/fee-structures/${initialData._id}`, payload);
+        toast.success("Fee structure updated");
+      } else {
+        await api.post("/finance/fee-structures", payload);
+        toast.success("Fee structure created");
+      }
+      setIsOpen(false);
       onSave();
     } catch (error) {
-      toast.error("Failed to create fee structure");
+      toast.error("Failed to save fee structure");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Add Fee Structure</Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button>Add Fee Structure</Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Fee Structure</DialogTitle>
+          <DialogTitle>{initialData ? "Edit" : "Create"} Fee Structure</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -54,7 +81,7 @@ export function FeeStructureDialog({ onSave }: { onSave: () => void }) {
           </div>
           <div className="space-y-2">
             <Label>Class</Label>
-            <Select value={formData.class} onValueChange={v => setFormData({ ...formData, class: v })}>
+            <Select value={formData.class || undefined} onValueChange={v => setFormData({ ...formData, class: v })}>
               <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
               <SelectContent>
                 {classes.map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}

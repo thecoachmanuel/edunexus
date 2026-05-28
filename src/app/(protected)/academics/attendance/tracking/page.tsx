@@ -197,7 +197,7 @@ function StudentDetailSheet({
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <SheetTitle className="flex items-center gap-2">
               <UserCheck className="h-5 w-5 text-primary" />
               Student Attendance Detail
@@ -241,7 +241,7 @@ function StudentDetailSheet({
             />
 
             {/* Stat cards */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <StatCard
                 label="Present"
                 value={detail.stats.presentDays}

@@ -161,7 +161,7 @@ const ClassForm = ({ open, onOpenChange, initialData, onSuccess }: Props) => {
     >
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomInput
               control={form.control}
               name="name"
@@ -179,7 +179,7 @@ const ClassForm = ({ open, onOpenChange, initialData, onSuccess }: Props) => {
               loading={loadingOptions}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomSelect
               control={form.control}
               name="classTeacher"

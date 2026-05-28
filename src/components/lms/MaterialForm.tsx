@@ -144,7 +144,7 @@ export const MaterialForm = ({ open, onOpenChange, initialData, onSuccess }: Pro
             placeholder="Brief description of the material..."
             disabled={pending}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomSelect
               control={form.control}
               name="type"
@@ -161,7 +161,7 @@ export const MaterialForm = ({ open, onOpenChange, initialData, onSuccess }: Pro
               disabled={pending}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomSelect
               control={form.control}
               name="classId"

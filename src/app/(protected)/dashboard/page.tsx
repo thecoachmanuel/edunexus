@@ -50,7 +50,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="p-8 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-10 w-32" />
         </div>

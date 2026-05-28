@@ -108,7 +108,7 @@ const QuizGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
                 name="subject"
                 control={form.control}
@@ -171,7 +171,7 @@ const QuizGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
                 name="difficulty"
                 control={form.control}

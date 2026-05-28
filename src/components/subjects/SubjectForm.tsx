@@ -139,7 +139,7 @@ export function SubjectForm({
     >
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomInput
               control={form.control}
               name="name"

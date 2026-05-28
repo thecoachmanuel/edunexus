@@ -20,7 +20,7 @@ export default function SalaryPage() {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Salary Management</h1>
         <div className="flex items-center gap-4">

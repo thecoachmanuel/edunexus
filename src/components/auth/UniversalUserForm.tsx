@@ -239,7 +239,7 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <FieldGroup>
-        <div className="grid grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
           {!isLogin && (
             <CustomInput
               control={form.control}

@@ -112,7 +112,7 @@ const GeneratorControls = ({
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <CardTitle>
               {hideGenerate ? "View Timetable" : "Timetable Controls"}
@@ -174,7 +174,7 @@ const GeneratorControls = ({
         </div>
         {!hideGenerate && (
           <>
-            <div className="grid grid-cols-3 gap-4 border-t pt-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4 mt-4">
               <div className="space-y-2">
                 <Label>Start Time</Label>
                 <Input

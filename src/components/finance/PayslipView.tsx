@@ -38,7 +38,7 @@ export function PayslipView({ record }: { record: SalaryRecord }) {
           <DialogTitle>Payslip Details</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 text-sm">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="font-semibold">Employee:</div>
             <div>{typeof record.employee === "object" ? record.employee.name : "N/A"}</div>
             <div className="font-semibold">Period:</div>

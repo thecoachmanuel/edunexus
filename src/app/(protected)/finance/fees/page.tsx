@@ -8,14 +8,30 @@ import { FeeStructureDialog } from "@/components/finance/FeeStructureDialog";
 import { RecordPaymentDialog } from "@/components/finance/RecordPaymentDialog";
 import { ExportButtons } from "@/components/finance/ExportButtons";
 import { FeeStructure, StudentFee } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function FeeManagement() {
   const [structures, setStructures] = useState<FeeStructure[]>([]);
   const [fees, setFees] = useState<StudentFee[]>([]);
+  const [editStructure, setEditStructure] = useState<FeeStructure | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const loadData = () => {
     api.get("/finance/fee-structures").then(res => setStructures(res.data.feeStructures));
     api.get("/finance/student-fees").then(res => setFees(res.data.studentFees));
+  };
+
+  const handleDeleteStructure = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this fee structure?")) return;
+    try {
+      await api.delete(`/finance/fee-structures/${id}`);
+      toast.success("Fee structure deleted");
+      loadData();
+    } catch (error) {
+      toast.error("Failed to delete fee structure");
+    }
   };
 
   useEffect(() => {
@@ -23,11 +39,22 @@ export default function FeeManagement() {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Fee Management</h1>
         <FeeStructureDialog onSave={loadData} />
       </div>
+
+      <FeeStructureDialog 
+        open={isEditDialogOpen} 
+        onOpenChange={setIsEditDialogOpen} 
+        initialData={editStructure} 
+        onSave={() => {
+          setIsEditDialogOpen(false);
+          setEditStructure(null);
+          loadData();
+        }} 
+      />
 
       <Tabs defaultValue="payments">
         <TabsList>
@@ -94,6 +121,7 @@ export default function FeeManagement() {
                   <TableHead>Category</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Due Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -104,6 +132,17 @@ export default function FeeManagement() {
                     <TableCell className="capitalize">{s.category}</TableCell>
                     <TableCell>₦{s.amount}</TableCell>
                     <TableCell>{new Date(s.dueDate).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        setEditStructure(s);
+                        setIsEditDialogOpen(true);
+                      }}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteStructure(s._id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
