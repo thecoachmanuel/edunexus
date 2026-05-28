@@ -3,13 +3,14 @@ import { connectDB } from "@/lib/db";
 import StudentFee from "@/lib/models/studentFee";
 import { getAuthUser } from "@/middleware/auth";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const authUser = await getAuthUser(req);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
-    const studentFee = await StudentFee.findById(params.id)
+    const studentFee = await StudentFee.findById(id)
       .populate("student", "name rollNumber email")
       .populate("feeStructure", "name amount dueDate")
       .populate("class", "name")
@@ -23,15 +24,16 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const { transaction } = await req.json();
     
-    const fee = await StudentFee.findById(params.id);
+    const fee = await StudentFee.findById(id);
     if (!fee) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
     if (transaction) {
