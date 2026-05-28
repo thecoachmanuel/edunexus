@@ -45,33 +45,40 @@ export async function POST(
       };
     });
 
-    let gradedAnswers: any[] = [];
     let score = 0;
+    const gradedAnswers = examQuestions.map((q: any) => {
+      const isCorrect = q.expectedAnswer === q.studentAnswer;
+      if (isCorrect) score += q.points;
+      return {
+        questionId: q.questionId,
+        questionText: q.questionText,
+        expectedAnswer: q.expectedAnswer,
+        studentAnswer: q.studentAnswer,
+        isCorrect,
+        feedback: "",
+      };
+    });
 
-    // 2. Delegate grading to AI
-    if (examQuestions.length > 0 && process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    const incorrectAnswers = gradedAnswers.filter((a: any) => !a.isCorrect && a.questionText);
+
+    // 2. Delegate explanation generation to AI
+    if (incorrectAnswers.length > 0 && process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       try {
         const prompt = `
-          You are an expert AI teacher marking a student's exam.
-          You are provided with a list of questions, the student's answers, and the expected correct answers (rubrics).
+          You are an expert AI teacher. A student took an exam and got the following questions wrong.
+          Provide a very brief 1-2 sentence explanation for each question on why their answer was wrong, and explicitly state what the right option is.
           
-          TASK:
-          1. Evaluate each student answer carefully using your best knowledge of the subject matter.
-          2. Determine if the student's answer is correct or incorrect.
-          3. If the answer is INCORRECT, you MUST provide a brief (1-2 sentence) explanation of why it is wrong AND explicitly state what the right option is.
-          4. If the answer is CORRECT, you may leave the feedback empty, or provide brief praise/confirmation.
-
-          QUESTIONS TO GRADE:
-          ${JSON.stringify(examQuestions, null, 2)}
+          Questions:
+          ${JSON.stringify(incorrectAnswers.map((a: any) => ({
+            id: a.questionId,
+            question: a.questionText,
+            studentAnswer: a.studentAnswer,
+            correctAnswer: a.expectedAnswer
+          })))}
           
-          Output STRICT JSON ONLY. Ensure the output is a valid JSON array of objects.
-          Schema:
+          Output STRICT JSON ONLY. Schema:
           [
-            { 
-              "id": "questionId", 
-              "isCorrect": boolean, 
-              "feedback": "Your explanation here (mandatory if isCorrect is false)" 
-            }
+            { "id": "questionId", "feedback": "Your brief explanation here" }
           ]
         `;
 
@@ -79,64 +86,23 @@ export async function POST(
         const result = await model.generateContent(prompt);
         const textResponse = result.response.text();
         const cleanJSON = textResponse.replace(/```json/g, "").replace(/```/g, "").trim();
-        const aiGrading = JSON.parse(cleanJSON);
+        const feedbackData = JSON.parse(cleanJSON);
 
-        // 3. Map AI results back to our final structure
-        gradedAnswers = examQuestions.map((q: any) => {
-          const aiGrade = aiGrading.find((g: any) => g.id === q.questionId);
-          
-          // Fallback to strict equality if AI misses a question
-          let isCorrect = q.expectedAnswer === q.studentAnswer;
-          let feedback = "";
-          
-          if (aiGrade) {
-            isCorrect = Boolean(aiGrade.isCorrect);
-            feedback = aiGrade.feedback || "";
+        feedbackData.forEach((fb: any) => {
+          const ans = gradedAnswers.find((a: any) => a.questionId === fb.id);
+          if (ans) {
+            ans.feedback = fb.feedback;
           }
-
-          if (isCorrect) score += q.points;
-
-          return {
-            questionId: q.questionId,
-            answer: q.studentAnswer,
-            feedback,
-            isCorrect,
-          };
         });
       } catch (aiError) {
-        console.error("AI GRADING ERROR", aiError);
-        // Fallback to basic strict grading if AI fails entirely
-        score = 0;
-        gradedAnswers = examQuestions.map((q: any) => {
-          const isCorrect = q.expectedAnswer === q.studentAnswer;
-          if (isCorrect) score += q.points;
-          return {
-            questionId: q.questionId,
-            answer: q.studentAnswer,
-            feedback: "AI grading unavailable. Fallback to exact match grading.",
-            isCorrect,
-          };
-        });
+        console.error("AI FEEDBACK ERROR", aiError);
       }
-    } else {
-       // Fallback if no API key
-       score = 0;
-       gradedAnswers = examQuestions.map((q: any) => {
-         const isCorrect = q.expectedAnswer === q.studentAnswer;
-         if (isCorrect) score += q.points;
-         return {
-           questionId: q.questionId,
-           answer: q.studentAnswer,
-           feedback: "",
-           isCorrect,
-         };
-       });
     }
 
     // Clean up temporary fields before saving
     const finalAnswers = gradedAnswers.map((a: any) => ({
       questionId: a.questionId,
-      answer: a.answer,
+      answer: a.studentAnswer,
       feedback: a.feedback
     }));
 
