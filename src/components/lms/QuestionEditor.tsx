@@ -58,6 +58,7 @@ export default function QuestionEditor({ exam, onSuccess, onCancel }: QuestionEd
       {
         _id: Date.now().toString(), // Temp ID
         questionText: "",
+        type: "MCQ",
         options: ["", "", "", ""],
         correctAnswer: "",
         points: 1,
