@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
-import type { exam, Question } from "@/types";
+import type { exam, question } from "@/types";
 
 interface QuestionEditorProps {
   exam: exam;
@@ -17,12 +17,12 @@ interface QuestionEditorProps {
 }
 
 export default function QuestionEditor({ exam, onSuccess, onCancel }: QuestionEditorProps) {
-  const [questions, setQuestions] = useState<Question[]>(
+  const [questions, setQuestions] = useState<question[]>(
     exam.questions.map(q => ({ ...q })) // Deep clone shallowly
   );
   const [saving, setSaving] = useState(false);
 
-  const handleQuestionChange = (index: number, field: keyof Question, value: any) => {
+  const handleQuestionChange = (index: number, field: keyof question, value: any) => {
     const updated = [...questions];
     updated[index] = { ...updated[index], [field]: value };
     setQuestions(updated);
