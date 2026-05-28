@@ -302,7 +302,7 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
               name="email"
               label="Email Address"
               type="email"
-              placeholder="m@example.com"
+              placeholder="johndoe@gmail.com"
               disabled={pending}
             />
           </div>
