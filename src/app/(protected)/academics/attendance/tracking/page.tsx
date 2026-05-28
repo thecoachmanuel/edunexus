@@ -386,7 +386,7 @@ export default function AttendanceTrackingPage() {
   const fetchIndividual = useCallback(
     async (studentId: string) => {
       if (!studentId) return;
-      const student = allStudents.find((s) => s._id === studentId);
+      const student = allStudents.find((s: any) => s._id === studentId);
       if (!student) return;
       const summary: StudentSummary = {
         studentId: student._id,
@@ -410,7 +410,7 @@ export default function AttendanceTrackingPage() {
   );
 
   // ── Filtered students for individual search ──────────────
-  const filteredAllStudents = allStudents.filter((s) =>
+  const filteredAllStudents = allStudents.filter((s: any) =>
     s.name.toLowerCase().includes(individualSearch.toLowerCase())
   );
 
@@ -665,7 +665,7 @@ export default function AttendanceTrackingPage() {
             {/* Search results */}
             {individualSearch && filteredAllStudents.length > 0 && (
               <div className="border rounded-lg overflow-hidden divide-y">
-                {filteredAllStudents.slice(0, 8).map((s) => (
+                {filteredAllStudents.slice(0, 8).map((s: any) => (
                   <button
                     key={s._id}
                     onClick={() => {
