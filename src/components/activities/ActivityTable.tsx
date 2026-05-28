@@ -84,9 +84,10 @@ export function ActivityTable({ data, loading, page, setPage, totalPages }: Prop
 
       {totalPages > 1 && (
         <CustomPagination
-          currentPage={page}
+          page={page}
+          setPage={setPage}
           totalPages={totalPages}
-          onPageChange={setPage}
+          loading={loading}
         />
       )}
     </div>
