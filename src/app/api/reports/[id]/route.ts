@@ -6,9 +6,10 @@ import { logActivity } from "@/lib/utils/activitieslog";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await props.params;
     await connectDB();
     const authUser = await getAuthUser(req, ["admin"]);
     
