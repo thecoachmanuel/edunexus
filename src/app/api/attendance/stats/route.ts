@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     let excusedDays = 0;
 
     records.forEach((record) => {
-      const studentRecord = record.records.find((r) => r.student.toString() === targetStudentId);
+      const studentRecord = record.records.find((r: any) => r.student.toString() === targetStudentId);
       if (studentRecord) {
         totalDays++;
         if (studentRecord.status === "Present") presentDays++;
