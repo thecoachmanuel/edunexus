@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,22 @@ export default function QuestionEditor({ exam, onSuccess, onCancel }: QuestionEd
   const [questions, setQuestions] = useState<question[]>(
     exam.questions.map(q => ({ ...q })) // Deep clone shallowly
   );
-  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error">("saved");
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    setSaveStatus("saving");
+    const timer = setTimeout(() => {
+      silentSave();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [questions]);
 
   const handleQuestionChange = (index: number, field: keyof question, value: any) => {
     const updated = [...questions];
@@ -70,31 +85,32 @@ export default function QuestionEditor({ exam, onSuccess, onCancel }: QuestionEd
     setQuestions(questions.filter((_, i) => i !== index));
   };
 
-  const handleSave = async () => {
+  const silentSave = async () => {
     // Validation
+    let isValid = true;
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      if (!q.questionText.trim()) return toast.error(`Question ${i + 1} text is empty`);
-      if (q.options.some(opt => !opt.trim())) return toast.error(`Question ${i + 1} has empty options`);
-      if (!q.correctAnswer) return toast.error(`Question ${i + 1} has no correct answer selected`);
-      if (!q.options.includes(q.correctAnswer)) return toast.error(`Question ${i + 1} correct answer must match one of the options exactly`);
+      if (!q.questionText.trim() || q.options.some(opt => !opt.trim()) || !q.correctAnswer || !q.options.includes(q.correctAnswer)) {
+        isValid = false;
+        break;
+      }
+    }
+
+    if (!isValid) {
+      setSaveStatus("error");
+      return;
     }
 
     try {
-      setSaving(true);
-      // Remove temp _ids from new questions before sending to backend
       const payload = questions.map(q => {
         const { _id, ...rest } = q;
         return _id.length > 20 ? q : rest; // keep real mongo ids, drop temp ones
       });
 
       await api.patch(`/exams/${exam._id}`, { questions: payload });
-      toast.success("Questions updated successfully");
-      onSuccess();
+      setSaveStatus("saved");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to save questions");
-    } finally {
-      setSaving(false);
+      setSaveStatus("error");
     }
   };
 
@@ -105,13 +121,24 @@ export default function QuestionEditor({ exam, onSuccess, onCancel }: QuestionEd
           <h2 className="text-xl font-bold">Edit Questions</h2>
           <p className="text-sm text-muted-foreground">Modify the AI generated quiz</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel} disabled={saving}>
-            <X className="h-4 w-4 mr-2" /> Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            Save Changes
+        <div className="flex gap-2 items-center">
+          {saveStatus === "saving" && (
+            <span className="text-sm text-muted-foreground flex items-center mr-4">
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...
+            </span>
+          )}
+          {saveStatus === "saved" && (
+            <span className="text-sm text-green-600 flex items-center mr-4">
+              <CheckCircle2 className="h-4 w-4 mr-2" /> All changes saved
+            </span>
+          )}
+          {saveStatus === "error" && (
+            <span className="text-sm text-destructive flex items-center mr-4">
+              <AlertCircle className="h-4 w-4 mr-2" /> Unsaved (Check errors)
+            </span>
+          )}
+          <Button onClick={onSuccess}>
+            Done
           </Button>
         </div>
       </div>

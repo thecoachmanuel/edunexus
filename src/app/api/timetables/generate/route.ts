@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     let qualifiedTeachers = allTeachers
       .filter((teacher) => {
-        if (!teacher.teacherSubject) return false;
+        if (!Array.isArray(teacher.teacherSubject)) return false;
         return teacher.teacherSubject.some((subId: any) =>
           classSubjectIds.includes(subId.toString())
         );
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       .map((tea) => ({
         id: tea._id.toString(),
         name: tea.name,
-        subjects: tea.teacherSubject ? tea.teacherSubject.map((s: any) => s.toString()) : [],
+        subjects: Array.isArray(tea.teacherSubject) ? tea.teacherSubject.map((s: any) => s.toString()) : [],
       }));
 
     let isUsingFallbackTeachers = false;
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       qualifiedTeachers = allTeachers.map((tea) => ({
         id: tea._id.toString(),
         name: tea.name,
-        subjects: tea.teacherSubject ? tea.teacherSubject.map((s: any) => s.toString()) : [],
+        subjects: Array.isArray(tea.teacherSubject) ? tea.teacherSubject.map((s: any) => s.toString()) : [],
       }));
     }
 
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
     const activeModel = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       generationConfig: {
         responseMimeType: "application/json"
       }

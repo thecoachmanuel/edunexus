@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     `;
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       generationConfig: { responseMimeType: "application/json" }
     });
     const result = await model.generateContent(prompt);
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       teacher: authUser._id,
       duration: count * 2, // 2 mins per question default
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
-      isActive: true,
+      isActive: false,
       questions: generatedQuestions,
     });
 

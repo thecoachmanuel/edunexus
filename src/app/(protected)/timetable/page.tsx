@@ -25,6 +25,7 @@ const Timetable = () => {
     if (!classId) return;
 
     try {
+      setLoadingSchedule(true);
       const { data } = await api.get(`/timetables/${classId}`);
       setScheduleData(data.schedule || []);
     } catch (error: any) {

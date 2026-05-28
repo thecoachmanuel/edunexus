@@ -46,29 +46,22 @@ const Exam = () => {
 
   const fetchExam = async () => {
     setLoading(true);
-    await api
-      .get(`/exams/${id}`)
-      .then((res) => {
-        setExam(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        toast.error("Failed to load exam");
-        router.push("/lms/exams");
-        setLoading(false);
-      });
-    setLoading(true);
-    if (isStudent) {
-      await api
-        .get(`/exams/${id}/result`)
-        .then((res) => {
-          setLoading(false);
-          setSubmission(res.data);
-        })
-        .catch(() => {
-          setLoading(false);
+    try {
+      const res = await api.get(`/exams/${id}`);
+      setExam(res.data);
+      if (isStudent) {
+        try {
+          const resultRes = await api.get(`/exams/${id}/result`);
+          setSubmission(resultRes.data);
+        } catch {
           setSubmission(null);
-        });
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to load exam");
+      router.push("/lms/exams");
+    } finally {
+      setLoading(false);
     }
   };
 
