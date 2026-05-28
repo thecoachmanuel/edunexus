@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/AuthProvider";
 import { Class } from "@/types";
 
 export function FeeStructureDialog({ onSave, initialData, open: controlledOpen, onOpenChange }: { onSave: () => void, initialData?: any, open?: boolean, onOpenChange?: (open: boolean) => void }) {
+  const { year } = useAuth();
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
   const isOpen = isControlled ? controlledOpen : internalOpen;

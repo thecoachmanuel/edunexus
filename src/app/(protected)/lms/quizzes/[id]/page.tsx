@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -238,7 +239,7 @@ const Quiz = () => {
         />
       ) : (
         <div className="space-y-6">
-        {exam.questions.map((q, index) => (
+        {exam.questions.map((q: any, index: number) => (
           <Card key={q._id}>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-medium flex flex-col sm:flex-row sm:items-start gap-2">
@@ -254,7 +255,7 @@ const Quiz = () => {
             <CardContent>
               {isTeacher ? (
                 <ul className="space-y-2">
-                  {q.options.map((opt, i) => (
+                  {q.options.map((opt: string, i: number) => (
                     <li
                       key={i}
                       className={`p-3 rounded-md border flex items-center gap-2 ${
