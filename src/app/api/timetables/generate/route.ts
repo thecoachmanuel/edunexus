@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
     // --- Step 2: Fetch existing timetables to avoid teacher clashes ---
     const allTimetables = await Timetable.find({ academicYear: academicYearId }).lean();
 
+    console.log("[Timetable] Subjects:", subjectsPayload.length, "Teachers:", qualifiedTeachers.length);
     // --- Step 3: Generate timetable with AI ---
     const prompt = `
       You are a school scheduler. Generate a weekly timetable (Monday to Friday).
@@ -126,8 +127,10 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    console.log("[Timetable] Sending prompt to Gemini...");
     const result = await activeModel.generateContent(prompt);
     const text = result.response.text();
+    console.log("[Timetable] AI response received, length:", text.length);
 
     let aiSchedule: any;
     try {
@@ -167,19 +170,21 @@ export async function POST(req: NextRequest) {
       })),
     }));
 
-    // --- Step 4: Save the timetable ---
-    await Timetable.findOneAndDelete({ class: classId, academicYear: academicYearId });
-    const createdTimetable = await Timetable.create({
-      class: classId,
-      academicYear: academicYearId,
-      schedule: sanitizedSchedule,
-    });
+    // --- Step 4: Save the timetable (atomic upsert to avoid duplicate key errors from the unique class+year index) ---
+    console.log("[Timetable] Saving sanitized schedule with", sanitizedSchedule.length, "days...");
+    const upsertedTimetable = await Timetable.findOneAndUpdate(
+      { class: classId, academicYear: academicYearId },
+      { $set: { schedule: sanitizedSchedule } },
+      { upsert: true, new: true }
+    );
 
     // Populate all details so the frontend receives a ready-to-render structure on success!
-    const newTimetable = await Timetable.findById(createdTimetable._id)
+    const newTimetable = await Timetable.findById(upsertedTimetable._id)
       .populate("academicYear")
       .populate("schedule.periods.subject")
       .populate("schedule.periods.teacher");
+
+    console.log("[Timetable] Saved successfully. Populated timetable id:", newTimetable?._id);
 
     await logActivity({
       userId: authUser._id.toString(),
@@ -191,8 +196,17 @@ export async function POST(req: NextRequest) {
       { message: "Timetable generated successfully", timetable: newTimetable },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("TIMETABLE GENERATE ERROR", error);
-    return NextResponse.json({ message: "Server Error", error }, { status: 500 });
+  } catch (error: any) {
+    const errMessage = error?.message || String(error);
+    const isOverloaded = errMessage.includes("503") || errMessage.includes("overloaded") || errMessage.includes("high demand");
+    const isQuota = errMessage.includes("429") || errMessage.includes("quota");
+    console.error("TIMETABLE GENERATE ERROR", errMessage);
+    if (isOverloaded) {
+      return NextResponse.json({ message: "The AI model is currently overloaded. Please wait a moment and try again." }, { status: 503 });
+    }
+    if (isQuota) {
+      return NextResponse.json({ message: "AI quota exceeded. Please try again later." }, { status: 429 });
+    }
+    return NextResponse.json({ message: errMessage || "Server Error" }, { status: 500 });
   }
 }

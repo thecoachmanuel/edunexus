@@ -467,7 +467,7 @@ export default function AttendanceTrackingPage() {
   const perfectCount = students.filter((s) => s.attendanceRate === 100).length;
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 space-y-6 p-8 pt-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
