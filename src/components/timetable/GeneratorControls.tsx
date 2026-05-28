@@ -61,22 +61,28 @@ const GeneratorControls = ({
   const [periods, setPeriods] = useState("5");
 
   useEffect(() => {
+    if (!user) return; // Wait for auth to resolve
     const fetchData = async () => {
       setLoadingData(true);
       try {
         const [clsRes, yearRes] = await Promise.all([
-          api.get("/classes"),
-          api.get("/academic-years"), // Get all years so we can see history if needed
+          api.get("/classes?limit=1000"),
+          api.get("/academic-years?limit=100"),
         ]);
-        setClasses(clsRes.data.classes);
-        setYears(yearRes.data.years);
+        setClasses(clsRes.data.classes || []);
 
-        // Auto-select current year
-        const current = Array.isArray(yearRes.data)
-          ? yearRes.data.find((y: academicYear) => y.isCurrent)
-          : yearRes.data;
+        // API returns { years: [...], pagination: {...} } — not a plain array
+        const yearsList: academicYear[] = yearRes.data.years || [];
+        setYears(yearsList);
 
-        if (current?._id) setSelectedYear(current._id);
+        // Auto-select the current academic year
+        const currentYear = yearsList.find((y) => y.isCurrent);
+        if (currentYear?._id) {
+          setSelectedYear(currentYear._id);
+        } else if (yearsList.length > 0) {
+          // Fall back to the first year if none is marked current
+          setSelectedYear(yearsList[0]._id);
+        }
       } catch (error) {
         toast.error("Failed to load selection data");
       } finally {
@@ -84,7 +90,8 @@ const GeneratorControls = ({
       }
     };
     fetchData();
-  }, []);
+  }, [user]); // re-run when auth resolves
+
 
   const handleGenerateClick = () => {
     if (!selectedClass || !selectedYear) {

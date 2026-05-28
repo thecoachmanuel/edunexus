@@ -42,8 +42,10 @@ const Exams = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchExams();
-  }, []);
+  }, [user]);
+
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this assignment?")) return;

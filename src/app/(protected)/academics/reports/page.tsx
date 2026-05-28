@@ -52,21 +52,6 @@ export default function ReportsPage() {
     },
   });
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        if (isAdminOrTeacher) {
-          const { data } = await api.get("/classes?limit=1000");
-          setClasses(data.classes || []);
-        }
-        await fetchReports();
-      } catch (error) {
-        toast.error("Failed to initialize");
-      }
-    };
-    init();
-  }, []);
-
   const fetchReports = async (classId?: string) => {
     try {
       setLoading(true);
@@ -80,6 +65,25 @@ export default function ReportsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Don't run until auth context has resolved and user role is known
+    if (!user) return;
+
+    const loadClasses = async () => {
+      if (!isAdminOrTeacher) return;
+      try {
+        const { data } = await api.get("/classes?limit=1000");
+        setClasses(data.classes || []);
+      } catch (error) {
+        toast.error("Failed to load classes");
+      }
+    };
+
+    loadClasses();
+    fetchReports();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const onFilter = filterForm.handleSubmit((data) => {
     fetchReports(data.classId === "all" ? undefined : data.classId);

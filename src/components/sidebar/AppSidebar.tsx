@@ -97,6 +97,12 @@ export const sidebardata = {
         {
           title: "Attendance",
           url: "/academics/attendance",
+          roles: ["admin", "teacher"],
+        },
+        {
+          title: "Attendance Tracking",
+          url: "/academics/attendance/tracking",
+          roles: ["admin", "teacher"],
         },
         {
           title: "Report Cards",

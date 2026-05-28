@@ -44,16 +44,14 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Initialize
+  // Initialize — wait until user object is resolved
   useEffect(() => {
+    if (!user) return; // Auth not ready yet
     const init = async () => {
       try {
         const { data } = await api.get("/classes?limit=1000");
         let availableClasses = data.classes || [];
         
-        // If teacher, optionally restrict to their classes, but the prompt says:
-        // "class teacher to mark daily attendance... admin can as well mark for any"
-        // Let's assume teachers can only mark their own assigned class.
         if (isTeacher) {
           availableClasses = availableClasses.filter((c: any) => c.classTeacher?._id === user?._id);
         }
@@ -70,10 +68,11 @@ export default function AttendancePage() {
     if (isAdmin || isTeacher) {
       init();
     }
-  }, [isAdmin, isTeacher, user]);
+  }, [user]); // re-run when user resolves
 
   // Fetch Attendance & Students
   useEffect(() => {
+    if (!user) return; // Auth not ready yet — prevent 401 on mount
     const fetchAttendanceData = async () => {
       if (!selectedClassId || !date) return;
       
@@ -83,7 +82,6 @@ export default function AttendancePage() {
         
         // 1. Fetch Students for the class
         const studentsRes = await api.get(`/users?role=student&limit=1000`);
-        // Filter students by class manually since the users API doesn't have classId filter natively yet
         const classStudents = studentsRes.data.users.filter((s: any) => s.studentClass?._id === selectedClassId);
         setStudents(classStudents);
 
@@ -101,7 +99,6 @@ export default function AttendancePage() {
               return;
             }
           }
-          // Default status requested by user: "Present"
           newRecords[student._id] = { status: "Present", remarks: "" };
         });
 
@@ -114,7 +111,7 @@ export default function AttendancePage() {
     };
 
     fetchAttendanceData();
-  }, [selectedClassId, date]);
+  }, [selectedClassId, date, user]);
 
   const handleStatusChange = (studentId: string, status: string) => {
     setRecords((prev) => ({

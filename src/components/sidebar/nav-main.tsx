@@ -16,6 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,13 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    // Auto-close drawer on mobile after navigating
+    if (isMobile) setOpenMobile(false);
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
@@ -65,8 +73,7 @@ export function NavMain({
                           subItem.isActive && "bg-primary text-white"
                         )}
                       >
-                        {/* here is where the issue was, <a> tag was used causing that reload change to react-router link */}
-                        <Link href={subItem.url}>
+                        <Link href={subItem.url} onClick={handleLinkClick}>
                           <span>{subItem.title}</span>
                         </Link>
                       </SidebarMenuSubButton>
