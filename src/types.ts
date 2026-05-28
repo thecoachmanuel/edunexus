@@ -84,3 +84,65 @@ export interface schedule {
   day: string; // "Monday", "Tuesday", etc.
   periods: period[];
 }
+
+export interface FeeStructure {
+  _id: string;
+  name: string;
+  amount: number;
+  class: Class | string;
+  academicYear: academicYear | string;
+  dueDate: string | Date;
+  description?: string;
+  category: "tuition" | "exam" | "library" | "sport" | "other";
+}
+
+export interface FeeTransaction {
+  _id?: string;
+  amount: number;
+  date: string | Date;
+  method: "cash" | "bank_transfer" | "card" | "other";
+  receiptNumber?: string;
+  notes?: string;
+}
+
+export interface StudentFee {
+  _id: string;
+  student: user | string;
+  feeStructure: FeeStructure | string;
+  class: Class | string;
+  academicYear: academicYear | string;
+  totalAmount: number;
+  amountPaid: number;
+  balance: number;
+  status: "paid" | "partial" | "unpaid";
+  transactions: FeeTransaction[];
+}
+
+export interface Expense {
+  _id: string;
+  title: string;
+  amount: number;
+  category: "salary" | "utilities" | "maintenance" | "supplies" | "equipment" | "other";
+  description?: string;
+  date: string | Date;
+  paymentMethod: "cash" | "bank_transfer" | "card" | "other";
+  receipt?: string;
+  recordedBy: user | string;
+  academicYear: academicYear | string;
+}
+
+export interface SalaryRecord {
+  _id: string;
+  employee: user | string;
+  academicYear: academicYear | string;
+  month: number;
+  year: number;
+  basicSalary: number;
+  allowances: number;
+  deductions: number;
+  netSalary: number;
+  status: "pending" | "paid";
+  paymentDate?: string | Date;
+  paymentMethod?: "cash" | "bank_transfer" | "card" | "other";
+  notes?: string;
+}

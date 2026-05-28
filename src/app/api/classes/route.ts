@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
       Class.find(query)
         .populate("academicYear", "name")
         .populate("classTeacher", "name email")
+        .populate("subjects", "name")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)

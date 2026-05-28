@@ -17,7 +17,7 @@ export async function GET(
     // In our system, timetable is usually linked to academicYear as well, 
     // but the frontend simply passes classId. We'll fetch the most recent one for the class.
     const timetable = await Timetable.findOne({ class: classId })
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: -1 })
       .populate("academicYear")
       .populate("schedule.periods.subject")
       .populate("schedule.periods.teacher");

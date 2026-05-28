@@ -100,7 +100,7 @@ const ClassForm = ({ open, onOpenChange, initialData, onSuccess }: Props) => {
         capacity: initialData.capacity,
         academicYear: initialData.academicYear?._id || "",
         classTeacher: initialData.classTeacher?._id || "",
-        subjectIds: initialData.subjects.map((s) => s._id),
+        subjectIds: initialData.subjects?.map((s) => s._id) || [],
       });
     } else {
       form.reset({

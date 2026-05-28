@@ -146,17 +146,19 @@ export const sidebardata = {
         },
       ],
     },
-    // {
-    //   title: "Finance",
-    //   url: "#",
-    //   icon: Banknote,
-    //   roles: ["admin"],
-    //   items: [
-    //     { title: "Fee Collection", url: "/finance/fees" },
-    //     { title: "Expenses", url: "/finance/expenses" },
-    //     { title: "Salary", url: "/finance/salary" },
-    //   ],
-    // },
+    {
+      title: "Finance",
+      url: "#",
+      icon: Banknote,
+      roles: ["admin", "student", "parent"],
+      items: [
+        { title: "Overview", url: "/finance", roles: ["admin"] },
+        { title: "Fee Management", url: "/finance/fees", roles: ["admin"] },
+        { title: "Expenses", url: "/finance/expenses", roles: ["admin"] },
+        { title: "Salary", url: "/finance/salary", roles: ["admin"] },
+        { title: "My Fees", url: "/finance/my-fees", roles: ["student", "parent"] },
+      ],
+    },
     {
       title: "System",
       url: "#",
