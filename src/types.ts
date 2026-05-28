@@ -13,7 +13,8 @@ export interface user {
   email: string;
   role: UserRole;
   studentClass?: Class;
-  teacherSubjects?: subject[];
+  teacherSubject?: subject[];
+  children?: user[];
 }
 
 export interface academicYear {
