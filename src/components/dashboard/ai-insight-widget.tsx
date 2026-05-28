@@ -21,6 +21,7 @@ export function AiInsightWidget({ role }: Props) {
     try {
       const { data } = await api.post('/ai/insight', { role });
       setInsight(data.text);
+      toast.success("AI Insight generated successfully!");
     } catch (e) {
       toast.error("Could not generate insight");
     } finally {
