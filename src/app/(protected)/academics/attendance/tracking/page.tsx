@@ -449,7 +449,7 @@ export default function AttendanceTrackingPage() {
               <SelectValue placeholder="Select Class" />
             </SelectTrigger>
             <SelectContent>
-              {classes.map((c) => (
+              {classes.map((c: any) => (
                 <SelectItem key={c._id} value={c._id}>
                   {c.name}
                 </SelectItem>
