@@ -64,7 +64,8 @@ const Timetable = () => {
       });
 
       toast.success(data.message || "Timetable generated successfully!");
-      setScheduleData(data.timetable?.schedule || []);
+      // Fetch fresh from the DB to ensure all Mongoose populates are fully resolved
+      await fetchTimetable(selectedClass);
       setIsGenerating(false);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Generation failed");

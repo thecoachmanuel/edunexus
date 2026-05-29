@@ -94,15 +94,19 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
                           <div className="flex flex-col gap-3 border-l-4 border-l-primary pl-3">
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <h4 className="font-semibold text-primary">{period.subject.name}</h4>
+                                <h4 className="font-semibold text-primary">
+                                  {typeof period.subject === "object" && period.subject?.name ? period.subject.name : "Subject Name Missing"}
+                                </h4>
                               </div>
                               <Badge variant="outline" className="text-[10px] whitespace-nowrap">
-                                {period.subject.code}
+                                {typeof period.subject === "object" && period.subject?.code ? period.subject.code : "Code"}
                               </Badge>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <UserIcon className="h-4 w-4" />
-                              <span>{period.teacher.name}</span>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <UserIcon className="h-3 w-3 shrink-0" />
+                              <span className="truncate">
+                                {typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : "Teacher Missing"}
+                              </span>
                             </div>
                           </div>
                         ) : (
@@ -162,17 +166,17 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <Badge variant="outline" className="font-bold text-[10px] px-1.5 bg-background">
-                                {period.subject.code}
+                                {typeof period.subject === "object" && period.subject?.code ? period.subject.code : "Code"}
                               </Badge>
                             </div>
                             <h4 className="font-semibold text-sm leading-tight text-primary line-clamp-2 group-hover:text-primary/80 transition-colors">
-                              {period.subject.name}
+                              {typeof period.subject === "object" && period.subject?.name ? period.subject.name : "Subject Name Missing"}
                             </h4>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto pt-2 border-t border-dashed">
                             <UserIcon className="h-3 w-3 shrink-0" />
-                            <span className="truncate" title={period.teacher.name}>
-                              {period.teacher.name}
+                            <span className="truncate" title={typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : ""}>
+                              {typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : "Teacher Missing"}
                             </span>
                           </div>
                         </div>
