@@ -1,5 +1,23 @@
 import mongoose from "mongoose";
 
+// Pre-register all models to prevent MissingSchemaError in Next.js serverless functions during populate()
+import "@/lib/models/academicYear";
+import "@/lib/models/activitieslog";
+import "@/lib/models/attendance";
+import "@/lib/models/class";
+import "@/lib/models/exam";
+import "@/lib/models/expense";
+import "@/lib/models/feeStructure";
+import "@/lib/models/material";
+import "@/lib/models/reportCard";
+import "@/lib/models/salary";
+import "@/lib/models/schoolSettings";
+import "@/lib/models/studentFee";
+import "@/lib/models/subject";
+import "@/lib/models/submission";
+import "@/lib/models/timetable";
+import "@/lib/models/user";
+
 const MONGODB_URI = process.env.MONGO_URL as string;
 
 if (!MONGODB_URI) {
