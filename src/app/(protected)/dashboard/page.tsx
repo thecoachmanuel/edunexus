@@ -106,89 +106,90 @@ export default function Dashboard() {
       </div>
 
       {/* --- MAIN CONTENT GRID --- */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-6 md:grid-cols-12">
         {/* LEFT COLUMN (Content) */}
-        <div className="col-span-4 space-y-4">
+        <div className="col-span-12 lg:col-span-8 space-y-4">
           {/* AI WIDGET */}
           <AiInsightWidget role={user?.role} />
 
-        {/* RECENT ACTIVITY & UPCOMING CLASSES ROW */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 col-span-7">
-          
-          {/* RECENT ACTIVITY CARD */}
-          <Card className="shadow-sm border-none">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg font-bold">Recent Activity</CardTitle>
-              <Link href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">View All</Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 mt-2">
-                {/* Mocked activity to match screenshot style */}
-                {[
-                  { name: "John Doe", action: "submitted assignment", sub: "UI/UX Design Assignment", status: "Submitted", time: "01:09 am", color: "text-green-600 bg-green-50" },
-                  { name: "Flores, Juanita", action: "", sub: "Web Development Assignment", status: "Pending", time: "02:10 pm", color: "text-yellow-600 bg-yellow-50" },
-                  { name: "You created a new assignment", action: "", sub: "SEO Assignment", status: "Assignment", time: "08:20 pm", color: "text-indigo-600 bg-indigo-50" },
-                  { name: "Miles, Esther", action: "", sub: "Content Creator Assignment", status: "Submitted", time: "01:34 pm", color: "text-green-600 bg-green-50" }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-2">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-slate-200 overflow-hidden shrink-0">
-                        {/* Mock Avatar */}
-                        <div className="h-full w-full bg-slate-300 flex items-center justify-center text-slate-500 text-xs font-bold">{item.name.charAt(0)}</div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{item.name} <span className="font-normal text-slate-600">{item.action}</span></p>
-                        <p className="text-xs text-slate-500">{item.sub}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className={`text-xs font-semibold px-2 py-1 rounded-md inline-block mb-1 ${item.color}`}>
-                        ✓ {item.status}
-                      </div>
-                      <p className="text-xs text-slate-400">{item.time}</p>
-                    </div>
+          {/* RECENT ACTIVITY & UPCOMING CLASSES ROW */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* RECENT ACTIVITY CARD */}
+            {user?.role === "admin" && (
+              <Card className="shadow-sm border-none">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-lg font-bold">Recent Activity</CardTitle>
+                  <Link href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">View All</Link>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 mt-2 max-h-[300px] overflow-y-auto no-scrollbar">
+                    {statsData?.recentActivity?.length > 0 ? (
+                      statsData.recentActivity.map((item: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between py-2 border-b last:border-0 pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-slate-200 overflow-hidden shrink-0">
+                              <div className="h-full w-full bg-slate-300 flex items-center justify-center text-slate-500 text-xs font-bold">
+                                {item.name.charAt(0)}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-slate-800">{item.name} <span className="font-normal text-slate-600">{item.action}</span></p>
+                              {item.sub && <p className="text-xs text-slate-500">{item.sub}</p>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-[10px] font-semibold px-2 py-0.5 rounded-md inline-block mb-1 ${item.color || "bg-gray-100 text-gray-600"}`}>
+                              ✓ {item.status || "Activity"}
+                            </div>
+                            <p className="text-xs text-slate-400 block">{item.time}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-slate-500">No recent activity found.</p>
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            )}
 
-          {/* UPCOMING CLASSES CARD */}
-          <Card className="shadow-sm border-none">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg font-bold">Upcoming Classes</CardTitle>
-              <Link href="/timetable" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">View Calendar</Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 mt-2">
-                {[
-                  { time: "09:30", period: "PM", title: "UI/UX Design", sub: "Class 01", diff: "In 30 min" },
-                  { time: "10:15", period: "PM", title: "Front-end Development", sub: "Class 02", diff: "In 45 min" },
-                  { time: "11:00", period: "PM", title: "Back-end Development", sub: "Class 03", diff: "In 60 min" },
-                  { time: "12:00", period: "PM", title: "Project Management", sub: "Class 04", diff: "In 90 min" }
-                ].map((cls, i) => (
-                  <div key={i} className="flex items-center justify-between border border-slate-100 rounded-lg p-3 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="flex flex-col items-center justify-center border-l-4 border-indigo-500 bg-indigo-50 px-3 py-1 rounded-r-md min-w-[70px]">
-                        <span className="text-sm font-bold text-indigo-900">{cls.time}</span>
-                        <span className="text-xs font-semibold text-indigo-600">{cls.period}</span>
+            {/* UPCOMING CLASSES CARD */}
+            <Card className="shadow-sm border-none">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-lg font-bold">Upcoming Events</CardTitle>
+                <Link href="/calendar" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">View Calendar</Link>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mt-2">
+                  {statsData?.upcomingClasses?.length > 0 ? (
+                    statsData.upcomingClasses.map((cls: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between border border-slate-100 rounded-lg p-3 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-center justify-center border-l-4 border-indigo-500 bg-indigo-50 px-3 py-1 rounded-r-md min-w-[70px]">
+                            <span className="text-sm font-bold text-indigo-900">{cls.time}</span>
+                            <span className="text-xs font-semibold text-indigo-600">{cls.period}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800">{cls.title}</p>
+                            <p className="text-xs text-slate-500">{cls.sub}</p>
+                          </div>
+                        </div>
+                        <div className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
+                          {cls.diff}
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-800">{cls.title}</p>
-                        <p className="text-xs text-slate-500">{cls.sub}</p>
-                      </div>
-                    </div>
-                    <div className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                      {cls.diff}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">No upcoming events scheduled.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-          
-          {/* ATTENDANCE WIDGET */}
+
+        {/* RIGHT COLUMN (Schedule/Quick Links) */}
+        <div className="col-span-12 lg:col-span-4 space-y-4">
           <AttendanceWidget role={user?.role} />
 
           {/* CLASS LEADERBOARD WIDGET */}

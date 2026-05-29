@@ -8,6 +8,7 @@ import Submission from "@/lib/models/submission";
 import ActivityLog from "@/lib/models/activitieslog";
 import Attendance from "@/lib/models/attendance";
 import ReportCard from "@/lib/models/reportCard";
+import { Event } from "@/lib/models/event";
 import jwt from "jsonwebtoken";
 
 const getTodayName = () => new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -82,12 +83,38 @@ export async function GET(req: NextRequest) {
     })).sort((a, b) => b.totalScore - a.totalScore).slice(0, 5); // Top 5
     // ----------------------------------
 
-    const formattedActivity = recentActivities.map(
-      (log) =>
-        `${(log.user as any)?.name || "System"}: ${log.action} (${new Date(
-          log.createdAt as any
-        ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })})`
-    );
+    const formattedActivity = recentActivities.map((log) => {
+      let color = "text-indigo-600 bg-indigo-50";
+      let status = "System";
+      if (log.action.includes("created")) { color = "text-blue-600 bg-blue-50"; status = "Created"; }
+      else if (log.action.includes("updated") || log.action.includes("submitted")) { color = "text-green-600 bg-green-50"; status = "Updated"; }
+      else if (log.action.includes("deleted")) { color = "text-red-600 bg-red-50"; status = "Deleted"; }
+
+      return {
+        name: (log.user as any)?.name || "System",
+        action: log.action,
+        sub: "",
+        status,
+        time: new Date(log.createdAt as any).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        color
+      };
+    });
+
+    const upcomingEvents = await Event.find({ startDate: { $gte: new Date() } })
+      .sort({ startDate: 1 })
+      .limit(4)
+      .lean();
+
+    const upcomingClasses = upcomingEvents.map((evt: any) => {
+      const d = new Date(evt.startDate);
+      return {
+        time: d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }).split(" ")[0],
+        period: d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }).split(" ")[1] || "AM",
+        title: evt.title,
+        sub: evt.type,
+        diff: new Date(evt.startDate).toLocaleDateString()
+      };
+    });
 
     if (user.role === "admin") {
       const totalStudents = await User.countDocuments({ role: "student" });
@@ -105,13 +132,13 @@ export async function GET(req: NextRequest) {
       });
       const avgAttendance = totalRecords === 0 ? "100%" : `${Math.round((presentRecords / totalRecords) * 100)}%`;
 
-      stats = { totalStudents, totalTeachers, activeExams, avgAttendance, recentActivity: formattedActivity, leaderboard };
+      stats = { totalStudents, totalTeachers, activeExams, avgAttendance, recentActivity: formattedActivity, upcomingClasses, leaderboard };
     } else if (user.role === "teacher") {
       const myClassesCount = await Class.countDocuments({ classTeacher: user._id });
       const myExams = await Exam.find({ teacher: user._id }).select("_id").lean();
       const myExamIds = myExams.map((exam) => exam._id);
       const pendingGrading = await Submission.countDocuments({ exam: { $in: myExamIds }, score: 0 });
-      stats = { myClassesCount, pendingGrading, nextClass: "Mathematics - Grade 10", nextClassTime: "10:00 AM", recentActivity: formattedActivity, leaderboard };
+      stats = { myClassesCount, pendingGrading, nextClass: "Mathematics - Grade 10", nextClassTime: "10:00 AM", recentActivity: formattedActivity, upcomingClasses, leaderboard };
     } else if (user.role === "student") {
       const nextExam = await Exam.findOne({ class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 }).lean();
       const pendingQuizzes = await Exam.countDocuments({ class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });
@@ -128,7 +155,7 @@ export async function GET(req: NextRequest) {
       });
       const myAttendance = totalMyRecords === 0 ? "100%" : `${Math.round((myPresentRecords / totalMyRecords) * 100)}%`;
 
-      stats = { myAttendance, pendingQuizzes, nextExam: nextExam?.title || "No upcoming exams", nextExamDate: nextExam ? new Date(nextExam.dueDate).toLocaleDateString() : "", recentActivity: formattedActivity, leaderboard };
+      stats = { myAttendance, pendingQuizzes, nextExam: nextExam?.title || "No upcoming exams", nextExamDate: nextExam ? new Date(nextExam.dueDate).toLocaleDateString() : "", recentActivity: formattedActivity, upcomingClasses, leaderboard };
     }
     return NextResponse.json(stats);
   } catch (error) {
