@@ -3,6 +3,8 @@ import { connectDB } from "@/lib/db";
 import StudentFee from "@/lib/models/studentFee";
 import { getAuthUser } from "@/middleware/auth";
 import User from "@/lib/models/user";
+import FeeStructure from "@/lib/models/feeStructure";
+import Class from "@/lib/models/class";
 
 export async function GET(req: NextRequest) {
   try {

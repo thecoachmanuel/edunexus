@@ -91,8 +91,8 @@ export default function FeeManagement() {
           <TabsTrigger value="structures">Fee Structures</TabsTrigger>
         </TabsList>
         <TabsContent value="payments" className="space-y-4 pt-4">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <div className="flex flex-col lg:flex-row justify-between gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
@@ -117,7 +117,7 @@ export default function FeeManagement() {
                 </Select>
               </div>
             </div>
-            <div className="flex justify-end">
+            <div className="flex w-full lg:w-auto lg:justify-end">
             <ExportButtons 
               filename="student-fees" 
               data={fees} 
