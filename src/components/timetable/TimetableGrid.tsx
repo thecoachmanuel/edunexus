@@ -41,7 +41,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
     if (!schedule) return [];
     const times = new Set<string>();
     schedule.forEach((day) => {
-      day.periods.forEach((period) => {
+      day.periods?.forEach((period) => {
         times.add(period.startTime);
       });
     });
@@ -50,7 +50,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
 
   const getRowLabel = (startTime: string) => {
     for (const day of schedule) {
-      const found = day.periods.find((p) => p.startTime === startTime);
+      const found = day.periods?.find((p) => p.startTime === startTime);
       if (found) {
         return `${found.startTime} - ${found.endTime}`;
       }
@@ -79,7 +79,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
                   <p className="text-center text-muted-foreground text-sm py-8">No classes scheduled.</p>
                 )}
                 {timeSlots.map((time) => {
-                  const period = dayData?.periods.find((p) => p.startTime === time);
+                  const period = dayData?.periods?.find((p) => p.startTime === time);
                   return (
                     <div key={time} className="flex flex-col border rounded-lg overflow-hidden bg-card shadow-sm">
                       <div className="bg-muted/50 p-2 text-xs font-semibold text-muted-foreground border-b flex items-center gap-2">
@@ -147,7 +147,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
                 {/* Day Cells */}
                 {DAYS.map((day) => {
                   const dayData = schedule.find((d) => d.day === day);
-                  const period = dayData?.periods.find((p) => p.startTime === time);
+                  const period = dayData?.periods?.find((p) => p.startTime === time);
 
                   return (
                     <div
