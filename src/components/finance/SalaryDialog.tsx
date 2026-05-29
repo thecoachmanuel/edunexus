@@ -68,7 +68,7 @@ export function SalaryDialog({ onSave }: { onSave: () => void }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Employee</Label>
-            <Select value={formData.employee} onValueChange={v => setFormData({ ...formData, employee: v })}>
+            <Select value={formData.employee || undefined} onValueChange={v => setFormData({ ...formData, employee: v })}>
               <SelectTrigger><SelectValue placeholder="Select Employee" /></SelectTrigger>
               <SelectContent>
                 {employees.map(e => <SelectItem key={e._id} value={e._id}>{e.name}</SelectItem>)}

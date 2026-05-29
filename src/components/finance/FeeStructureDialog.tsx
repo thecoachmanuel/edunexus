@@ -22,9 +22,14 @@ export function FeeStructureDialog({ onSave, initialData, open: controlledOpen, 
     name: "", amount: "", class: "", category: "tuition", dueDate: ""
   });
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
-      api.get("/classes?limit=1000").then(res => setClasses(res.data.classes));
+      setLoading(true);
+      api.get("/classes?limit=1000")
+        .then(res => setClasses(res.data.classes))
+        .finally(() => setLoading(false));
       if (initialData) {
         setFormData({
           name: initialData.name || "",
@@ -83,8 +88,8 @@ export function FeeStructureDialog({ onSave, initialData, open: controlledOpen, 
           </div>
           <div className="space-y-2">
             <Label>Class</Label>
-            <Select value={formData.class || undefined} onValueChange={v => setFormData({ ...formData, class: v })}>
-              <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
+            <Select disabled={loading} value={formData.class || undefined} onValueChange={v => setFormData({ ...formData, class: v })}>
+              <SelectTrigger><SelectValue placeholder={loading ? "Loading classes..." : "Select class"} /></SelectTrigger>
               <SelectContent>
                 {classes.map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}
               </SelectContent>
