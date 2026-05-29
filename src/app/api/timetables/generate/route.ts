@@ -125,7 +125,8 @@ export async function POST(req: NextRequest) {
       4. Schedule the following breaks EXACTLY as defined: ${breaksDescription}. Set "subject" and "teacher" to null for break periods.
       5. Each teaching period must be exactly ${settings.periodDuration || 45} minutes long (unless interrupted by a break).
       6. Avoid teacher clashes (a teacher cannot appear in two classes at the same time).
-      7. Output strict JSON only.
+      7. Do NOT schedule any extra "Free Periods" or empty slots unless absolutely necessary (e.g. if no teacher is available). Fill all available teaching time with subjects from the RESOURCES.
+      8. Output strict JSON only.
          - "subject" and "teacher" MUST be the exact 24-character hexadecimal ObjectId strings from the resources.
          - For Break, Lunch, or Free Periods: set "subject" to null and "teacher" to null.
          - Do NOT use plain text names for subject or teacher fields.
