@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type Status = "Todo" | "In Progress" | "Review" | "Done";
-const COLUMNS: Status[] = ["Todo", "In Progress", "Review", "Done"];
+type Status = "Todo" | "In Progress" | "Done";
+const COLUMNS: Status[] = ["Todo", "In Progress", "Done"];
 
 export function KanbanBoard() {
   const { data, mutate, isLoading } = useSWR("/tasks");
@@ -99,11 +99,11 @@ export function KanbanBoard() {
         </Button>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-x-auto pb-4 h-full min-h-0 lg:min-h-[500px]">
+      <div className="flex-1 flex gap-4 overflow-x-auto pb-4 h-[70vh] min-h-[500px] snap-x snap-mandatory">
         {COLUMNS.map((col) => (
           <div
             key={col}
-            className="flex flex-col w-full lg:min-w-[300px] lg:max-w-[300px] shrink-0 bg-slate-100 rounded-xl p-3 h-[400px] lg:h-full"
+            className="flex flex-col w-[85vw] min-w-[280px] sm:min-w-[300px] max-w-[300px] shrink-0 bg-slate-100 rounded-xl p-3 h-full snap-center"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col)}
           >
