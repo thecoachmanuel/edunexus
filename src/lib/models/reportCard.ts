@@ -2,18 +2,27 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IGrade {
   subject: mongoose.Types.ObjectId;
-  score: number;
+  // Component scores
+  quizScore: number;     // Normalised quiz score (out of quizWeight)
+  caScore: number;       // Normalised CA score (out of caWeight)
+  examScore: number;     // Normalised exam score (out of examWeight)
+  aggregateScore: number; // Total out of 100
   grade: string;
+  remark: string;
 }
 
 export interface IReportCard extends Document {
   student: mongoose.Types.ObjectId;
   class: mongoose.Types.ObjectId;
   academicYear: mongoose.Types.ObjectId;
-  term: string; // e.g., "Term 1", "Term 2"
+  term: string;
   grades: IGrade[];
-  averageScore: number;
+  totalScore: number;      // Sum of all aggregateScores
+  averageScore: number;    // Average across all subjects
   overallGrade: string;
+  position: number;        // Class position e.g. 1, 2, 3
+  totalStudents: number;   // Total students ranked for this term
+  showPosition: boolean;   // Snapshot from GradingConfig at generation time
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,12 +36,20 @@ const reportCardSchema = new Schema<IReportCard>(
     grades: [
       {
         subject: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
-        score: { type: Number, required: true },
-        grade: { type: String, required: true },
+        quizScore: { type: Number, default: 0 },
+        caScore: { type: Number, default: 0 },
+        examScore: { type: Number, default: 0 },
+        aggregateScore: { type: Number, default: 0 },
+        grade: { type: String, default: "F" },
+        remark: { type: String, default: "Fail" },
       },
     ],
-    averageScore: { type: Number, required: true },
-    overallGrade: { type: String, required: true },
+    totalScore: { type: Number, default: 0 },
+    averageScore: { type: Number, default: 0 },
+    overallGrade: { type: String, default: "F" },
+    position: { type: Number, default: 0 },
+    totalStudents: { type: Number, default: 0 },
+    showPosition: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
@@ -44,3 +61,4 @@ reportCardSchema.index({ class: 1 });
 
 export default mongoose.models.ReportCard ||
   mongoose.model<IReportCard>("ReportCard", reportCardSchema);
+

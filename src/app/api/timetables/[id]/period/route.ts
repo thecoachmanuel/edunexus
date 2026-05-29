@@ -7,16 +7,15 @@ export const dynamic = "force-dynamic";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: classId } = await params;
     await connectDB();
     const authUser = await getAuthUser(request, ["admin"]);
     if (!authUser) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-
-    const classId = params.id;
     const body = await request.json();
     const { day, startTime, subjectId, teacherId, force } = body;
 
