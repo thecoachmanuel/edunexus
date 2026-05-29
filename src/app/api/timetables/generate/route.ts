@@ -130,13 +130,13 @@ export async function POST(req: NextRequest) {
       1. CRITICAL: You MUST use EVERY SINGLE subject provided in the RESOURCES. ${weightsDescription} You MUST verify that NO subject is left out (unless a specific count is set to 0).
       2. Assign a valid Teacher to every Subject period.
       ${isUsingFallbackTeachers ? "3. Since no teachers are specifically mapped to these subjects, you may assign any listed teacher to any subject." : "3. Prefer assigning teachers whose subject list includes the subject being scheduled."}
-      4. Schedule the following breaks EXACTLY as defined: ${breaksDescription}. Set "subject" and "teacher" to null for break periods.
+      4. Schedule the following breaks EXACTLY as defined: ${breaksDescription}. For these break periods, set "subject" to null, "teacher" to null, and set "name" to the name of the break (e.g. "Lunch").
       5. Each teaching period must be exactly ${settings.periodDuration || 45} minutes long (unless interrupted by a break).
       6. Avoid teacher clashes (a teacher cannot appear in two classes at the same time).
       7. CRITICAL: Do NOT schedule ANY extra "Free Periods" or empty slots. Every single period that is not a designated break MUST be assigned a valid subject and teacher. Fill 100% of the available teaching time with subjects from the RESOURCES, distributing them evenly.
       8. Output strict JSON only.
          - "subject" and "teacher" MUST be the exact 24-character hexadecimal ObjectId strings from the resources.
-         - For Break, Lunch, or Free Periods: set "subject" to null and "teacher" to null.
+         - For Break or Lunch Periods: set "subject" to null, "teacher" to null, and set "name" to the break's name.
          - Do NOT use plain text names for subject or teacher fields.
          Schema:
          {
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
              {
                "day": "Monday",
                "periods": [
-                 { "subject": "24_CHAR_SUBJECT_OBJECTID_OR_NULL", "teacher": "24_CHAR_TEACHER_OBJECTID_OR_NULL", "startTime": "HH:MM", "endTime": "HH:MM" }
+                 { "subject": "24_CHAR_SUBJECT_OBJECTID_OR_NULL", "teacher": "24_CHAR_TEACHER_OBJECTID_OR_NULL", "startTime": "HH:MM", "endTime": "HH:MM", "name": "Optional Break Name" }
                ]
              }
            ]
@@ -199,7 +199,8 @@ export async function POST(req: NextRequest) {
         teacher: period.teacher && isValidObjectId(period.teacher) ? period.teacher : null,
         startTime: period.startTime,
         endTime: period.endTime,
-      })),
+        name: period.name || null
+      }))
     }));
 
     // --- Step 4: Save the timetable (atomic upsert to avoid duplicate key errors from the unique class+year index) ---

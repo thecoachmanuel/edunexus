@@ -129,7 +129,7 @@ export default function EditPeriodDialog({
                   <SelectValue placeholder="Select subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="null">-- Free Period --</SelectItem>
+                  <SelectItem value="null">-- Break / Free Period --</SelectItem>
                   {subjects.map((sub) => (
                     <SelectItem key={sub._id} value={sub._id}>
                       {sub.name} ({sub.code})

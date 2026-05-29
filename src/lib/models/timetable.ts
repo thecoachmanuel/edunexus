@@ -5,6 +5,7 @@ export interface IPeriod {
   teacher: mongoose.Types.ObjectId;
   startTime: string; // e.g., "08:00"
   endTime: string; // e.g., "08:45"
+  name?: string; // Optional name for breaks, e.g., "Lunch Break"
 }
 
 export interface IDaySchedule {
@@ -36,6 +37,7 @@ const timetableSchema = new Schema(
             teacher: { type: Schema.Types.ObjectId, ref: "User" },
             startTime: String,
             endTime: String,
+            name: String,
           },
         ],
       },

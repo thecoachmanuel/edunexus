@@ -147,7 +147,7 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
                           </div>
                         ) : (
                           <div className="flex items-center justify-center py-4 bg-primary/5 rounded-md border border-dashed border-primary/20">
-                            <span className="text-sm font-medium text-primary/60">Free Period</span>
+                            <span className="text-sm font-medium text-primary/60">{period?.name || "Free Period"}</span>
                           </div>
                         )}
                       </div>
@@ -219,7 +219,7 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
                         </div>
                       ) : (
                         <div className="h-full min-h-[100px] w-full rounded-md border border-dashed border-primary/30 bg-primary/5 flex items-center justify-center opacity-70">
-                          <span className="text-xs text-primary/60 font-medium">Free Period</span>
+                          <span className="text-xs text-primary/60 font-medium">{period?.name || "Free Period"}</span>
                         </div>
                       )}
                     </div>
