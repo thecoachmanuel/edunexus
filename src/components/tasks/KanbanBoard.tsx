@@ -15,15 +15,100 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors, MouseSensor } from '@dnd-kit/core';
+import { useDroppable, useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 
 type Status = "Todo" | "In Progress" | "Done";
 const COLUMNS: Status[] = ["Todo", "In Progress", "Done"];
+
+const getPriorityColor = (p: string) => {
+  if (p === "High") return "text-red-500 bg-red-50";
+  if (p === "Medium") return "text-yellow-500 bg-yellow-50";
+  return "text-green-500 bg-green-50";
+};
+
+// --- DRAGGABLE TASK COMPONENT ---
+function TaskCard({ task, isDragging }: { task: any, isDragging?: boolean }) {
+  return (
+    <div className={`bg-white p-3 rounded-lg shadow-sm border ${isDragging ? 'border-indigo-500 opacity-50' : 'border-slate-200'} cursor-grab active:cursor-grabbing hover:border-indigo-300 transition-colors group`}>
+      <div className="flex justify-between items-start mb-2">
+        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${getPriorityColor(task.priority)}`}>
+          {task.priority}
+        </span>
+        <GripVertical className="h-4 w-4 text-slate-300 group-hover:text-slate-400 focus:outline-none" />
+      </div>
+      <h4 className="font-semibold text-slate-800 text-sm mb-1">{task.title}</h4>
+      {task.description && (
+        <p className="text-xs text-slate-500 line-clamp-2 mb-3">{task.description}</p>
+      )}
+      <div className="flex justify-between items-center text-xs text-slate-400 mt-2">
+        <span className="flex items-center gap-1">
+          <Calendar className="h-3 w-3" />
+          {new Date(task.createdAt).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SortableTask({ task }: { task: any }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task._id,
+    data: {
+      type: "Task",
+      task,
+    }
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
+
+  return (
+    // 'touch-none' prevents scrolling when starting a drag on this specific element
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="touch-none">
+      <TaskCard task={task} isDragging={isDragging} />
+    </div>
+  );
+}
+
+// --- DROPPABLE COLUMN COMPONENT ---
+function Column({ col, tasks }: { col: Status, tasks: any[] }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: col,
+    data: {
+      type: "Column",
+      status: col,
+    }
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col w-[85vw] sm:w-[320px] shrink-0 bg-slate-100/80 rounded-xl p-3 h-full snap-center transition-colors ${isOver ? 'bg-indigo-50/50 border-indigo-200 border-2 border-dashed' : 'border-2 border-transparent'}`}
+    >
+      <div className="flex justify-between items-center mb-3 px-1">
+        <h3 className="font-semibold text-slate-700">{col}</h3>
+        <span className="text-xs font-medium bg-white shadow-sm text-slate-600 px-2.5 py-0.5 rounded-full">
+          {tasks.length}
+        </span>
+      </div>
+
+      <div className="flex-1 flex flex-col gap-3 overflow-y-auto pb-2">
+        {tasks.map((task) => (
+          <SortableTask key={task._id} task={task} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function KanbanBoard() {
   const { data, mutate, isLoading } = useSWR("/tasks");
   const [tasks, setTasks] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [draggedTask, setDraggedTask] = useState<string | null>(null);
+  const [activeTask, setActiveTask] = useState<any | null>(null);
 
   // Form State
   const [title, setTitle] = useState("");
@@ -31,33 +116,51 @@ export function KanbanBoard() {
   const [priority, setPriority] = useState("Medium");
   const [status, setStatus] = useState<Status>("Todo");
 
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  );
+
   useEffect(() => {
     if (data?.tasks) setTasks(data.tasks);
   }, [data]);
 
-  const handleDragStart = (e: React.DragEvent, taskId: string) => {
-    setDraggedTask(taskId);
-    e.dataTransfer.effectAllowed = "move";
+  const handleDragStart = (e: DragStartEvent) => {
+    const { active } = e;
+    if (active.data.current?.type === "Task") {
+      setActiveTask(active.data.current.task);
+    }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
+  const handleDragEnd = async (e: DragEndEvent) => {
+    setActiveTask(null);
+    const { active, over } = e;
 
-  const handleDrop = async (e: React.DragEvent, newStatus: Status) => {
-    e.preventDefault();
-    if (!draggedTask) return;
+    if (!over) return;
+
+    const taskId = active.id as string;
+    const newStatus = over.id as Status;
+    const task = tasks.find(t => t._id === taskId);
+
+    if (!task || task.status === newStatus) return;
 
     // Optimistic Update
     setTasks((prev) =>
-      prev.map((t) => (t._id === draggedTask ? { ...t, status: newStatus } : t))
+      prev.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t))
     );
-    setDraggedTask(null);
 
     // Persist
     try {
-      await api.put(`/tasks/${draggedTask}`, { status: newStatus });
+      await api.put(`/tasks/${taskId}`, { status: newStatus });
       mutate();
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to update task");
@@ -79,76 +182,35 @@ export function KanbanBoard() {
     }
   };
 
-  const getPriorityColor = (p: string) => {
-    if (p === "High") return "text-red-500 bg-red-50";
-    if (p === "Medium") return "text-yellow-500 bg-yellow-50";
-    return "text-green-500 bg-green-50";
-  };
-
   if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading tasks...</div>;
 
   return (
     <div className="h-full flex flex-col space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-800">Task Board</h2>
           <p className="text-sm text-slate-500">Manage your schedule and tasks</p>
         </div>
-        <Button onClick={() => setOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+        <Button onClick={() => setOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
           <Plus className="mr-2 h-4 w-4" /> Add Task
         </Button>
       </div>
 
-      <div className="flex-1 flex gap-4 overflow-x-auto pb-4 h-[70vh] min-h-[500px] snap-x snap-mandatory">
-        {COLUMNS.map((col) => (
-          <div
-            key={col}
-            className="flex flex-col w-[85vw] min-w-[280px] sm:min-w-[300px] max-w-[300px] shrink-0 bg-slate-100 rounded-xl p-3 h-full snap-center"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, col)}
-          >
-            <div className="flex justify-between items-center mb-3 px-1">
-              <h3 className="font-semibold text-slate-700">{col}</h3>
-              <span className="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
-                {tasks.filter((t) => t.status === col).length}
-              </span>
-            </div>
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        {/* We use full width on mobile, and standard width on larger screens. Snap allows native feeling horizontal scroll on mobile */}
+        <div className="flex-1 flex gap-4 overflow-x-auto pb-4 h-[75vh] min-h-[500px] snap-x snap-mandatory px-2">
+          {COLUMNS.map((col) => (
+            <Column key={col} col={col} tasks={tasks.filter((t) => t.status === col)} />
+          ))}
+        </div>
 
-            <div className="flex-1 flex flex-col gap-3 overflow-y-auto">
-              {tasks
-                .filter((t) => t.status === col)
-                .map((task) => (
-                  <div
-                    key={task._id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, task._id)}
-                    className="bg-white p-3 rounded-lg shadow-sm border border-slate-200 cursor-grab active:cursor-grabbing hover:border-indigo-300 transition-colors group"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
-                      </span>
-                      <GripVertical className="h-4 w-4 text-slate-300 group-hover:text-slate-400" />
-                    </div>
-                    <h4 className="font-semibold text-slate-800 text-sm mb-1">{task.title}</h4>
-                    {task.description && (
-                      <p className="text-xs text-slate-500 line-clamp-2 mb-3">{task.description}</p>
-                    )}
-                    <div className="flex justify-between items-center text-xs text-slate-400 mt-2">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(task.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
+        <DragOverlay>
+          {activeTask ? <TaskCard task={activeTask} isDragging /> : null}
+        </DragOverlay>
+      </DndContext>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create Task</DialogTitle>
           </DialogHeader>
@@ -183,7 +245,7 @@ export function KanbanBoard() {
                 </Select>
               </div>
             </div>
-            <Button onClick={handleCreate} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white mt-4">Create</Button>
+            <Button onClick={handleCreate} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white mt-4 shadow-sm">Create Task</Button>
           </div>
         </DialogContent>
       </Dialog>

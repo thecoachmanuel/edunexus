@@ -185,7 +185,7 @@ export const AnnualReportCardView = ({ report, showActions = true }: ReportCardP
           {/* Big grade circle */}
           <div style={{
             width: 72, height: 72, borderRadius: "50%",
-            border: \`4px solid \${gradeCol}\`,
+            border: `4px solid ${gradeCol}`,
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
           }}>
@@ -209,7 +209,7 @@ export const AnnualReportCardView = ({ report, showActions = true }: ReportCardP
             </div>
             {/* Progress bar */}
             <div style={{ background: "#e2e8f0", borderRadius: 6, height: 10, width: "100%", overflow: "hidden" }}>
-              <div style={{ width: \`\${avg}%\`, height: "100%", background: avg >= 80 ? "#16a34a" : avg >= 60 ? "#d97706" : "#dc2626", borderRadius: 6 }} />
+              <div style={{ width: `${avg}%`, height: "100%", background: avg >= 80 ? "#16a34a" : avg >= 60 ? "#d97706" : "#dc2626", borderRadius: 6 }} />
             </div>
             <div style={{ marginTop: 8, fontSize: 12, color: "#475569", fontStyle: "italic" }}>{getRemarks(Number(avg))}</div>
           </div>
@@ -256,8 +256,8 @@ export const AnnualReportCardView = ({ report, showActions = true }: ReportCardP
                     <td style={{ padding: "9px 10px", textAlign: "center" }}>
                       <span style={{
                         display: "inline-block", fontWeight: 800, fontSize: 12,
-                        color: gradeColor(g.grade), background: \`\${gradeColor(g.grade)}15\`,
-                        border: \`1.5px solid \${gradeColor(g.grade)}50\`,
+                        color: gradeColor(g.grade), background: `${gradeColor(g.grade)}15`,
+                        border: `1.5px solid ${gradeColor(g.grade)}50`,
                         borderRadius: 6, padding: "2px 8px"
                       }}>{g.grade}</span>
                     </td>
@@ -276,8 +276,8 @@ export const AnnualReportCardView = ({ report, showActions = true }: ReportCardP
                 <td style={{ padding: "12px 10px", textAlign: "center" }}>
                   <span style={{
                     display: "inline-block", fontWeight: 900, fontSize: 14,
-                    color: gradeCol, background: \`\${gradeCol}20\`,
-                    border: \`2px solid \${gradeCol}\`,
+                    color: gradeCol, background: `${gradeCol}20`,
+                    border: `2px solid ${gradeCol}`,
                     borderRadius: 8, padding: "3px 12px"
                   }}>{report.overallGrade}</span>
                 </td>
