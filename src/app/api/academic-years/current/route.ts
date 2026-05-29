@@ -6,7 +6,7 @@ import AcademicYear from "@/lib/models/academicYear";
 export async function GET() {
   try {
     await connectDB();
-    const currentYear = await AcademicYear.findOne({ isCurrent: true });
+    const currentYear = await AcademicYear.findOne({ isCurrent: true }).lean();
     if (!currentYear) {
       return NextResponse.json({ message: "No current academic year found" }, { status: 404 });
     }

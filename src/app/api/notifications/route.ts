@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const token = req.cookies.get("jwt")?.value;
     if (!token) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(decoded.userId).lean();
     if (!user) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const limit = 20;

@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       const matchingStaff = await User.find({
         role: { $in: ["teacher", "admin"] },
         name: { $regex: search, $options: "i" }
-      }).select("_id");
+      }).select("_id").lean();
       
       const staffIds = matchingStaff.map(s => s._id);
       query.employee = { $in: staffIds };
@@ -37,7 +37,8 @@ export async function GET(req: NextRequest) {
 
     const salaries = await Salary.find(query)
       .populate("employee", "name role email")
-      .sort({ year: -1, month: -1 });
+      .sort({ year: -1, month: -1 })
+      .lean();
 
     return NextResponse.json({ salaries });
   } catch (error) {

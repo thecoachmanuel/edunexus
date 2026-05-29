@@ -15,7 +15,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       .populate("student", "name rollNumber email")
       .populate("feeStructure", "name amount dueDate")
       .populate("class", "name")
-      .populate("academicYear", "name");
+      .populate("academicYear", "name")
+      .lean();
 
     if (!studentFee) return NextResponse.json({ message: "Not found" }, { status: 404 });
 

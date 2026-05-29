@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
 
-    const parent = await User.findById(decoded.userId).populate("children");
+    const parent = await User.findById(decoded.userId).populate("children").lean();
     if (!parent || parent.role !== "parent") {
       return NextResponse.json({ message: "Not authorized" }, { status: 403 });
     }

@@ -48,6 +48,7 @@ const salarySchema = new Schema(
 
 // Prevent duplicate salary records for the same employee in the same month/year
 salarySchema.index({ employee: 1, month: 1, year: 1 }, { unique: true });
+salarySchema.index({ status: 1 });
 
 export default (mongoose.models.Salary ||
   mongoose.model<ISalary>("Salary", salarySchema));

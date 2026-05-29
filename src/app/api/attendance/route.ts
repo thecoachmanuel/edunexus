@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
 
     const attendanceRecord = await Attendance.findOne({ class: classId, date })
       .populate("recordedBy", "name")
-      .populate("records.student", "name");
+      .populate("records.student", "name")
+      .lean();
 
     return NextResponse.json({ attendance: attendanceRecord });
   } catch (error) {

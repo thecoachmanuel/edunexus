@@ -25,7 +25,8 @@ export async function GET(
       .sort({ updatedAt: -1 })
       .populate("academicYear")
       .populate("schedule.periods.subject")
-      .populate("schedule.periods.teacher");
+      .populate("schedule.periods.teacher")
+      .lean();
 
     if (!timetable) {
       return NextResponse.json({ message: "Timetable not found" }, { status: 404 });

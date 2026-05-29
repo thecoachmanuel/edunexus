@@ -15,7 +15,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const submission = await Submission.findOne({ exam: id, student: authUser._id });
+    const submission = await Submission.findOne({ exam: id, student: authUser._id }).lean();
     
     if (!submission) {
       return NextResponse.json({ message: "Result not found" }, { status: 404 });

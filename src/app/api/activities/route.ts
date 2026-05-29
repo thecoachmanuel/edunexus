@@ -16,7 +16,8 @@ export async function GET(req: NextRequest) {
       .populate("user", "name email role")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     return NextResponse.json({
       logs,

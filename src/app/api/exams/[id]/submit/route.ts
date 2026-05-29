@@ -21,14 +21,14 @@ export async function POST(
     const { id } = await params;
     const { answers } = await req.json();
 
-    const exam = await Exam.findById(id).select("+questions.correctAnswer");
+    const exam = await Exam.findById(id).select("+questions.correctAnswer").lean();
     if (!exam) return NextResponse.json({ message: "Exam not found" }, { status: 404 });
 
     if (!exam.isActive || new Date() > new Date(exam.dueDate)) {
       return NextResponse.json({ message: "Exam is no longer active" }, { status: 400 });
     }
 
-    const existingSubmission = await Submission.findOne({ exam: id, student: authUser._id });
+    const existingSubmission = await Submission.findOne({ exam: id, student: authUser._id }).lean();
     if (existingSubmission) {
       return NextResponse.json({ message: "You have already submitted this exam" }, { status: 400 });
     }

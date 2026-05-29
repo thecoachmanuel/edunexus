@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
 
     const expenses = await Expense.find(query)
       .populate("recordedBy", "name")
-      .sort({ date: -1 });
+      .sort({ date: -1 })
+      .lean();
 
     return NextResponse.json({ expenses });
   } catch (error) {

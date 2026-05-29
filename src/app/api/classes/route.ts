@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (authUser?.role === "parent") {
-      const children = await User.find({ _id: { $in: authUser.children || [] } }).select("studentClass");
+      const children = await User.find({ _id: { $in: authUser.children || [] } }).select("studentClass").lean();
       const classIds = children.map(c => c.studentClass).filter(Boolean);
       query._id = { $in: classIds };
     }
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     const { name, academicYear, classTeacher, capacity } = await req.json();
 
-    const existingClass = await Class.findOne({ name, academicYear });
+    const existingClass = await Class.findOne({ name, academicYear }).lean();
     if (existingClass) {
       return NextResponse.json(
         { message: "Class with this name already exists for the specified academic year." },

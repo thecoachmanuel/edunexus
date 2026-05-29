@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
     await connectDB();
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.userId).select("-password").lean();
 
     if (user) {
       return NextResponse.json({

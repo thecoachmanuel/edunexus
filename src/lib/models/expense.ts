@@ -54,5 +54,9 @@ const expenseSchema = new Schema(
   { timestamps: true }
 );
 
+expenseSchema.index({ category: 1 });
+expenseSchema.index({ date: 1 });
+expenseSchema.index({ academicYear: 1 });
+
 export default (mongoose.models.Expense ||
   mongoose.model<IExpense>("Expense", expenseSchema));

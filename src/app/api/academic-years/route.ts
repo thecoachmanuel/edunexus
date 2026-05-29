@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
       AcademicYear.find(query)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
     ]);
 
     return NextResponse.json({

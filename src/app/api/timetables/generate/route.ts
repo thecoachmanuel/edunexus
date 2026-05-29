@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     }
 
     // --- Step 1: Fetch class context ---
-    const classData = await Class.findById(classId).populate("subjects");
+    const classData = await Class.findById(classId).populate("subjects").lean();
     if (!classData) {
       return NextResponse.json({ message: "Class not found" }, { status: 404 });
     }
@@ -205,7 +205,8 @@ export async function POST(req: NextRequest) {
     const newTimetable = await Timetable.findById(upsertedTimetable._id)
       .populate("academicYear")
       .populate("schedule.periods.subject")
-      .populate("schedule.periods.teacher");
+      .populate("schedule.periods.teacher")
+      .lean();
 
     console.log("[Timetable] Saved successfully. Populated timetable id:", newTimetable?._id);
 

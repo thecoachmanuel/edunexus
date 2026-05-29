@@ -61,5 +61,9 @@ const studentFeeSchema = new Schema(
   { timestamps: true }
 );
 
+studentFeeSchema.index({ student: 1 });
+studentFeeSchema.index({ status: 1 });
+studentFeeSchema.index({ class: 1, academicYear: 1 });
+
 export default (mongoose.models.StudentFee ||
   mongoose.model<IStudentFee>("StudentFee", studentFeeSchema));

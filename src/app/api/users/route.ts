@@ -12,7 +12,7 @@ const protectAdmin = async (req: NextRequest) => {
   if (!token) return null;
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.userId).select("-password").lean();
     if (user && (user.role === "admin" || user.role === "teacher")) return user;
   } catch (e) {}
   return null;

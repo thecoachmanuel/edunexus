@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       const matchingStudents = await User.find({
         role: "student",
         name: { $regex: search, $options: "i" }
-      }).select("_id");
+      }).select("_id").lean();
       
       const studentIds = matchingStudents.map(s => s._id);
       
@@ -63,7 +63,8 @@ export async function GET(req: NextRequest) {
       .populate("student", "name rollNumber")
       .populate("feeStructure", "name category")
       .populate("class", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json({ studentFees });
   } catch (error) {

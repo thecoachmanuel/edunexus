@@ -12,9 +12,9 @@ export async function GET(req: NextRequest) {
     const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
-    const fees = await StudentFee.find({});
-    const expenses = await Expense.find({});
-    const salaries = await Salary.find({ status: "paid" });
+    const fees = await StudentFee.find({}).lean();
+    const expenses = await Expense.find({}).lean();
+    const salaries = await Salary.find({ status: "paid" }).lean();
 
     const totalFeesCollected = fees.reduce((acc, fee) => acc + (fee.amountPaid || 0), 0);
     const pendingFees = fees.reduce((acc, fee) => acc + (fee.balance || 0), 0);

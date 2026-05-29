@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const { classId, academicYear, schedule } = await req.json();
 
-    const existingTimetable = await Timetable.findOne({ class: classId, academicYear });
+    const existingTimetable = await Timetable.findOne({ class: classId, academicYear }).lean();
     if (existingTimetable) {
       return NextResponse.json({ message: "Timetable already exists for this class and year" }, { status: 400 });
     }

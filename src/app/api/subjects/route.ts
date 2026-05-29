@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const { name, code, teacher, isActive } = await req.json();
-    const subjectExists = await subject.findOne({ code });
+    const subjectExists = await subject.findOne({ code }).lean();
     if (subjectExists) {
       return NextResponse.json({ message: "Subject code already exists" }, { status: 400 });
     }

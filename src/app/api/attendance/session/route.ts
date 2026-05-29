@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     // Teachers can only view their own assigned class
     if (authUser.role === "teacher") {
-      const cls = await Class.findById(classId);
+      const cls = await Class.findById(classId).lean();
       if (!cls || cls.classTeacher?.toString() !== authUser._id.toString()) {
         return NextResponse.json(
           { message: "Not authorized to view this class" },

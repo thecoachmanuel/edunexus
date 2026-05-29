@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import FeeStructure from "@/lib/models/feeStructure";
+import Class from "@/lib/models/class";
+import AcademicYear from "@/lib/models/academicYear";
 import { getAuthUser } from "@/middleware/auth";
 
 export async function GET(req: NextRequest) {
@@ -13,7 +15,8 @@ export async function GET(req: NextRequest) {
     const feeStructures = await FeeStructure.find({})
       .populate("class", "name")
       .populate("academicYear", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json({ feeStructures });
   } catch (error) {
