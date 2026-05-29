@@ -95,21 +95,21 @@ export function CalendarGrid() {
   };
 
   const getTypeColor = (t: string) => {
-    if (t === "Holiday") return "bg-green-100 text-green-700 border-green-200";
-    if (t === "Exam") return "bg-red-100 text-red-700 border-red-200";
-    if (t === "Meeting") return "bg-purple-100 text-purple-700 border-purple-200";
-    return "bg-blue-100 text-blue-700 border-blue-200";
+    if (t === "Holiday") return "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20";
+    if (t === "Exam") return "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20";
+    if (t === "Meeting") return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20";
+    return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
   };
 
   return (
     <div className="flex flex-col h-full space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="flex items-center bg-white rounded-md border shadow-sm">
+          <div className="flex items-center bg-white dark:bg-slate-900 rounded-md border dark:border-slate-800 shadow-sm">
             <Button variant="ghost" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="font-bold w-32 text-center text-slate-800">
+            <div className="font-bold w-32 text-center text-slate-800 dark:text-slate-100">
               {format(currentDate, "MMMM yyyy")}
             </div>
             <Button variant="ghost" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))}>
@@ -120,17 +120,17 @@ export function CalendarGrid() {
         </div>
         
         {(user?.role === "admin" || user?.role === "teacher") && (
-          <Button onClick={() => setOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button onClick={() => setOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white">
             <Plus className="mr-2 h-4 w-4" /> Add Event
           </Button>
         )}
       </div>
 
-      <div className="flex-1 bg-white border rounded-xl overflow-x-auto shadow-sm flex flex-col">
+      <div className="flex-1 bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-xl overflow-x-auto shadow-sm flex flex-col">
         <div className="min-w-[700px] flex-1 flex flex-col">
-          <div className="grid grid-cols-7 border-b bg-slate-50">
+          <div className="grid grid-cols-7 border-b dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-            <div key={day} className="py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div key={day} className="py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               {day}
             </div>
           ))}
@@ -144,13 +144,13 @@ export function CalendarGrid() {
             return (
               <div 
                 key={i} 
-                className={`min-h-[100px] border-b border-r p-2 transition-colors hover:bg-slate-50
-                  ${!isCurrentMonth ? "bg-slate-50/50 text-slate-400" : "bg-white"}
+                className={`min-h-[100px] border-b border-r dark:border-slate-800 p-2 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/80
+                  ${!isCurrentMonth ? "bg-slate-50/50 dark:bg-slate-900/50 text-slate-400 dark:text-slate-600" : "bg-white dark:bg-slate-900"}
                   ${i % 7 === 6 ? "border-r-0" : ""}
                 `}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full ${isToday ? "bg-indigo-600 text-white" : "text-slate-700"}`}>
+                  <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full ${isToday ? "bg-indigo-600 text-white" : "text-slate-700 dark:text-slate-300"}`}>
                     {format(day, "d")}
                   </span>
                 </div>
