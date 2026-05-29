@@ -131,6 +131,7 @@ export default function FeeManagement() {
               ]} 
             />
           </div>
+          </div>
           <div className="border rounded-lg overflow-x-auto">
             <Table>
               <TableHeader>
