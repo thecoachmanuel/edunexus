@@ -7,7 +7,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import { MobileTopbar } from "@/components/sidebar/MobileTopbar";
-import { DesktopTopbar } from "@/components/sidebar/DesktopTopbar";
 import { useEffect } from "react";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -50,11 +49,8 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       <SidebarInset>
         {/* Mobile-only sticky top bar with hamburger + page title */}
         <MobileTopbar />
-        {/* Desktop-only sticky top bar with search and profile */}
-        <DesktopTopbar />
-        
         {/* Push content below the mobile topbar (h-14) only on mobile */}
-        <div className="pt-14 md:pt-0 flex flex-col flex-1 min-h-0 overflow-x-hidden w-full bg-[#f6f7fb]">
+        <div className="pt-14 md:pt-0 flex flex-col flex-1 min-h-0 overflow-x-hidden w-full">
           {children}
         </div>
       </SidebarInset>
