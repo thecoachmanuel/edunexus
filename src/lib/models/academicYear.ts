@@ -5,6 +5,7 @@ export interface IAcademicYear extends Document {
   fromYear: Date; // "2024-09-01"
   toYear: Date; // "2025-06-30"
   isCurrent: boolean; // true/false
+  term: string; // "Term 1"
 }
 
 const academicYearSchema = new Schema(
@@ -13,6 +14,7 @@ const academicYearSchema = new Schema(
     fromYear: { type: Date, required: true },
     toYear: { type: Date, required: true },
     isCurrent: { type: Boolean, default: false },
+    term: { type: String, default: "Term 1" },
   },
   { timestamps: true }
 );

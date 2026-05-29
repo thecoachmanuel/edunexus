@@ -88,8 +88,15 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
 
   return (
     <div className="w-full">
+      <style>{`
+        @media print {
+          @page { size: landscape; margin: 10mm; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}</style>
+
       {/* MOBILE VIEW */}
-      <div className="block md:hidden space-y-4">
+      <div className="block md:hidden print:hidden space-y-4">
         <Tabs value={selectedDay} onValueChange={setSelectedDay} className="w-full">
           <TabsList className="w-full flex overflow-x-auto h-auto p-1 sticky top-14 z-10 bg-background/95 backdrop-blur">
             {DAYS.map((day) => (
@@ -154,8 +161,8 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
       </div>
 
       {/* DESKTOP VIEW */}
-      <div className="hidden md:block">
-        <div className="w-full rounded-md border bg-card overflow-auto max-h-[70vh] relative shadow-sm">
+      <div className="hidden md:block print:block">
+        <div className="w-full rounded-md border bg-card overflow-auto print:overflow-visible max-h-[70vh] print:max-h-none relative shadow-sm">
           <div className="w-max min-w-full">
             {/* Header Row */}
             <div className="flex border-b sticky top-0 z-20 bg-background">

@@ -23,6 +23,7 @@ export interface academicYear {
   fromYear: Date; // "2024-09-01"
   toYear: Date; // "2025-06-30"
   isCurrent: boolean; // true/false
+  term: string; // "Term 1"
 }
 
 export interface Class {

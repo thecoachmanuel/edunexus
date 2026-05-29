@@ -46,6 +46,7 @@ const AcademicYearTable = ({
         <TableHeader>
           <TableRow>
             <TableHead>Year Name</TableHead>
+            <TableHead>Active Term</TableHead>
             <TableHead>Start Date</TableHead>
             <TableHead>End Date</TableHead>
             <TableHead>Status</TableHead>
@@ -55,14 +56,14 @@ const AcademicYearTable = ({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto" />
               </TableCell>
             </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={6}
                 className="h-24 text-center text-muted-foreground"
               >
                 No academic years found.
@@ -72,6 +73,7 @@ const AcademicYearTable = ({
             data.map((year) => (
               <TableRow key={year._id}>
                 <TableCell className="font-medium">{year.name}</TableCell>
+                <TableCell>{year.term || "Term 1"}</TableCell>
                 <TableCell>{format(new Date(year.fromYear), "PPP")}</TableCell>
                 <TableCell>{format(new Date(year.toYear), "PPP")}</TableCell>
                 <TableCell>

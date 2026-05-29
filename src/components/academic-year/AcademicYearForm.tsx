@@ -17,6 +17,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -54,6 +61,7 @@ const AcademicYearForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      term: "Term 1",
       isCurrent: false,
     },
   });
@@ -62,6 +70,7 @@ const AcademicYearForm = ({
     if (initialData) {
       form.reset({
         name: initialData.name,
+        term: initialData.term || "Term 1",
         fromYear: new Date(initialData.fromYear),
         toYear: new Date(initialData.toYear),
         isCurrent: initialData.isCurrent,
@@ -69,6 +78,7 @@ const AcademicYearForm = ({
     } else {
       form.reset({
         name: "",
+        term: "Term 1",
         fromYear: undefined,
         toYear: undefined,
         isCurrent: false,
@@ -116,6 +126,29 @@ const AcademicYearForm = ({
               label="Year Name"
               placeholder="2026"
               disabled={pending}
+            />
+            {/* Term Field */}
+            <Controller
+              name="term"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Active Term</FieldLabel>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={pending}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Term" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Term 1">Term 1</SelectItem>
+                      <SelectItem value="Term 2">Term 2</SelectItem>
+                      <SelectItem value="Term 3">Term 3</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
             />
             {/* date grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

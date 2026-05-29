@@ -311,7 +311,7 @@ export default function ResultsPage() {
                 <TableRow className="bg-muted/50">
                   <TableHead className="sticky left-0 bg-muted/50 z-10 min-w-[160px] font-bold">Student</TableHead>
                   {visibleSubjects.map(sub => (
-                    <TableHead key={sub.id} colSpan={4} className="text-center border-l font-semibold">
+                    <TableHead key={sub.id} colSpan={5} className="text-center border-l font-semibold">
                       {sub.name}
                     </TableHead>
                   ))}
@@ -329,6 +329,9 @@ export default function ResultsPage() {
                       </TableHead>
                       <TableHead key={`${sub.id}-exam`} className="text-center text-xs py-1 text-muted-foreground">
                         Exam<br/><span className="font-normal opacity-70">/{cfg.examMaxScore}</span>
+                      </TableHead>
+                      <TableHead key={`${sub.id}-total`} className="text-center text-xs py-1 text-muted-foreground font-semibold">
+                        Total<br/><span className="font-normal opacity-70">/100</span>
                       </TableHead>
                       <TableHead key={`${sub.id}-agg`} className="text-center text-xs py-1 text-muted-foreground">
                         Grade
@@ -355,6 +358,7 @@ export default function ResultsPage() {
                               <TableCell key={`${sub.id}-q`} className="border-l text-center text-xs text-muted-foreground">—</TableCell>
                               <TableCell key={`${sub.id}-c`} className="text-center text-xs text-muted-foreground">—</TableCell>
                               <TableCell key={`${sub.id}-e`} className="text-center text-xs text-muted-foreground">—</TableCell>
+                              <TableCell key={`${sub.id}-t`} className="text-center text-xs text-muted-foreground">—</TableCell>
                               <TableCell key={`${sub.id}-g`} className="text-center text-xs text-muted-foreground">—</TableCell>
                             </>
                           );
@@ -408,6 +412,10 @@ export default function ResultsPage() {
                                 onChange={e => updateRow(entry.idx, "examScore", Number(e.target.value))}
                                 className="h-7 text-xs w-16 text-center"
                               />
+                            </TableCell>
+                            {/* Total Score */}
+                            <TableCell key={`${sub.id}-total-${student.id}`} className="text-center p-1 font-semibold text-sm">
+                              {entry.aggregateScore ?? "—"}
                             </TableCell>
                             {/* Grade Badge */}
                             <TableCell key={`${sub.id}-grade-${student.id}`} className="text-center p-1">

@@ -43,11 +43,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    const { name, fromYear, toYear, isCurrent } = await req.json();
+    const { name, fromYear, toYear, isCurrent, term } = await req.json();
 
-    const existingYear = await AcademicYear.findOne({ fromYear, toYear });
+    const existingYear = await AcademicYear.findOne({ fromYear, toYear, term }).lean();
     if (existingYear) {
-      return NextResponse.json({ message: "Academic Year already exists" }, { status: 400 });
+      return NextResponse.json({ message: "Academic Year for this term already exists" }, { status: 400 });
     }
     if (isCurrent) {
       await AcademicYear.updateMany({ _id: { $ne: null } }, { isCurrent: false });
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
       fromYear,
       toYear,
       isCurrent: isCurrent || false,
+      term: term || "Term 1",
     });
     return NextResponse.json(academicYear, { status: 201 });
   } catch (error) {

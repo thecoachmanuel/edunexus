@@ -265,21 +265,21 @@ export async function POST(req: NextRequest) {
       }).lean();
 
       // Group submissions by subject, average scores
-      const subjectScores: Record<string, { total: number; count: number; maxPossible: number }> = {};
+      const subjectScores: Record<string, { totalScore: number; totalMax: number }> = {};
       for (const sub of submissions) {
         const subjectId = examSubjectMap.get(sub.exam.toString());
         if (!subjectId) continue;
         const exam = exams.find((e: any) => e._id.toString() === sub.exam.toString());
         const maxPoints = exam?.questions?.reduce((s: number, q: any) => s + (q.points || 1), 0) || 1;
-        if (!subjectScores[subjectId]) subjectScores[subjectId] = { total: 0, count: 0, maxPossible: maxPoints };
-        subjectScores[subjectId].total += sub.score;
-        subjectScores[subjectId].count += 1;
+        if (!subjectScores[subjectId]) subjectScores[subjectId] = { totalScore: 0, totalMax: 0 };
+        subjectScores[subjectId].totalScore += sub.score;
+        subjectScores[subjectId].totalMax += maxPoints;
       }
 
       for (const [subjectId, data] of Object.entries(subjectScores)) {
         // Normalise to quizMaxScore (scale average score to the configured max)
-        const avgRatio = data.total / (data.count * data.maxPossible);
-        const normalised = Math.round(avgRatio * quizMaxScore);
+        const ratio = data.totalMax > 0 ? (data.totalScore / data.totalMax) : 0;
+        const normalised = Math.round(ratio * quizMaxScore);
 
         await StudentResult.findOneAndUpdate(
           { student: student._id, subject: subjectId, academicYear: academicYearId, term },
