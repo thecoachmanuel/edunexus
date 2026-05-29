@@ -18,9 +18,9 @@ export async function GET(req: NextRequest) {
     const parents = await User.countDocuments({ role: "parent" });
     
     const enrollmentData = [
-      { name: "Students", value: students, fill: "hsl(var(--chart-1))" },
-      { name: "Teachers", value: teachers, fill: "hsl(var(--chart-2))" },
-      { name: "Parents", value: parents, fill: "hsl(var(--chart-3))" },
+      { name: "Students", value: students, fill: "#10b981" }, // Emerald
+      { name: "Teachers", value: teachers, fill: "#3b82f6" }, // Blue
+      { name: "Parents", value: parents, fill: "#8b5cf6" },  // Violet
     ];
 
     // 2. Finance Data (Last 6 Months)

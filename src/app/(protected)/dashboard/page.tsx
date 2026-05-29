@@ -94,45 +94,49 @@ export default function Dashboard() {
           {/* AI WIDGET */}
           <AiInsightWidget role={user?.role} />
 
-          {/* CLASS LEADERBOARD WIDGET */}
-          <ClassLeaderboardWidget data={statsData?.leaderboard} />
-
-          {/* RECENT ACTIVITY CARD */}
-          {user?.role === "admin" && (
-            <Card>
-              <CardHeader>
-                <div>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>
-                    Latest updates from the school system.
-                  </CardDescription>
-                </div>
-                <Link href="/"></Link>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {statsData.recentActivity?.map(
-                    (activity: string, i: number) => (
-                      <div
-                        key={i}
-                        className="flex items-start pb-4 last:mb-0 last:pb-0 border-b last:border-0"
-                      >
-                        <CheckCircle2 className="mr-2 h-4 w-4 text-blue-500 mt-1" />
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {activity}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Just now
-                          </p>
+          <div className={`grid gap-4 ${user?.role === "admin" ? "md:grid-cols-2" : "grid-cols-1"}`}>
+            {/* RECENT ACTIVITY CARD (Left side for admins) */}
+            {user?.role === "admin" && (
+              <Card>
+                <CardHeader>
+                  <div>
+                    <CardTitle>Recent Activity</CardTitle>
+                    <CardDescription>
+                      Latest updates from the school system.
+                    </CardDescription>
+                  </div>
+                  <Link href="/"></Link>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {statsData.recentActivity?.map(
+                      (activity: string, i: number) => (
+                        <div
+                          key={i}
+                          className="flex items-start pb-4 last:mb-0 last:pb-0 border-b last:border-0"
+                        >
+                          <CheckCircle2 className="mr-2 h-4 w-4 text-blue-500 mt-1" />
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none">
+                              {activity}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Just now
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                      )
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* CLASS LEADERBOARD WIDGET (Right side) */}
+            <div className="h-full">
+              <ClassLeaderboardWidget data={statsData?.leaderboard} />
+            </div>
+          </div>
         </div>
 
         {/* RIGHT COLUMN (Schedule/Quick Links) */}

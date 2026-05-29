@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { Bell, X, CheckCheck, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Notification {
   _id: string;
@@ -47,7 +48,6 @@ export function NotificationBell() {
       return new Set();
     }
   });
-  const panelRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useSWR("/notifications", {
     refreshInterval: 30000, // Poll every 30s for new notifications
@@ -67,20 +67,10 @@ export function NotificationBell() {
     }
   };
 
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
+  // No need for custom click outside handler with Popover
   return (
-    <div className="relative" ref={panelRef}>
-      {/* Bell button */}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
       <button
         onClick={open ? () => setOpen(false) : handleOpen}
         aria-label="Notifications"
@@ -97,18 +87,13 @@ export function NotificationBell() {
           </span>
         )}
       </button>
+      </PopoverTrigger>
 
-      {/* Dropdown panel */}
-      {open && (
-        <div
-          className={cn(
-            "absolute right-0 top-12 z-50",
-            "w-[340px] sm:w-[380px]",
-            "bg-background border border-border rounded-2xl shadow-2xl",
-            "flex flex-col overflow-hidden",
-            "animate-in fade-in slide-in-from-top-2 duration-200"
-          )}
-        >
+      <PopoverContent
+        align="start"
+        side="right"
+        className="w-[340px] sm:w-[380px] p-0 flex flex-col overflow-hidden border-border rounded-2xl shadow-2xl"
+      >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
             <div className="flex items-center gap-2">
@@ -189,8 +174,7 @@ export function NotificationBell() {
               </p>
             </div>
           )}
-        </div>
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }
