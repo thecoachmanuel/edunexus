@@ -7,7 +7,7 @@ import Class from "@/lib/models/class";
 import Exam from "@/lib/models/exam";
 import Attendance from "@/lib/models/attendance";
 import Submission from "@/lib/models/submission";
-import Task from "@/lib/models/task";
+import { Task } from "@/lib/models/task";
 import { Event } from "@/lib/models/event";
 import { getAuthUser } from "@/middleware/auth";
 import { aiRateLimiter } from "@/lib/rate-limit";
