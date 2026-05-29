@@ -5,7 +5,7 @@ import { getAuthUser } from "@/middleware/auth";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -23,7 +23,8 @@ export async function PATCH(
       );
     }
 
-    const year = await AcademicYear.findById(params.id);
+    const { id } = await params;
+    const year = await AcademicYear.findById(id);
     if (!year) {
       return NextResponse.json(
         { message: "Academic Year not found" },
