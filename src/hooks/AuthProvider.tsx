@@ -27,29 +27,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        setLoading(true);
         const { data } = await api.get("/users/profile");
         setUser(data.user);
       } catch (error) {
-        console.log(error);
-        setLoading(false);
+        console.log("Auth error:", error);
         setUser(null);
       }
     };
-    const fetchYear = async () => {
+
+    const loadYear = async () => {
       try {
         const { data } = await api.get("/academic-years/current");
         setYear(data);
-        setLoading(false);
       } catch (error) {
-        console.log(error);
-        setLoading(false);
+        console.log("Year error:", error);
         setYear(null);
       }
     };
 
-    checkAuth();
-    fetchYear();
+    const initialize = async () => {
+      setLoading(true);
+      await Promise.allSettled([checkAuth(), loadYear()]);
+      setLoading(false);
+    };
+
+    initialize();
   }, []);
 
   const fetchYear = async () => {

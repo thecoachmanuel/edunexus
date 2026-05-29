@@ -94,7 +94,7 @@ export default function Dashboard() {
           {/* AI WIDGET */}
           <AiInsightWidget role={user?.role} />
 
-          <div className={`grid gap-4 ${user?.role === "admin" ? "md:grid-cols-2" : "grid-cols-1"}`}>
+          <div className={`grid gap-4 ${"grid-cols-1"}`}>
             {/* RECENT ACTIVITY CARD (Left side for admins) */}
             {user?.role === "admin" && (
               <Card>
@@ -131,11 +131,6 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             )}
-
-            {/* CLASS LEADERBOARD WIDGET (Right side) */}
-            <div className="h-full">
-              <ClassLeaderboardWidget data={statsData?.leaderboard} />
-            </div>
           </div>
         </div>
 
@@ -174,6 +169,9 @@ export default function Dashboard() {
           
           {/* ATTENDANCE WIDGET */}
           <AttendanceWidget role={user?.role} />
+
+          {/* CLASS LEADERBOARD WIDGET */}
+          <ClassLeaderboardWidget data={statsData?.leaderboard} />
         </div>
       </div>
     </div>
