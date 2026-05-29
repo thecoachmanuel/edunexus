@@ -150,12 +150,13 @@ const Timetable = () => {
         classId={selectedClass}
         onPeriodUpdated={() => fetchTimetable(selectedClass)}
       />
-      {isAdmin && scheduleData.length > 0 && (
+      {!isStudent && scheduleData.length > 0 && (
         <div className="print:hidden">
           <TimetableStatistics 
             scheduleData={scheduleData} 
             onRegenerateWithWeights={handleRegenerateWithWeights} 
             isGenerating={isGenerating}
+            isAdmin={isAdmin}
           />
         </div>
       )}

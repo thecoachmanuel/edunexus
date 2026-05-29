@@ -12,9 +12,10 @@ interface Props {
   scheduleData: schedule[];
   onRegenerateWithWeights: (weights: Record<string, number>) => void;
   isGenerating: boolean;
+  isAdmin?: boolean;
 }
 
-export default function TimetableStatistics({ scheduleData, onRegenerateWithWeights, isGenerating }: Props) {
+export default function TimetableStatistics({ scheduleData, onRegenerateWithWeights, isGenerating, isAdmin }: Props) {
   const [weights, setWeights] = useState<Record<string, number>>({});
   const [subjectNames, setSubjectNames] = useState<Record<string, string>>({});
   const [totalAvailable, setTotalAvailable] = useState(0);
@@ -68,33 +69,37 @@ export default function TimetableStatistics({ scheduleData, onRegenerateWithWeig
               Subject Distribution
             </CardTitle>
             <CardDescription>
-              Adjust the desired number of periods per subject and regenerate.
+              {isAdmin 
+                ? "Adjust the desired number of periods per subject and regenerate."
+                : "Weekly distribution of subjects across the timetable."}
             </CardDescription>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-sm">
               <span className="text-muted-foreground">Total Periods: </span>
-              <span className={`font-bold ${diff > 0 ? "text-destructive" : diff < 0 ? "text-amber-500" : "text-emerald-600"}`}>
+              <span className={`font-bold ${isAdmin && diff > 0 ? "text-destructive" : isAdmin && diff < 0 ? "text-amber-500" : "text-emerald-600"}`}>
                 {totalAssigned} / {totalAvailable}
               </span>
             </div>
-            <Button
-              onClick={() => onRegenerateWithWeights(weights)}
-              disabled={isGenerating || diff > 0}
-              size="sm"
-            >
-              {isGenerating ? (
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              Regenerate
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={() => onRegenerateWithWeights(weights)}
+                disabled={isGenerating || diff > 0}
+                size="sm"
+              >
+                {isGenerating ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Regenerate
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        {diff > 0 && (
+        {isAdmin && diff > 0 && (
           <div className="mb-4 p-3 bg-destructive/10 text-destructive text-sm rounded-md border border-destructive/20">
             You have assigned {diff} more periods than available in the week. Please reduce some subject weights before regenerating.
           </div>
@@ -110,6 +115,7 @@ export default function TimetableStatistics({ scheduleData, onRegenerateWithWeig
                   className="h-8"
                   value={weights[id] || 0}
                   onChange={(e) => handleWeightChange(id, e.target.value)}
+                  disabled={!isAdmin}
                 />
                 <Badge variant="secondary" className="whitespace-nowrap">
                   {((weights[id] || 0) / totalAvailable * 100).toFixed(0)}%
