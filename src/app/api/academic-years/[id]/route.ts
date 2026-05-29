@@ -16,6 +16,16 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     if (body.isCurrent) {
       await AcademicYear.updateMany({ _id: { $ne: params.id } }, { isCurrent: false });
     }
+
+    if (body.terms && Array.isArray(body.terms) && body.terms.length > 0) {
+      body.fromYear = body.terms[0].startDate;
+      body.toYear = body.terms[body.terms.length - 1].endDate;
+    }
+
+    if (body.activeTerm) {
+      body.term = body.activeTerm; // Keep legacy term synced
+    }
+
     const updatedYear = await AcademicYear.findByIdAndUpdate(params.id, body, {
       new: true,
       runValidators: true,

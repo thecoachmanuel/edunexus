@@ -104,6 +104,20 @@ const AcademicYear = () => {
     }
   };
 
+  const handleTermSwitch = async (id: string, term: string) => {
+    try {
+      setLoading(true);
+      await api.patch(`/academic-years/${id}/term`, { activeTerm: term });
+      toast.success(`Switched to ${term}`);
+      fetchYears();
+      // Reload page to re-fetch the global useAuth context.
+      window.location.reload(); 
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to switch term");
+      setLoading(false);
+    }
+  };
+
   //   console.log(years);
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
@@ -126,6 +140,7 @@ const AcademicYear = () => {
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDeleteClick}
+        onTermSwitch={handleTermSwitch}
         pageNum={pageNum}
         setPageNum={setPageNum}
         totalPages={totalPages}

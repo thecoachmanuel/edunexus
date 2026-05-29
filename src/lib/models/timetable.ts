@@ -16,6 +16,7 @@ export interface IDaySchedule {
 export interface ITimetable extends Document {
   class: mongoose.Types.ObjectId;
   academicYear: mongoose.Types.ObjectId;
+  term?: string; // e.g. "Term 1"
   schedule: IDaySchedule[];
   createdAt: Date;
 }
@@ -28,6 +29,7 @@ const timetableSchema = new Schema(
       ref: "AcademicYear",
       required: true,
     },
+    term: { type: String, enum: ["Term 1", "Term 2", "Term 3"] },
     schedule: [
       {
         day: { type: String, required: true },
@@ -46,7 +48,7 @@ const timetableSchema = new Schema(
   { timestamps: true }
 );
 
-// Prevent multiple timetables for the same class/year
-timetableSchema.index({ class: 1, academicYear: 1 }, { unique: true });
+// Prevent multiple timetables for the same class/year/term
+timetableSchema.index({ class: 1, academicYear: 1, term: 1 }, { unique: true });
 
 export default (mongoose.models.Timetable || mongoose.model<ITimetable>("Timetable", timetableSchema));

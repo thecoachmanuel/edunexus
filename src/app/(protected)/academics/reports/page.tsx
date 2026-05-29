@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ReportCardView } from "@/components/academics/ReportCardView";
+import { AnnualReportCardView } from "@/components/academics/AnnualReportCardView";
 
 export default function ReportsPage() {
   const { user, year } = useAuth();
@@ -52,13 +53,18 @@ export default function ReportsPage() {
     },
   });
 
-  const fetchReports = async (classId?: string) => {
+  const fetchReports = async (classId?: string, term?: string) => {
     try {
       setLoading(true);
-      let url = "/reports";
-      if (classId) url += `?classId=${classId}`;
-      const { data } = await api.get(url);
-      setReports(data.reports);
+      let url = term === "Annual" ? "/reports/annual" : "/reports";
+      
+      const params = new URLSearchParams();
+      if (classId) params.append("classId", classId);
+      if (term && term !== "Annual") params.append("term", term);
+      if (year && term === "Annual") params.append("academicYearId", year._id);
+      
+      const { data } = await api.get(`${url}?${params.toString()}`);
+      setReports(data.reports || []);
     } catch (error) {
       toast.error("Failed to load reports");
     } finally {
@@ -86,7 +92,7 @@ export default function ReportsPage() {
   }, [user]);
 
   const onFilter = filterForm.handleSubmit((data) => {
-    fetchReports(data.classId === "all" ? undefined : data.classId);
+    fetchReports(data.classId === "all" ? undefined : data.classId, data.term);
   });
 
   const handleDelete = async (id: string) => {
@@ -109,7 +115,7 @@ export default function ReportsPage() {
     try {
       const res = await api.delete('/reports', { data: { classId, term } });
       toast.success(`Deleted ${res.data.count} report cards`);
-      fetchReports(filterForm.getValues().classId === "all" ? undefined : filterForm.getValues().classId);
+      fetchReports(filterForm.getValues().classId === "all" ? undefined : filterForm.getValues().classId, filterForm.getValues().term);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to batch delete");
     } finally {
@@ -126,7 +132,7 @@ export default function ReportsPage() {
       const res = await api.delete('/reports', { data: { ids: selectedIds } });
       toast.success(`Deleted ${res.data.count} report cards`);
       setSelectedIds([]);
-      fetchReports(filterForm.getValues().classId === "all" ? undefined : filterForm.getValues().classId);
+      fetchReports(filterForm.getValues().classId === "all" ? undefined : filterForm.getValues().classId, filterForm.getValues().term);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to delete selected");
     } finally {
@@ -159,7 +165,8 @@ export default function ReportsPage() {
       toast.success(`Generated ${res.data.count} report cards!`);
       // refresh the view for that class
       filterForm.setValue("classId", data.classId);
-      fetchReports(data.classId);
+      filterForm.setValue("term", data.term);
+      fetchReports(data.classId, data.term);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to generate reports");
     } finally {
@@ -258,6 +265,24 @@ export default function ReportsPage() {
                   )}
                 />
               </div>
+              <div className="w-full sm:w-48">
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Term</label>
+                <Controller
+                  name="term"
+                  control={filterForm.control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Term 1">Term 1</SelectItem>
+                        <SelectItem value="Term 2">Term 2</SelectItem>
+                        <SelectItem value="Term 3">Term 3</SelectItem>
+                        <SelectItem value="Annual">Annual Average</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
               <div className="flex gap-2 w-full sm:w-auto">
                 <Button type="submit" variant="secondary" className="flex-1 sm:flex-none">Filter</Button>
                 {selectedIds.length > 0 && (
@@ -295,11 +320,11 @@ export default function ReportsPage() {
               <div className="flex justify-between items-start mb-2 pr-6">
                 <h3 className="font-semibold truncate pr-2">{report.student?.name}</h3>
                 <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full whitespace-nowrap">
-                  {report.overallGrade} ({report.averageScore}%)
+                  {report.overallGrade} ({report.averageScore || report.annualAverage || 0}%)
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mb-1">
-                {report.class?.name} • {report.term}
+                {report.class?.name} • {filterForm.getValues().term}
               </p>
               <div className="flex gap-2 mt-4">
                 <Button
@@ -331,7 +356,11 @@ export default function ReportsPage() {
             <DialogTitle>Report Card Preview</DialogTitle>
           </DialogHeader>
           <div className="print:block overflow-x-auto w-full pb-4" id="printable-report">
-            {selectedReport && <ReportCardView report={selectedReport} />}
+            {selectedReport && filterForm.getValues().term === "Annual" ? (
+               <AnnualReportCardView report={selectedReport} />
+            ) : (
+               selectedReport && <ReportCardView report={selectedReport} />
+            )}
           </div>
         </DialogContent>
       </Dialog>

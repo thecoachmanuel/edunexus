@@ -43,22 +43,36 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    const { name, fromYear, toYear, isCurrent, term } = await req.json();
+    const { name, isCurrent, term, activeTerm, terms, fromYear: inputFromYear, toYear: inputToYear } = await req.json();
 
-    const existingYear = await AcademicYear.findOne({ fromYear, toYear, term }).lean();
-    if (existingYear) {
-      return NextResponse.json({ message: "Academic Year for this term already exists" }, { status: 400 });
+    const currentTerm = activeTerm || term || "Term 1";
+    let fromYear = inputFromYear;
+    let toYear = inputToYear;
+
+    if (terms && Array.isArray(terms) && terms.length > 0) {
+      fromYear = terms[0].startDate;
+      toYear = terms[terms.length - 1].endDate;
     }
+
+    const existingYear = await AcademicYear.findOne({ name }).lean();
+    if (existingYear) {
+      return NextResponse.json({ message: "Academic Year with this name already exists" }, { status: 400 });
+    }
+    
     if (isCurrent) {
       await AcademicYear.updateMany({ _id: { $ne: null } }, { isCurrent: false });
     }
+    
     const academicYear = await AcademicYear.create({
       name,
       fromYear,
       toYear,
       isCurrent: isCurrent || false,
-      term: term || "Term 1",
+      term: currentTerm,
+      activeTerm: currentTerm,
+      terms: terms || [],
     });
+    
     return NextResponse.json(academicYear, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: "Server Error", error }, { status: 500 });

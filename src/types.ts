@@ -17,13 +17,23 @@ export interface user {
   children?: user[];
 }
 
+export interface term {
+  _id?: string;
+  term: string;
+  startDate: Date;
+  endDate: Date;
+}
+
 export interface academicYear {
   _id: string;
   name: string; // "2024-2025"
   fromYear: Date; // "2024-09-01"
   toYear: Date; // "2025-06-30"
   isCurrent: boolean; // true/false
-  term: string; // "Term 1"
+  term: string; // Legacy
+  activeTerm: string; // "Term 1"
+  terms?: term[];
+  currentTermDates?: { startDate: Date; endDate: Date };
 }
 
 export interface Class {

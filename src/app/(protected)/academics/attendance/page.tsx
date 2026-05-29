@@ -71,6 +71,12 @@ export default function AttendancePage() {
     selectedClassId ? `/attendance?classId=${selectedClassId}&date=${dateString}` : null
   );
 
+  // Fetch missed attendance days
+  const { data: missedData, mutate: mutateMissed } = useSWR(
+    selectedClassId && year?._id ? `/attendance/missed?classId=${selectedClassId}&academicYearId=${year._id}` : null
+  );
+  const missedDays: string[] = missedData?.missedDays || [];
+
   const loading = loadingStudents || loadingAttendance;
 
   // Sync records whenever students or attendance changes
@@ -132,6 +138,7 @@ export default function AttendancePage() {
       });
 
       toast.success("Attendance saved successfully!");
+      if (mutateMissed) mutateMissed();
     } catch (error) {
       toast.error("Failed to save attendance");
     } finally {
@@ -139,10 +146,23 @@ export default function AttendancePage() {
     }
   };
 
-  // Disable weekends
-  const isWeekend = (date: Date) => {
-    const day = date.getDay();
-    return day === 0 || day === 6;
+  // Disable weekends, future dates, and dates outside academic year
+  const isDateDisabled = (d: Date) => {
+    const day = d.getDay();
+    if (day === 0 || day === 6) return true; // Weekend
+    
+    // Disable future dates
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (d > today) return true;
+
+    // Disable dates outside academic year bounds
+    if (year) {
+      if (year.fromYear && d < new Date(year.fromYear)) return true;
+      if (year.toYear && d > new Date(year.toYear)) return true;
+    }
+
+    return false;
   };
 
   return (
@@ -153,6 +173,34 @@ export default function AttendancePage() {
           Track and manage student attendance records.
         </p>
       </div>
+
+      {missedDays.length > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md p-4">
+          <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-500 mb-2">
+            Missed Attendance Days ({missedDays.length})
+          </h3>
+          <p className="text-xs text-amber-700 dark:text-amber-600 mb-3">
+            You have not recorded attendance for the following days. Click a date to jump to it.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {missedDays.slice(0, 15).map((missedDate) => (
+              <Badge 
+                key={missedDate}
+                variant="outline" 
+                className="cursor-pointer bg-white dark:bg-slate-900 hover:bg-amber-100 dark:hover:bg-amber-900 text-amber-700 dark:text-amber-500 border-amber-300 dark:border-amber-800"
+                onClick={() => setDate(new Date(missedDate))}
+              >
+                {format(new Date(missedDate), "MMM d, yyyy")}
+              </Badge>
+            ))}
+            {missedDays.length > 15 && (
+              <Badge variant="outline" className="bg-transparent border-dashed">
+                +{missedDays.length - 15} more
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 bg-white dark:bg-slate-900 p-4 rounded-md border items-end">
         <div className="w-full sm:w-64">
@@ -172,7 +220,8 @@ export default function AttendancePage() {
                 mode="single"
                 selected={date}
                 onSelect={(d) => d && setDate(d)}
-                disabled={isWeekend}
+                disabled={isDateDisabled}
+                defaultMonth={date}
               />
             </PopoverContent>
           </Popover>

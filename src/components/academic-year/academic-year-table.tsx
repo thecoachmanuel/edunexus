@@ -27,6 +27,7 @@ interface Props {
   loading: boolean;
   onEdit: (year: academicYear) => void;
   onDelete: (id: string) => void;
+  onTermSwitch: (id: string, term: string) => void;
   pageNum: number;
   setPageNum: (page: number) => void;
   totalPages: number;
@@ -36,6 +37,7 @@ const AcademicYearTable = ({
   loading,
   onEdit,
   onDelete,
+  onTermSwitch,
   pageNum,
   setPageNum,
   totalPages,
@@ -97,6 +99,17 @@ const AcademicYearTable = ({
                       <DropdownMenuItem onClick={() => onEdit(year)}>
                         <Pencil className="mr-2 h-4 w-4" /> Edit
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">Switch Term</DropdownMenuLabel>
+                      {["Term 1", "Term 2", "Term 3"].map((t) => (
+                        <DropdownMenuItem
+                          key={t}
+                          disabled={year.activeTerm === t || year.term === t}
+                          onClick={() => onTermSwitch(year._id, t)}
+                        >
+                          <span className="ml-6">{t}</span>
+                        </DropdownMenuItem>
+                      ))}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-red-400 dark:hover:text-red-600 hover:text-red-600"

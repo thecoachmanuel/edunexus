@@ -61,27 +61,44 @@ const AcademicYearForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      term: "Term 1",
+      activeTerm: "Term 1",
       isCurrent: false,
+      terms: [
+        { term: "Term 1", startDate: undefined as unknown as Date, endDate: undefined as unknown as Date },
+        { term: "Term 2", startDate: undefined as unknown as Date, endDate: undefined as unknown as Date },
+        { term: "Term 3", startDate: undefined as unknown as Date, endDate: undefined as unknown as Date },
+      ],
     },
   });
   // Reset form when dialog opens or data changes
   useEffect(() => {
     if (initialData) {
+      const initTerms = initialData.terms?.length === 3 ? initialData.terms : [
+        { term: "Term 1", startDate: new Date(initialData.fromYear || Date.now()), endDate: new Date(initialData.toYear || Date.now()) },
+        { term: "Term 2", startDate: new Date(initialData.fromYear || Date.now()), endDate: new Date(initialData.toYear || Date.now()) },
+        { term: "Term 3", startDate: new Date(initialData.fromYear || Date.now()), endDate: new Date(initialData.toYear || Date.now()) },
+      ];
+      
       form.reset({
         name: initialData.name,
-        term: initialData.term || "Term 1",
-        fromYear: new Date(initialData.fromYear),
-        toYear: new Date(initialData.toYear),
+        activeTerm: initialData.activeTerm || initialData.term || "Term 1",
         isCurrent: initialData.isCurrent,
+        terms: initTerms.map(t => ({
+          term: t.term,
+          startDate: new Date(t.startDate),
+          endDate: new Date(t.endDate),
+        })) as any,
       });
     } else {
       form.reset({
         name: "",
-        term: "Term 1",
-        fromYear: undefined,
-        toYear: undefined,
+        activeTerm: "Term 1",
         isCurrent: false,
+        terms: [
+          { term: "Term 1", startDate: undefined as unknown as Date, endDate: undefined as unknown as Date },
+          { term: "Term 2", startDate: undefined as unknown as Date, endDate: undefined as unknown as Date },
+          { term: "Term 3", startDate: undefined as unknown as Date, endDate: undefined as unknown as Date },
+        ],
       });
     }
   }, [initialData, form, open]);
@@ -129,7 +146,7 @@ const AcademicYearForm = ({
             />
             {/* Term Field */}
             <Controller
-              name="term"
+              name="activeTerm"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
@@ -150,87 +167,103 @@ const AcademicYearForm = ({
                 </Field>
               )}
             />
-            {/* date grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Start Date */}
-              <Controller
-                name="fromYear"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Start Date</FieldLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          autoFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+
+            <div className="pt-2 pb-1 border-b">
+              <h4 className="text-sm font-semibold">Term Dates</h4>
+              <p className="text-xs text-muted-foreground">Specify the start and end date for each term.</p>
+            </div>
+
+            {/* Term Dates */}
+            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-muted/30 rounded-md border">
+                  <div className="col-span-1 md:col-span-2">
+                    <h5 className="text-sm font-medium">Term {index + 1}</h5>
+                  </div>
+                  {/* Start Date */}
+                  <Controller
+                    name={`terms.${index}.startDate`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Start Date</FieldLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              autoFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
                     )}
-                  </Field>
-                )}
-              />
-              {/* End Date */}
-              <Controller
-                name="toYear"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>End Date</FieldLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < form.getValues("fromYear")}
-                          autoFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                  />
+                  {/* End Date */}
+                  <Controller
+                    name={`terms.${index}.endDate`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>End Date</FieldLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => {
+                                const startDate = form.getValues(`terms.${index}.startDate`);
+                                return startDate ? date < startDate : false;
+                              }}
+                              autoFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
                     )}
-                  </Field>
-                )}
-              />
+                  />
+                </div>
+              ))}
             </div>
             {/* Checkbox */}
             <Controller

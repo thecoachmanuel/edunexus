@@ -38,6 +38,17 @@ export async function GET(req: NextRequest) {
       filter.student = studentId;
     }
 
+    const term = searchParams.get("term");
+    if (term) {
+      filter.term = term;
+    } else {
+      // Default to the current active term
+      const currentYear = await AcademicYear.findOne({ isCurrent: true }).lean();
+      if (currentYear) {
+        filter.term = currentYear.activeTerm;
+      }
+    }
+
     const reports = await ReportCard.find(filter)
       .populate("student", "name email")
       .populate("class", "name")

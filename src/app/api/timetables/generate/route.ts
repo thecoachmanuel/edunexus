@@ -29,11 +29,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { classId, academicYearId, settings } = await req.json();
+    const { classId, academicYearId, term, settings } = await req.json();
 
-    if (!classId || !academicYearId || !settings) {
+    if (!classId || !academicYearId || !term || !settings) {
       return NextResponse.json(
-        { message: "classId, academicYearId, and settings are required" },
+        { message: "classId, academicYearId, term, and settings are required" },
         { status: 400 }
       );
     }
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     }
 
     // --- Step 2: Fetch existing timetables to avoid teacher clashes ---
-    const allTimetables = await Timetable.find({ academicYear: academicYearId }).lean();
+    const allTimetables = await Timetable.find({ academicYear: academicYearId, term }).lean();
 
     console.log("[Timetable] Subjects:", subjectsPayload.length, "Teachers:", qualifiedTeachers.length);
     // --- Step 3: Generate timetable with AI ---
@@ -204,15 +204,20 @@ export async function POST(req: NextRequest) {
     }));
 
     // --- Step 4: Save the timetable (atomic upsert to avoid duplicate key errors from the unique class+year index) ---
-    console.log("[Timetable] Saving sanitized schedule with", sanitizedSchedule.length, "days...");
-    const upsertedTimetable = await Timetable.findOneAndUpdate(
-      { class: classId, academicYear: academicYearId },
-      { $set: { schedule: sanitizedSchedule } },
-      { upsert: true, new: true }
+    console.log("[Timetable] Saving sanitized schedule with", finalSchedule.length, "days...");
+    const updatedTimetable = await Timetable.findOneAndUpdate(
+      { class: classId, academicYear: academicYearId, term },
+      {
+        class: classId,
+        academicYear: academicYearId,
+        term,
+        schedule: finalSchedule,
+      },
+      { new: true, upsert: true }
     );
 
     // Populate all details so the frontend receives a ready-to-render structure on success!
-    const newTimetable = await Timetable.findById(upsertedTimetable._id)
+    const newTimetable = await Timetable.findById(updatedTimetable._id)
       .populate("academicYear")
       .populate("schedule.periods.subject")
       .populate("schedule.periods.teacher")

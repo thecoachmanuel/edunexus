@@ -18,10 +18,20 @@ export async function GET(
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const { id: classId } = await params;
+    const searchParams = req.nextUrl.searchParams;
+    let term = searchParams.get("term");
+
+    if (!term) {
+      const currentYear = await AcademicYear.findOne({ isCurrent: true }).lean();
+      if (currentYear) {
+        term = currentYear.activeTerm;
+      }
+    }
+
+    const query: any = { class: classId };
+    if (term) query.term = term;
     
-    // In our system, timetable is usually linked to academicYear as well, 
-    // but the frontend simply passes classId. We'll fetch the most recent one for the class.
-    const timetable = await Timetable.findOne({ class: classId })
+    const timetable = await Timetable.findOne(query)
       .sort({ updatedAt: -1 })
       .populate("academicYear")
       .populate("schedule.periods.subject")
@@ -49,9 +59,21 @@ export async function DELETE(
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const { id: classId } = await params;
+    const searchParams = req.nextUrl.searchParams;
+    let term = searchParams.get("term");
+
+    if (!term) {
+      const currentYear = await AcademicYear.findOne({ isCurrent: true }).lean();
+      if (currentYear) {
+        term = currentYear.activeTerm;
+      }
+    }
+
+    const query: any = { class: classId };
+    if (term) query.term = term;
     
-    // Clear all timetables for this specific class
-    const result = await Timetable.deleteMany({ class: classId });
+    // Clear timetable for this specific class and term
+    const result = await Timetable.deleteMany(query);
     if (result.deletedCount === 0) {
       return NextResponse.json({ message: "No timetable found to clear" }, { status: 404 });
     }

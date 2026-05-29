@@ -38,6 +38,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadYear = async () => {
       try {
         const { data } = await api.get("/academic-years/current");
+        if (data) {
+          const activeTermDoc = data.terms?.find((t: any) => t.term === data.activeTerm);
+          if (activeTermDoc) {
+            data.currentTermDates = {
+              startDate: new Date(activeTermDoc.startDate),
+              endDate: new Date(activeTermDoc.endDate)
+            };
+          }
+        }
         setYear(data);
       } catch (error) {
         console.log("Year error:", error);
@@ -57,6 +66,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchYear = async () => {
     try {
       const { data } = await api.get("/academic-years/current");
+      if (data) {
+        const activeTermDoc = data.terms?.find((t: any) => t.term === data.activeTerm);
+        if (activeTermDoc) {
+          data.currentTermDates = {
+            startDate: new Date(activeTermDoc.startDate),
+            endDate: new Date(activeTermDoc.endDate)
+          };
+        }
+      }
       setYear(data);
     } catch (error) {
       console.log(error);
