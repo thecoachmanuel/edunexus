@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Task } from "@/lib/models/task";
-import { requireAuth } from "@/lib/auth/server";
+import { getAuthUser } from "@/middleware/auth";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    const user = await getAuthUser(req);
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     await connectDB();
@@ -26,9 +26,9 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    const user = await getAuthUser(req);
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     await connectDB();
