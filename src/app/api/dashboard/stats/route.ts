@@ -124,25 +124,52 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - 7);
+
     if (user.role === "admin") {
       const totalStudents = await User.countDocuments({ role: "student" });
+      const newStudentsThisWeek = await User.countDocuments({ role: "student", createdAt: { $gte: startOfWeek } });
+
       const totalTeachers = await User.countDocuments({ role: "teacher" });
+      const newTeachersThisWeek = await User.countDocuments({ role: "teacher", createdAt: { $gte: startOfWeek } });
+
       const activeQuizzes = await Exam.countDocuments({ isActive: true });
+      const newQuizzesThisWeek = await Exam.countDocuments({ isActive: true, createdAt: { $gte: startOfWeek } });
       
       const allAttendance = await Attendance.find({}).lean();
       let totalRecords = 0;
       let presentRecords = 0;
+      let weekTotal = 0;
+      let weekPresent = 0;
+      
       allAttendance.forEach((att) => {
+        const isThisWeek = new Date(att.date) >= startOfWeek;
         att.records.forEach((rec: any) => {
           totalRecords++;
           if (rec.status === "Present" || rec.status === "Late") presentRecords++;
+          if (isThisWeek) {
+            weekTotal++;
+            if (rec.status === "Present" || rec.status === "Late") weekPresent++;
+          }
         });
       });
-      const avgAttendance = totalRecords === 0 ? "100%" : `${Math.round((presentRecords / totalRecords) * 100)}%`;
+      const overallAvg = totalRecords === 0 ? 100 : Math.round((presentRecords / totalRecords) * 100);
+      const weekAvg = weekTotal === 0 ? overallAvg : Math.round((weekPresent / weekTotal) * 100);
+      const attDiff = weekAvg - overallAvg;
+      
+      const avgAttendance = `${overallAvg}%`;
 
-      stats = { totalStudents, totalTeachers, activeQuizzes, avgAttendance, recentActivity: formattedActivity, upcomingClasses, leaderboard };
+      stats = { 
+        totalStudents, newStudentsThisWeek,
+        totalTeachers, newTeachersThisWeek,
+        activeQuizzes, newQuizzesThisWeek,
+        avgAttendance, attDiff,
+        recentActivity: formattedActivity, upcomingClasses, leaderboard 
+      };
     } else if (user.role === "teacher") {
       const myClassesCount = await Class.countDocuments({ classTeacher: user._id });
+      const newClassesThisWeek = await Class.countDocuments({ classTeacher: user._id, createdAt: { $gte: startOfWeek } });
       const myExams = await Exam.find({ teacher: user._id }).select("_id").lean();
       const myExamIds = myExams.map((exam) => exam._id);
       const pendingGrading = await Submission.countDocuments({ exam: { $in: myExamIds }, score: 0 });
@@ -154,6 +181,7 @@ export async function GET(req: NextRequest) {
         
       let nextClass = "No upcoming classes";
       let nextClassTime = "";
+      let classesToday = 0;
       
       for (const tt of timetables) {
         const todaySchedule = (tt as any).schedule?.find((s: any) => s.day === currentDay);
@@ -162,15 +190,20 @@ export async function GET(req: NextRequest) {
             .filter((p: any) => p.teacher?.toString() === user._id.toString())
             .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime));
             
-          if (myPeriods.length > 0) {
+          classesToday += myPeriods.length;
+          
+          if (myPeriods.length > 0 && nextClassTime === "") {
             nextClass = `${(tt.class as any)?.name || "Class"}`;
             nextClassTime = myPeriods[0].startTime;
-            break;
           }
         }
       }
 
-      stats = { myClassesCount, pendingGrading, nextClass, nextClassTime, recentActivity: formattedActivity, upcomingClasses, leaderboard };
+      stats = { 
+        myClassesCount, newClassesThisWeek,
+        pendingGrading, classesToday, nextClass, nextClassTime, 
+        recentActivity: formattedActivity, upcomingClasses, leaderboard 
+      };
     } else if (user.role === "student") {
       const nextExam = await Exam.findOne({ class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 }).lean();
       const pendingQuizzes = await Exam.countDocuments({ class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });

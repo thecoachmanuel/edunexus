@@ -93,7 +93,7 @@ const AcademicYear = () => {
   const confirmDelete = async () => {
     if (!deletingId) return;
     try {
-      await api.delete(`/academic-years/delete/${deletingId}`);
+      await api.delete(`/academic-years/${deletingId}`);
       toast.success("Academic year deleted");
       fetchYears();
     } catch (error: any) {

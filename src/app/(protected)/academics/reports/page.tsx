@@ -351,7 +351,7 @@ export default function ReportsPage() {
 
       {/* Print Modal */}
       <Dialog open={!!selectedReport} onOpenChange={(o) => !o && setSelectedReport(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[95vw] sm:w-full">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[95vw] sm:w-full">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>Report Card Preview</DialogTitle>
           </DialogHeader>

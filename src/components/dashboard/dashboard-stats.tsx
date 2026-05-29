@@ -30,7 +30,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-green-500 font-medium flex items-center">
-                +12 This Week <span className="ml-1 text-lg leading-none">↗</span>
+                +{data.newStudentsThisWeek || 0} This Week <span className="ml-1 text-lg leading-none">↗</span>
               </span>
             </div>
           </CardContent>
@@ -48,7 +48,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-green-500 font-medium flex items-center">
-                +2 This Week <span className="ml-1 text-lg leading-none">↗</span>
+                +{data.newTeachersThisWeek || 0} This Week <span className="ml-1 text-lg leading-none">↗</span>
               </span>
             </div>
           </CardContent>
@@ -65,8 +65,8 @@ export function DashboardStats({ role, data }: StatsProps) {
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-500 font-medium flex items-center">
-                +5% This Week <span className="ml-1 text-lg leading-none">↗</span>
+              <span className={`${(data.attDiff || 0) >= 0 ? "text-green-500" : "text-red-500"} font-medium flex items-center`}>
+                {(data.attDiff || 0) > 0 ? "+" : ""}{data.attDiff || 0}% This Week <span className="ml-1 text-lg leading-none">{(data.attDiff || 0) >= 0 ? "↗" : "↘"}</span>
               </span>
             </div>
           </CardContent>
@@ -84,7 +84,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-green-500 font-medium flex items-center">
-                +8 This Week <span className="ml-1 text-lg leading-none">↗</span>
+                +{data.newQuizzesThisWeek || 0} This Week <span className="ml-1 text-lg leading-none">↗</span>
               </span>
             </div>
           </CardContent>
@@ -110,7 +110,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-green-500 font-medium flex items-center">
-                +2 This Week <span className="ml-1 text-lg leading-none">↗</span>
+                +{data.newClassesThisWeek || 0} This Week <span className="ml-1 text-lg leading-none">↗</span>
               </span>
             </div>
           </CardContent>
