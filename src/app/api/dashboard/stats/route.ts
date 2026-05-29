@@ -6,6 +6,7 @@ import Exam from "@/lib/models/exam";
 import Submission from "@/lib/models/submission";
 import ActivityLog from "@/lib/models/activitieslog";
 import Attendance from "@/lib/models/attendance";
+import ReportCard from "@/lib/models/reportCard";
 import jwt from "jsonwebtoken";
 
 const getTodayName = () => new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
       });
     });
 
-    reportCards.forEach(rc => {
+    reportCards.forEach((rc: any) => {
       if (!rc.class) return;
       const cId = rc.class.toString();
       if (leaderboardMap.has(cId)) {
@@ -63,7 +64,7 @@ export async function GET(req: NextRequest) {
       const cId = log.class.toString();
       if (leaderboardMap.has(cId)) {
         const stats = leaderboardMap.get(cId);
-        log.records.forEach(rec => {
+        log.records.forEach((rec: any) => {
           stats.attTotal += 1;
           if (rec.status === "Present" || rec.status === "Late") {
             stats.attPresent += 1;

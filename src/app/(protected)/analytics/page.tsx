@@ -66,13 +66,13 @@ export default function AnalyticsPage() {
                       outerRadius={100}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }: any) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                     >
                       {enrollmentData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <RechartsTooltip formatter={(value: number) => [value, "Users"]} />
+                    <RechartsTooltip formatter={(value: any) => [value, "Users"]} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -99,7 +99,7 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} domain={[0, 100]} />
-                    <RechartsTooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} formatter={(value: number) => [`${value}%`, "Average Score"]} />
+                    <RechartsTooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} formatter={(value: any) => [`${value}%`, "Average Score"]} />
                     <Bar dataKey="average" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40}>
                       {academicData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.average >= 75 ? "#10b981" : entry.average >= 50 ? "#f59e0b" : "#ef4444"} />
@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`} />
-                    <RechartsTooltip formatter={(value: number) => [`₦${value.toLocaleString()}`, ""]} />
+                    <RechartsTooltip formatter={(value: any) => [`₦${value.toLocaleString()}`, ""]} />
                     <Legend />
                     <Line type="monotone" name="Revenue (Fees)" dataKey="revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                     <Line type="monotone" name="Expenses" dataKey="expenses" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
