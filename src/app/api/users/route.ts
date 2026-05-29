@@ -24,8 +24,11 @@ export async function GET(req: NextRequest) {
     if (!adminUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const searchParams = req.nextUrl.searchParams;
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const pageParam = searchParams.get("page");
+    const limitParam = searchParams.get("limit");
+    
+    const page = pageParam ? parseInt(pageParam) : 1;
+    const limit = limitParam ? parseInt(limitParam) : (pageParam ? 10 : 10000);
     const role = searchParams.get("role");
     const search = searchParams.get("search");
 
