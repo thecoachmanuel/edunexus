@@ -9,9 +9,10 @@ import { RecordPaymentDialog } from "@/components/finance/RecordPaymentDialog";
 import { ExportButtons } from "@/components/finance/ExportButtons";
 import { FeeStructure, StudentFee } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Loader2 } from "lucide-react";
+import { Edit, Trash2, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useAuth } from "@/hooks/AuthProvider";
 
 export default function FeeManagement() {
   const { data: structuresData, mutate: mutateStructures, isLoading: loadingStructures } = useSWR("/finance/fee-structures");
@@ -28,6 +29,8 @@ export default function FeeManagement() {
     mutateFees();
   };
 
+  const { year } = useAuth();
+
   const handleDeleteStructure = async (id: string) => {
     if (!confirm("Are you sure you want to delete this fee structure?")) return;
     try {
@@ -36,6 +39,24 @@ export default function FeeManagement() {
       mutateStructures();
     } catch (error) {
       toast.error("Failed to delete fee structure");
+    }
+  };
+
+  const handleAssignToClass = async (structure: FeeStructure) => {
+    if (!confirm(`Assign ${structure.name} to all students in ${typeof structure.class === 'object' ? structure.class.name : 'the class'}?`)) return;
+    try {
+      const payload = {
+        assignToClass: true,
+        classId: typeof structure.class === 'object' ? structure.class._id : structure.class,
+        feeStructureId: structure._id,
+        totalAmount: structure.amount,
+        academicYear: year?._id,
+      };
+      const res = await api.post("/finance/student-fees", payload);
+      toast.success(`Assigned fee to ${res.data.count} students successfully`);
+      mutateFees();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to assign fee");
     }
   };
 
@@ -134,6 +155,9 @@ export default function FeeManagement() {
                     <TableCell>₦{s.amount}</TableCell>
                     <TableCell>{new Date(s.dueDate).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" title="Assign to Class" onClick={() => handleAssignToClass(s)}>
+                        <Users className="h-4 w-4 text-blue-500" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => {
                         setEditStructure(s);
                         setIsEditDialogOpen(true);

@@ -18,12 +18,10 @@ export function RecordPaymentDialog({ fee, onSave }: { fee: StudentFee, onSave: 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.put(`/finance/student-fees/${fee._id}`, { 
-        transaction: {
-          amount: Number(formData.amount),
-          method: formData.method,
-          notes: formData.notes
-        }
+      await api.post(`/finance/student-fees/${fee._id}/payment`, { 
+        amount: Number(formData.amount),
+        method: formData.method,
+        notes: formData.notes
       });
       toast.success("Payment recorded");
       setOpen(false);

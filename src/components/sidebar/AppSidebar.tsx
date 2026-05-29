@@ -172,7 +172,7 @@ export const sidebardata = {
       roles: ["admin"],
       items: [
         { title: "Analytics", url: "/analytics" },
-        // { title: "School Settings", url: "/settings/general" },
+        { title: "School Settings", url: "/settings/school" },
         { title: "Academic Years", url: "/settings/academic-years" },
         // { title: "Roles & Permissions", url: "/settings/roles" },
       ],

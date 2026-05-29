@@ -14,9 +14,16 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search");
 
+    const authUser = await getAuthUser(req);
     const query: any = {};
     if (search) {
       query.name = { $regex: search, $options: "i" };
+    }
+
+    if (authUser?.role === "parent") {
+      const children = await User.find({ _id: { $in: authUser.children || [] } }).select("studentClass");
+      const classIds = children.map(c => c.studentClass).filter(Boolean);
+      query._id = { $in: classIds };
     }
 
     const [total, classes] = await Promise.all([

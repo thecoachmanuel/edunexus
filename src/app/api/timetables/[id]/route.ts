@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Timetable from "@/lib/models/timetable";
+import AcademicYear from "@/lib/models/academicYear";
+import Subject from "@/lib/models/subject";
+import User from "@/lib/models/user";
+import Class from "@/lib/models/class";
 import { getAuthUser } from "@/middleware/auth";
 
 export async function GET(

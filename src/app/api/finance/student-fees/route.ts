@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import StudentFee from "@/lib/models/studentFee";
 import { getAuthUser } from "@/middleware/auth";
+import User from "@/lib/models/user";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,12 +37,40 @@ export async function POST(req: NextRequest) {
 
     const data = await req.json();
     
-    // Check if it's a bulk assignment
+    // Check if it's a bulk assignment by class
+    if (data.assignToClass && data.classId && data.feeStructureId && data.totalAmount) {
+      const students = await User.find({ role: "student", studentClass: data.classId }).select("_id").lean();
+      
+      if (students.length === 0) {
+        return NextResponse.json({ message: "No students found in this class" }, { status: 404 });
+      }
+
+      // Prepare fees to insert
+      const fees = students.map((s) => ({
+        student: s._id,
+        feeStructure: data.feeStructureId,
+        class: data.classId,
+        academicYear: data.academicYear,
+        totalAmount: data.totalAmount,
+        amountPaid: 0,
+        balance: data.totalAmount,
+        status: "unpaid",
+        transactions: []
+      }));
+
+      const createdFees = await StudentFee.insertMany(fees);
+      return NextResponse.json({ message: "Bulk assigned successfully", count: createdFees.length }, { status: 201 });
+    }
+
+    // Check if it's a bulk assignment by array of student IDs (legacy)
     if (data.students && Array.isArray(data.students)) {
       const fees = data.students.map((studentId: string) => ({
         ...data,
         student: studentId,
-        students: undefined
+        students: undefined,
+        amountPaid: 0,
+        balance: data.totalAmount,
+        status: "unpaid"
       }));
       const createdFees = await StudentFee.insertMany(fees);
       return NextResponse.json({ message: "Bulk assigned successfully", count: createdFees.length }, { status: 201 });
