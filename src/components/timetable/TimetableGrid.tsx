@@ -25,7 +25,7 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
     );
   }
 
-  if (!schedule || schedule.length === 0) {
+  if (!schedule || !Array.isArray(schedule) || schedule.length === 0) {
     return (
       <div className="h-[400px] w-full flex flex-col items-center justify-center border rounded-lg border-dashed bg-card">
         <Clock className="h-10 w-10 text-muted-foreground mb-3" />
@@ -38,19 +38,22 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
   }
 
   const timeSlots = useMemo(() => {
-    if (!schedule) return [];
+    if (!schedule || !Array.isArray(schedule)) return [];
     const times = new Set<string>();
     schedule.forEach((day) => {
-      day.periods?.forEach((period) => {
-        times.add(period.startTime);
+      day?.periods?.forEach((period) => {
+        if (period?.startTime) {
+          times.add(period.startTime);
+        }
       });
     });
     return Array.from(times).sort();
   }, [schedule]);
 
   const getRowLabel = (startTime: string) => {
+    if (!Array.isArray(schedule)) return startTime;
     for (const day of schedule) {
-      const found = day.periods?.find((p) => p.startTime === startTime);
+      const found = day?.periods?.find((p) => p?.startTime === startTime);
       if (found) {
         return `${found.startTime} - ${found.endTime}`;
       }
@@ -72,14 +75,14 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
           </TabsList>
 
           {DAYS.map((day) => {
-            const dayData = schedule.find((d) => d.day === day);
+            const dayData = schedule.find((d) => d?.day === day);
             return (
               <TabsContent key={day} value={day} className="mt-4 space-y-3 outline-none">
                 {timeSlots.length === 0 && (
                   <p className="text-center text-muted-foreground text-sm py-8">No classes scheduled.</p>
                 )}
                 {timeSlots.map((time) => {
-                  const period = dayData?.periods?.find((p) => p.startTime === time);
+                  const period = dayData?.periods?.find((p) => p?.startTime === time);
                   return (
                     <div key={time} className="flex flex-col border rounded-lg overflow-hidden bg-card shadow-sm">
                       <div className="bg-muted/50 p-2 text-xs font-semibold text-muted-foreground border-b flex items-center gap-2">
@@ -146,8 +149,8 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
 
                 {/* Day Cells */}
                 {DAYS.map((day) => {
-                  const dayData = schedule.find((d) => d.day === day);
-                  const period = dayData?.periods?.find((p) => p.startTime === time);
+                  const dayData = schedule.find((d) => d?.day === day);
+                  const period = dayData?.periods?.find((p) => p?.startTime === time);
 
                   return (
                     <div
