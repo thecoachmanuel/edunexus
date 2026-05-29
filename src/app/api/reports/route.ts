@@ -6,6 +6,7 @@ import User from "@/lib/models/user";
 import Submission from "@/lib/models/submission";
 import Exam from "@/lib/models/exam";
 import { getAuthUser } from "@/middleware/auth";
+import AcademicYear from "@/lib/models/academicYear";
 import { logActivity } from "@/lib/utils/activitieslog";
 
 function calculateGrade(score: number): string {

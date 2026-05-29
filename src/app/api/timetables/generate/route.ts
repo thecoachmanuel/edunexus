@@ -204,14 +204,14 @@ export async function POST(req: NextRequest) {
     }));
 
     // --- Step 4: Save the timetable (atomic upsert to avoid duplicate key errors from the unique class+year index) ---
-    console.log("[Timetable] Saving sanitized schedule with", finalSchedule.length, "days...");
+    console.log("[Timetable] Saving sanitized schedule with", sanitizedSchedule.length, "days...");
     const updatedTimetable = await Timetable.findOneAndUpdate(
       { class: classId, academicYear: academicYearId, term },
       {
         class: classId,
         academicYear: academicYearId,
         term,
-        schedule: finalSchedule,
+        schedule: sanitizedSchedule,
       },
       { new: true, upsert: true }
     );

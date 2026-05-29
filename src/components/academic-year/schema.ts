@@ -6,8 +6,8 @@ export const formSchema = z.object({
   activeTerm: z.string().min(1, "Initial active term is required"),
   terms: z.array(z.object({
     term: z.string(),
-    startDate: z.date({ required_error: "Start date is required" }),
-    endDate: z.date({ required_error: "End date is required" }),
+    startDate: z.date({ invalid_type_error: "Start date is required" }),
+    endDate: z.date({ invalid_type_error: "End date is required" }),
   })).length(3),
 });
 
