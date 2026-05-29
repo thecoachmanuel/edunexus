@@ -9,7 +9,24 @@ export async function GET(req: NextRequest) {
     const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
-    const expenses = await Expense.find({})
+    const searchParams = req.nextUrl.searchParams;
+    const search = searchParams.get("search");
+    const category = searchParams.get("category");
+
+    const query: any = {};
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    if (category && category !== "all") {
+      query.category = category;
+    }
+
+    const expenses = await Expense.find(query)
       .populate("recordedBy", "name")
       .sort({ date: -1 });
 

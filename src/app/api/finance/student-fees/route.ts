@@ -10,11 +10,50 @@ export async function GET(req: NextRequest) {
     const authUser = await getAuthUser(req);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
+    const searchParams = req.nextUrl.searchParams;
+    const search = searchParams.get("search");
+    const status = searchParams.get("status");
+
     let query: any = {};
     if (authUser.role === "student") {
       query.student = authUser._id;
     } else if (authUser.role === "parent") {
       query.student = { $in: authUser.children }; // Assuming parent has children array
+    }
+
+    if (search) {
+      // Find students whose name matches the search
+      const matchingStudents = await User.find({
+        role: "student",
+        name: { $regex: search, $options: "i" }
+      }).select("_id");
+      
+      const studentIds = matchingStudents.map(s => s._id);
+      
+      if (query.student) {
+        // Intersect parent/student restriction with search restriction
+        if (Array.isArray(query.student.$in)) {
+          query.student.$in = query.student.$in.filter((id: any) => 
+            studentIds.some(sid => sid.toString() === id.toString())
+          );
+        } else {
+          // If query.student is already a specific ID (authUser._id), check if it's in the search results
+          if (!studentIds.some(sid => sid.toString() === query.student.toString())) {
+            query.student = null; // Forces empty result if search doesn't match the current student
+          }
+        }
+      } else {
+        query.student = { $in: studentIds };
+      }
+    }
+
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    // if query.student was forced to null, bypass DB query
+    if (query.student === null) {
+      return NextResponse.json({ studentFees: [] });
     }
 
     const studentFees = await StudentFee.find(query)

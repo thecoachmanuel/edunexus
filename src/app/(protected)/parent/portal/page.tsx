@@ -238,22 +238,32 @@ function ChildCard({ child }: { child: ChildData }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ParentPortalPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (user && user.role !== "parent") {
+    if (!authLoading && user && user.role !== "parent") {
       router.replace("/dashboard");
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
-  const { data, isLoading } = useSWR(user?.role === "parent" ? "/parent/portal" : null);
+  const { data, error, isLoading } = useSWR(user?.role === "parent" ? "/parent/portal" : null);
   const children: ChildData[] = data?.children || [];
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="h-[80vh] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-red-500">
+        <AlertTriangle className="h-10 w-10 mb-4" />
+        <h2 className="text-xl font-bold">Failed to load portal</h2>
+        <p className="text-sm mt-2">{error.message || "An unexpected error occurred."}</p>
       </div>
     );
   }

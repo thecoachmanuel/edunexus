@@ -19,7 +19,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "Not authorized" }, { status: 403 });
     }
 
-    const childrenIds = (parent.children || []).map((c: any) => c._id);
+    const childrenIds = (parent.children || [])
+      .filter((c: any) => c != null)
+      .map((c: any) => c._id);
 
     // Get full children profiles
     const children = await User.find({ _id: { $in: childrenIds } })

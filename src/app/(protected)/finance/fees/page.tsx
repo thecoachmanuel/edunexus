@@ -9,14 +9,21 @@ import { RecordPaymentDialog } from "@/components/finance/RecordPaymentDialog";
 import { ExportButtons } from "@/components/finance/ExportButtons";
 import { FeeStructure, StudentFee } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Loader2, Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Edit, Trash2, Loader2, Users, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useAuth } from "@/hooks/AuthProvider";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function FeeManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
+  const [statusFilter, setStatusFilter] = useState("all");
+
   const { data: structuresData, mutate: mutateStructures, isLoading: loadingStructures } = useSWR("/finance/fee-structures");
-  const { data: feesData, mutate: mutateFees, isLoading: loadingFees } = useSWR("/finance/student-fees");
+  const { data: feesData, mutate: mutateFees, isLoading: loadingFees } = useSWR(`/finance/student-fees?search=${debouncedSearch}&status=${statusFilter}`);
 
   const [editStructure, setEditStructure] = useState<FeeStructure | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -84,7 +91,33 @@ export default function FeeManagement() {
           <TabsTrigger value="structures">Fee Structures</TabsTrigger>
         </TabsList>
         <TabsContent value="payments" className="space-y-4 pt-4">
-          <div className="flex justify-end">
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search students..." 
+                  className="pl-8 w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="w-full sm:w-48">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="Filter Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="partial">Partial</SelectItem>
+                    <SelectItem value="unpaid">Unpaid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end">
             <ExportButtons 
               filename="student-fees" 
               data={fees} 
