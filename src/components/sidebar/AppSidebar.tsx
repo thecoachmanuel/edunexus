@@ -111,6 +111,16 @@ export const sidebardata = {
           roles: ["admin", "teacher"],
         },
         {
+          title: "Results Broadsheet",
+          url: "/academics/results",
+          roles: ["admin", "teacher"],
+        },
+        {
+          title: "Grading Config",
+          url: "/academics/grading-config",
+          roles: ["admin"],
+        },
+        {
           title: "Report Cards",
           url: "/academics/reports",
           roles: ["admin", "teacher", "parent", "student"],

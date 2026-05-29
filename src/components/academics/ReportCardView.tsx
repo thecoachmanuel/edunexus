@@ -161,7 +161,18 @@ export const ReportCardView = ({ report, showActions = true }: ReportCardProps) 
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
               <span style={{ fontWeight: 700, fontSize: 15 }}>Overall Average: <span style={{ color: gradeCol }}>{avg}%</span></span>
-              <span style={{ fontSize: 12, color: "#64748b" }}>{report.grades?.length ?? 0} subjects assessed</span>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                {report.showPosition && report.position > 0 && (
+                  <span style={{
+                    background: "#1e40af", color: "white",
+                    borderRadius: 6, padding: "3px 10px",
+                    fontWeight: 700, fontSize: 12,
+                  }}>
+                    Position: {report.position} / {report.totalStudents}
+                  </span>
+                )}
+                <span style={{ fontSize: 12, color: "#64748b" }}>{report.grades?.length ?? 0} subjects assessed</span>
+              </div>
             </div>
             {/* Progress bar */}
             <div style={{ background: "#e2e8f0", borderRadius: 6, height: 10, width: "100%", overflow: "hidden" }}>
@@ -176,48 +187,66 @@ export const ReportCardView = ({ report, showActions = true }: ReportCardProps) 
           <div style={{ fontWeight: 700, fontSize: 13, color: "#1e40af", marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>
             Subject Performance Breakdown
           </div>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
               <tr style={{ background: "#1e40af" }}>
-                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "left", borderRadius: "6px 0 0 0" }}>Subject</th>
-                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "center", width: 120 }}>Score</th>
-                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "center", width: 80 }}>Grade</th>
-                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "left", borderRadius: "0 6px 0 0" }}>Progress</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "9px 10px", textAlign: "left", borderRadius: "6px 0 0 0" }}>Subject</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "9px 10px", textAlign: "center", width: 70 }}>Quiz</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "9px 10px", textAlign: "center", width: 70 }}>CA</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "9px 10px", textAlign: "center", width: 70 }}>Exam</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "9px 10px", textAlign: "center", width: 80 }}>Total</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "9px 10px", textAlign: "center", width: 60 }}>Grade</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "9px 10px", textAlign: "left", borderRadius: "0 6px 0 0", width: 90 }}>Remark</th>
               </tr>
             </thead>
             <tbody>
               {report.grades?.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ padding: "20px", textAlign: "center", color: "#94a3b8" }}>No grades recorded for this term.</td>
+                  <td colSpan={7} style={{ padding: "20px", textAlign: "center", color: "#94a3b8" }}>No grades recorded for this term.</td>
                 </tr>
               ) : (
                 report.grades?.map((g: any, i: number) => (
                   <tr key={g._id || i} style={{ background: i % 2 === 0 ? "#f8fafc" : "white" }}>
-                    <td style={{ padding: "10px 14px", fontWeight: 600 }}>{g.subject?.name ?? g.subject}</td>
-                    <td style={{ padding: "10px 14px", textAlign: "center", fontWeight: 700, fontSize: 15 }}>{g.score}%</td>
-                    <td style={{ padding: "10px 14px", textAlign: "center" }}>
+                    <td style={{ padding: "9px 10px", fontWeight: 600 }}>{g.subject?.name ?? g.subject}</td>
+                    {/* Component scores — show new fields if available, fall back to legacy score */}
+                    <td style={{ padding: "9px 10px", textAlign: "center" }}>
+                      {g.quizScore != null ? g.quizScore.toFixed(1) : (g.score != null ? "—" : "—")}
+                    </td>
+                    <td style={{ padding: "9px 10px", textAlign: "center" }}>
+                      {g.caScore != null ? g.caScore.toFixed(1) : "—"}
+                    </td>
+                    <td style={{ padding: "9px 10px", textAlign: "center" }}>
+                      {g.examScore != null ? g.examScore.toFixed(1) : "—"}
+                    </td>
+                    <td style={{ padding: "9px 10px", textAlign: "center", fontWeight: 700, fontSize: 14 }}>
+                      {g.aggregateScore ?? g.score ?? "—"}
+                    </td>
+                    <td style={{ padding: "9px 10px", textAlign: "center" }}>
                       <span style={{
-                        display: "inline-block", fontWeight: 800, fontSize: 13,
+                        display: "inline-block", fontWeight: 800, fontSize: 12,
                         color: gradeColor(g.grade), background: `${gradeColor(g.grade)}15`,
                         border: `1.5px solid ${gradeColor(g.grade)}50`,
-                        borderRadius: 6, padding: "2px 10px"
+                        borderRadius: 6, padding: "2px 8px"
                       }}>{g.grade}</span>
                     </td>
-                    <td style={{ padding: "10px 14px" }}>{scoreBar(g.score)}</td>
+                    <td style={{ padding: "9px 10px", color: "#475569", fontStyle: "italic", fontSize: 11 }}>
+                      {g.remark || ""}
+                    </td>
                   </tr>
                 ))
               )}
             </tbody>
             <tfoot>
               <tr style={{ background: "#eff6ff", borderTop: "2px solid #bfdbfe" }}>
-                <td style={{ padding: "12px 14px", fontWeight: 800, color: "#1e40af" }}>Overall Average</td>
-                <td style={{ padding: "12px 14px", textAlign: "center", fontWeight: 800, fontSize: 16, color: gradeCol }}>{avg}%</td>
-                <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                <td style={{ padding: "12px 10px", fontWeight: 800, color: "#1e40af" }}>Overall Average</td>
+                <td colSpan={3} />
+                <td style={{ padding: "12px 10px", textAlign: "center", fontWeight: 800, fontSize: 16, color: gradeCol }}>{avg}%</td>
+                <td style={{ padding: "12px 10px", textAlign: "center" }}>
                   <span style={{
-                    display: "inline-block", fontWeight: 900, fontSize: 15,
+                    display: "inline-block", fontWeight: 900, fontSize: 14,
                     color: gradeCol, background: `${gradeCol}20`,
                     border: `2px solid ${gradeCol}`,
-                    borderRadius: 8, padding: "3px 14px"
+                    borderRadius: 8, padding: "3px 12px"
                   }}>{report.overallGrade}</span>
                 </td>
                 <td />
