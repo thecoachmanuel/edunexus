@@ -38,3 +38,27 @@ export async function GET(
     return NextResponse.json({ message: "Server Error", error }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> } // id is classId
+) {
+  try {
+    await connectDB();
+    const authUser = await getAuthUser(req, ["admin"]);
+    if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+
+    const { id: classId } = await params;
+    
+    // Clear all timetables for this specific class
+    const result = await Timetable.deleteMany({ class: classId });
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ message: "No timetable found to clear" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Timetable cleared successfully" });
+  } catch (error) {
+    console.error("DELETE TIMETABLE ERROR", error);
+    return NextResponse.json({ message: "Server Error", error }, { status: 500 });
+  }
+}

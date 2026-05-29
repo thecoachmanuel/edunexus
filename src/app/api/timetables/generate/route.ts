@@ -104,6 +104,14 @@ export async function POST(req: NextRequest) {
           .join(", ")
       : "No custom breaks specified. Use your judgment to place one short break (10 min) and one lunch break (30 min) at sensible times.";
 
+    const weightsDescription = settings.subjectWeights && Object.keys(settings.subjectWeights).length > 0
+      ? "CRITICAL: You MUST strictly adhere to the following exact period counts for the week: " + 
+        Object.entries(settings.subjectWeights).map(([id, count]) => {
+          const subject = subjectsPayload.find((s: any) => s._id === id);
+          return subject ? `"${subject.name}" (${id}) MUST appear EXACTLY ${count} times` : "";
+        }).filter(Boolean).join(". ")
+      : "The total number of teaching periods in the week MUST be divided as evenly as possible among ALL available subjects. For example, if there are 40 teaching periods and 8 subjects, each subject MUST appear exactly 5 times.";
+
     const prompt = `
       You are a school scheduler. Generate a weekly timetable (Monday to Friday).
 
@@ -119,13 +127,13 @@ export async function POST(req: NextRequest) {
       - Other Timetables (for clash detection): ${JSON.stringify(allTimetables)}
 
       STRICT RULES:
-      1. You MUST use ALL of the subjects provided in the RESOURCES. Every subject listed must appear at least once across the week, distributed evenly.
+      1. CRITICAL: You MUST use EVERY SINGLE subject provided in the RESOURCES. ${weightsDescription} You MUST verify that NO subject is left out (unless a specific count is set to 0).
       2. Assign a valid Teacher to every Subject period.
       ${isUsingFallbackTeachers ? "3. Since no teachers are specifically mapped to these subjects, you may assign any listed teacher to any subject." : "3. Prefer assigning teachers whose subject list includes the subject being scheduled."}
       4. Schedule the following breaks EXACTLY as defined: ${breaksDescription}. Set "subject" and "teacher" to null for break periods.
       5. Each teaching period must be exactly ${settings.periodDuration || 45} minutes long (unless interrupted by a break).
       6. Avoid teacher clashes (a teacher cannot appear in two classes at the same time).
-      7. Do NOT schedule any extra "Free Periods" or empty slots unless absolutely necessary (e.g. if no teacher is available). Fill all available teaching time with subjects from the RESOURCES.
+      7. CRITICAL: Do NOT schedule ANY extra "Free Periods" or empty slots. Every single period that is not a designated break MUST be assigned a valid subject and teacher. Fill 100% of the available teaching time with subjects from the RESOURCES, distributing them evenly.
       8. Output strict JSON only.
          - "subject" and "teacher" MUST be the exact 24-character hexadecimal ObjectId strings from the resources.
          - For Break, Lunch, or Free Periods: set "subject" to null and "teacher" to null.

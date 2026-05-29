@@ -9,6 +9,10 @@ import GeneratorControls, {
   type GenSettings,
 } from "@/components/timetable/GeneratorControls";
 import TimetableGrid from "@/components/timetable/TimetableGrid";
+import TimetableStatistics from "@/components/timetable/TimetableStatistics";
+
+import { Button } from "@/components/ui/button";
+import { Printer, Trash2 } from "lucide-react";
 
 const Timetable = () => {
   const { user } = useAuth();
@@ -19,6 +23,7 @@ const Timetable = () => {
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
+  const [lastUsedSettings, setLastUsedSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
 
   // fetch timetable
   const fetchTimetable = async (classId: string) => {
@@ -43,6 +48,19 @@ const Timetable = () => {
     }
   };
 
+  const handleClear = async () => {
+    if (!selectedClass) return;
+    if (!confirm("Are you sure you want to clear the timetable for this class?")) return;
+
+    try {
+      await api.delete(`/timetables/${selectedClass}`);
+      toast.success("Timetable cleared successfully");
+      setScheduleData([]);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to clear timetable");
+    }
+  };
+
   // auto fetch using useEffect
   useEffect(() => {
     if (selectedClass) {
@@ -56,6 +74,7 @@ const Timetable = () => {
     settings: GenSettings
   ) => {
     try {
+      setLastUsedSettings({ yearId, settings });
       setIsGenerating(true);
       const { data } = await api.post("/timetables/generate", {
         classId: selectedClass,
@@ -72,30 +91,71 @@ const Timetable = () => {
       setIsGenerating(false);
     }
   };
-  //   console.log("class timetable:", scheduleData);
-  //   console.log("selected class:", selectedClass);
+
+  const handleRegenerateWithWeights = async (weights: Record<string, number>) => {
+    if (!lastUsedSettings) {
+      toast.error("Please generate a timetable first before adjusting weights");
+      return;
+    }
+    const newSettings = { ...lastUsedSettings.settings, subjectWeights: weights };
+    await handleGenerate(selectedClass, lastUsedSettings.yearId, newSettings);
+  };
+
   return (
-    <div className="p-4 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Timetable Management
-        </h1>
-        <p className="text-muted-foreground">
-          {isStudent
-            ? "View your weekly class schedule."
-            : "View or manage weekly schedules."}
-        </p>
+    <div className="p-4 space-y-6 print:p-0 print:space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Timetable Management
+          </h1>
+          <p className="text-muted-foreground print:hidden">
+            {isStudent
+              ? "View your weekly class schedule."
+              : "View or manage weekly schedules."}
+          </p>
+        </div>
+        {scheduleData.length > 0 && (
+          <div className="flex items-center gap-2 print:hidden">
+            {!isStudent && (
+              <Button variant="outline" size="sm" onClick={handleClear} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Timetable
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4 mr-2" />
+              Print
+            </Button>
+          </div>
+        )}
       </div>
       {!isStudent && (
-        <GeneratorControls
-          onGenerate={handleGenerate}
-          onClassChange={fetchTimetable}
-          isGenerating={isGenerating}
-          selectedClass={selectedClass}
-          setSelectedClass={setSelectedClass}
-        />
+        <div className="print:hidden">
+          <GeneratorControls
+            onGenerate={handleGenerate}
+            onClassChange={fetchTimetable}
+            isGenerating={isGenerating}
+            selectedClass={selectedClass}
+            setSelectedClass={setSelectedClass}
+          />
+        </div>
       )}
-      <TimetableGrid schedule={scheduleData} isLoading={loadingSchedule} />
+      <TimetableGrid 
+        schedule={scheduleData} 
+        isLoading={loadingSchedule} 
+        isAdmin={isAdmin}
+        classId={selectedClass}
+        onPeriodUpdated={() => fetchTimetable(selectedClass)}
+      />
+      {!isStudent && scheduleData.length > 0 && (
+        <div className="print:hidden">
+          <TimetableStatistics 
+            scheduleData={scheduleData} 
+            onRegenerateWithWeights={handleRegenerateWithWeights} 
+            isGenerating={isGenerating}
+          />
+        </div>
+      )}
     </div>
   );
 };

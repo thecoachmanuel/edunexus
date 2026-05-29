@@ -3,16 +3,40 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, User as UserIcon, CalendarDays } from "lucide-react";
 import type { schedule } from "@/types";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import EditPeriodDialog from "./EditPeriodDialog";
 
 interface Props {
   schedule: schedule[];
   isLoading: boolean;
+  isAdmin?: boolean;
+  classId?: string;
+  onPeriodUpdated?: () => void;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-const TimetableGrid = ({ schedule, isLoading }: Props) => {
+const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated }: Props) => {
   const [selectedDay, setSelectedDay] = useState<string>("Monday");
+  const [editState, setEditState] = useState({
+    isOpen: false,
+    day: "",
+    startTime: "",
+    endTime: "",
+    currentSubjectId: "",
+    currentTeacherId: "",
+  });
+
+  const handleCellClick = (day: string, time: string, period: any) => {
+    if (!isAdmin || !classId) return;
+    setEditState({
+      isOpen: true,
+      day,
+      startTime: time,
+      endTime: period?.endTime || "",
+      currentSubjectId: period?.subject?._id || period?.subject || "",
+      currentTeacherId: period?.teacher?._id || period?.teacher || "",
+    });
+  };
 
   const timeSlots = useMemo(() => {
     if (!schedule || !Array.isArray(schedule)) return [];
@@ -85,7 +109,11 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
                 {timeSlots.map((time) => {
                   const period = dayData?.periods?.find((p) => p?.startTime === time);
                   return (
-                    <div key={time} className="flex flex-col border rounded-lg overflow-hidden bg-card shadow-sm">
+                    <div 
+                      key={time} 
+                      className={`flex flex-col border rounded-lg overflow-hidden bg-card shadow-sm ${isAdmin ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all' : ''}`}
+                      onClick={() => handleCellClick(day, time, period)}
+                    >
                       <div className="bg-muted/50 p-2 text-xs font-semibold text-muted-foreground border-b flex items-center gap-2">
                         <Clock className="h-3 w-3" />
                         {getRowLabel(time)}
@@ -160,7 +188,8 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
                   return (
                     <div
                       key={`${day}-${time}`}
-                      className="flex-1 min-w-[200px] border-r p-3 last:border-r-0 hover:bg-muted/10 transition-colors"
+                      className={`flex-1 min-w-[200px] border-r p-3 last:border-r-0 hover:bg-muted/10 transition-colors ${isAdmin ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 hover:z-10 relative' : ''}`}
+                      onClick={() => handleCellClick(day, time, period)}
                     >
                       {period && period.subject && period.teacher ? (
                         <div className="h-full min-h-[100px] w-full rounded-md border bg-background p-3 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-2 border-l-4 border-l-primary group">
@@ -194,6 +223,21 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
           </div>
         </div>
       </div>
+      {isAdmin && classId && (
+        <EditPeriodDialog
+          isOpen={editState.isOpen}
+          onClose={() => setEditState({ ...editState, isOpen: false })}
+          classId={classId}
+          day={editState.day}
+          startTime={editState.startTime}
+          endTime={editState.endTime}
+          currentSubjectId={editState.currentSubjectId}
+          currentTeacherId={editState.currentTeacherId}
+          onSuccess={() => {
+            if (onPeriodUpdated) onPeriodUpdated();
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -37,6 +37,7 @@ export interface GenSettings {
   periods: number;
   periodDuration: number;
   breaks: BreakSetting[];
+  subjectWeights?: Record<string, number>;
 }
 
 interface Props {
