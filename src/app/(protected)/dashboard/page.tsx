@@ -64,7 +64,9 @@ export default function Dashboard() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Welcome Back, {user?.name}</h2>
           <p className="text-muted-foreground mt-1">
-            Here's what's happening with your classes today.
+            {user?.role === "admin" 
+              ? "Here is an overview of the entire school's activity today." 
+              : "Here's what's happening with your classes today."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -82,7 +84,7 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 className="h-auto py-3 px-4 flex flex-col items-center gap-2 border-blue-100 bg-blue-50/50 hover:bg-blue-100 text-blue-700 hover:text-blue-800"
-                onClick={() => router.push("/classes/attendance")}
+                onClick={() => router.push("/academics/attendance")}
               >
                 <CalendarCheck className="h-5 w-5" />
                 <span className="text-xs font-semibold">Mark Attendance</span>
