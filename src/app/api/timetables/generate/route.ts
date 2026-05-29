@@ -6,6 +6,7 @@ import Timetable from "@/lib/models/timetable";
 import { getAuthUser } from "@/middleware/auth";
 import { logActivity } from "@/lib/utils/activitieslog";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { aiRateLimiter } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +15,15 @@ export async function POST(req: NextRequest) {
     const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
+
+    // Apply Rate Limiting (10 requests per minute per user)
+    const rateLimit = aiRateLimiter.check(authUser._id.toString());
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { message: "Too many AI timetable requests. Please try again in a minute." },
+        { status: 429 }
+      );
     }
 
     const { classId, academicYearId, settings } = await req.json();

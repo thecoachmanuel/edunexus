@@ -5,6 +5,7 @@ import User from "@/lib/models/user";
 import Class from "@/lib/models/class";
 import Exam from "@/lib/models/exam";
 import { getAuthUser } from "@/middleware/auth";
+import { aiRateLimiter } from "@/lib/rate-limit";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
 
@@ -14,6 +15,15 @@ export async function POST(req: NextRequest) {
     const authUser = await getAuthUser(req, ["admin", "teacher", "student"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
+
+    // Apply Rate Limiting (10 requests per minute per user)
+    const rateLimit = aiRateLimiter.check(authUser._id.toString());
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { message: "Too many AI requests. Please try again in a minute." },
+        { status: 429 }
+      );
     }
 
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {

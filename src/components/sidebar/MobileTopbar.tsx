@@ -6,6 +6,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { sidebardata } from "@/components/sidebar/AppSidebar";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 /** Derives a readable page title from the current pathname using sidebar nav data */
 function usePageTitle(): string {
@@ -83,16 +84,19 @@ export function MobileTopbar() {
         {pageTitle}
       </h1>
 
-      {/* User avatar */}
-      <div
-        className={cn(
-          "h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
-          "bg-gradient-to-br from-primary to-primary/70",
-          "text-primary-foreground text-xs font-bold",
-          "shadow-sm select-none",
-        )}
-      >
-        {initials}
+      {/* Notification Bell + User avatar */}
+      <div className="flex items-center gap-1 shrink-0">
+        <NotificationBell />
+        <div
+          className={cn(
+            "h-9 w-9 rounded-xl flex items-center justify-center",
+            "bg-gradient-to-br from-primary to-primary/70",
+            "text-primary-foreground text-xs font-bold",
+            "shadow-sm select-none",
+          )}
+        >
+          {initials}
+        </div>
       </div>
     </header>
   );

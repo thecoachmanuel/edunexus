@@ -32,6 +32,7 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToogle } from "./ThemeToogle";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface NavItem {
   title: string;
@@ -65,7 +66,12 @@ export const sidebardata = {
         {
           title: "Dashboard",
           url: "/dashboard",
-          roles: ["admin", "teacher", "student", "parent"],
+          roles: ["admin", "teacher", "student"],
+        },
+        {
+          title: "Parent Portal",
+          url: "/parent/portal",
+          roles: ["parent"],
         },
         {
           title: "Activities Log",
@@ -165,6 +171,7 @@ export const sidebardata = {
       icon: Settings2,
       roles: ["admin"],
       items: [
+        { title: "Analytics", url: "/analytics" },
         // { title: "School Settings", url: "/settings/general" },
         { title: "Academic Years", url: "/settings/academic-years" },
         // { title: "Roles & Permissions", url: "/settings/roles" },
@@ -241,6 +248,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <LogOut />
             </Button>
           </SidebarMenuItem>
+          {!isCollapsed && <NotificationBell />}
           <ThemeToogle />
         </div>
         <NavUser user={userData} />

@@ -22,11 +22,19 @@ import { Calendar, FileText, CheckCircle2 } from "lucide-react";
 import { AiInsightWidget } from "@/components/dashboard/ai-insight-widget";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AttendanceWidget } from "@/components/dashboard/attendance-widget";
+import { ClassLeaderboardWidget } from "@/components/dashboard/leaderboard-widget";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const router = useRouter();
   const { data: statsData, isLoading: loading } = useSWR(user ? "/dashboard/stats" : null);
+
+  // Parents have their own portal — redirect them immediately
+  useEffect(() => {
+    if (user?.role === "parent") {
+      router.replace("/parent/portal");
+    }
+  }, [user, router]);
 
   // 2. Loading State
   if (loading) {
@@ -85,6 +93,9 @@ export default function Dashboard() {
         <div className="col-span-4 space-y-4">
           {/* AI WIDGET */}
           <AiInsightWidget role={user?.role} />
+
+          {/* CLASS LEADERBOARD WIDGET */}
+          <ClassLeaderboardWidget data={statsData?.leaderboard} />
 
           {/* RECENT ACTIVITY CARD */}
           {user?.role === "admin" && (

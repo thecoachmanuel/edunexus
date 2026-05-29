@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Printer, CheckCircle, Search, Trash2 } from "lucide-react";
+import { Loader2, CheckCircle, Search, Trash2 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 
 import { api } from "@/lib/api";
@@ -325,15 +325,6 @@ export default function ReportsPage() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>Report Card Preview</DialogTitle>
-            <Button
-              size="sm"
-              onClick={() => {
-                window.print();
-              }}
-              className="mr-6"
-            >
-              <Printer className="h-4 w-4 mr-2" /> Print PDF
-            </Button>
           </DialogHeader>
           <div className="print:block" id="printable-report">
             {selectedReport && <ReportCardView report={selectedReport} />}

@@ -27,6 +27,59 @@ export async function GET(req: NextRequest) {
       .populate("user", "name")
       .lean();
 
+    // --- Calculate Leaderboard Data ---
+    // 1. Get all classes
+    const classes = await Class.find().select("name").lean();
+    
+    // 2. Calculate average score per class
+    // We can use ReportCard to get the overall average score for each class
+    const reportCards = await ReportCard.find().select("class averageScore").lean();
+    
+    // 3. Calculate attendance per class
+    const allAttendanceLogs = await Attendance.find().select("class records").lean();
+    
+    const leaderboardMap = new Map();
+    classes.forEach(c => {
+      leaderboardMap.set(c._id.toString(), {
+        className: c.name,
+        scoreTotal: 0,
+        scoreCount: 0,
+        attTotal: 0,
+        attPresent: 0
+      });
+    });
+
+    reportCards.forEach(rc => {
+      if (!rc.class) return;
+      const cId = rc.class.toString();
+      if (leaderboardMap.has(cId)) {
+        leaderboardMap.get(cId).scoreTotal += rc.averageScore;
+        leaderboardMap.get(cId).scoreCount += 1;
+      }
+    });
+
+    allAttendanceLogs.forEach(log => {
+      if (!log.class) return;
+      const cId = log.class.toString();
+      if (leaderboardMap.has(cId)) {
+        const stats = leaderboardMap.get(cId);
+        log.records.forEach(rec => {
+          stats.attTotal += 1;
+          if (rec.status === "Present" || rec.status === "Late") {
+            stats.attPresent += 1;
+          }
+        });
+      }
+    });
+
+    const leaderboard = Array.from(leaderboardMap.values()).map(item => ({
+      className: item.className,
+      averageScore: item.scoreCount > 0 ? Math.round(item.scoreTotal / item.scoreCount) : 0,
+      attendanceRate: item.attTotal > 0 ? Math.round((item.attPresent / item.attTotal) * 100) : 0,
+      totalScore: (item.scoreCount > 0 ? Math.round(item.scoreTotal / item.scoreCount) : 0) + (item.attTotal > 0 ? Math.round((item.attPresent / item.attTotal) * 100) : 0)
+    })).sort((a, b) => b.totalScore - a.totalScore).slice(0, 5); // Top 5
+    // ----------------------------------
+
     const formattedActivity = recentActivities.map(
       (log) =>
         `${(log.user as any)?.name || "System"}: ${log.action} (${new Date(
@@ -50,13 +103,13 @@ export async function GET(req: NextRequest) {
       });
       const avgAttendance = totalRecords === 0 ? "100%" : `${Math.round((presentRecords / totalRecords) * 100)}%`;
 
-      stats = { totalStudents, totalTeachers, activeExams, avgAttendance, recentActivity: formattedActivity };
+      stats = { totalStudents, totalTeachers, activeExams, avgAttendance, recentActivity: formattedActivity, leaderboard };
     } else if (user.role === "teacher") {
       const myClassesCount = await Class.countDocuments({ classTeacher: user._id });
       const myExams = await Exam.find({ teacher: user._id }).select("_id").lean();
       const myExamIds = myExams.map((exam) => exam._id);
       const pendingGrading = await Submission.countDocuments({ exam: { $in: myExamIds }, score: 0 });
-      stats = { myClassesCount, pendingGrading, nextClass: "Mathematics - Grade 10", nextClassTime: "10:00 AM", recentActivity: formattedActivity };
+      stats = { myClassesCount, pendingGrading, nextClass: "Mathematics - Grade 10", nextClassTime: "10:00 AM", recentActivity: formattedActivity, leaderboard };
     } else if (user.role === "student") {
       const nextExam = await Exam.findOne({ class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 }).lean();
       const pendingQuizzes = await Exam.countDocuments({ class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });
@@ -73,7 +126,7 @@ export async function GET(req: NextRequest) {
       });
       const myAttendance = totalMyRecords === 0 ? "100%" : `${Math.round((myPresentRecords / totalMyRecords) * 100)}%`;
 
-      stats = { myAttendance, pendingQuizzes, nextExam: nextExam?.title || "No upcoming exams", nextExamDate: nextExam ? new Date(nextExam.dueDate).toLocaleDateString() : "", recentActivity: formattedActivity };
+      stats = { myAttendance, pendingQuizzes, nextExam: nextExam?.title || "No upcoming exams", nextExamDate: nextExam ? new Date(nextExam.dueDate).toLocaleDateString() : "", recentActivity: formattedActivity, leaderboard };
     }
     return NextResponse.json(stats);
   } catch (error) {

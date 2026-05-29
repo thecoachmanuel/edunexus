@@ -1,74 +1,265 @@
-import React from "react";
+"use client";
+
+import React, { useRef } from "react";
 import { format } from "date-fns";
+import { Download, Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ReportCardProps {
   report: any;
+  showActions?: boolean;
 }
 
-export const ReportCardView = ({ report }: ReportCardProps) => {
+function gradeColor(grade: string): string {
+  switch (grade) {
+    case "A": return "#16a34a";
+    case "B": return "#2563eb";
+    case "C": return "#d97706";
+    case "D": return "#ea580c";
+    case "F": return "#dc2626";
+    default:  return "#6b7280";
+  }
+}
+
+function scoreBar(score: number) {
+  const pct = Math.min(score, 100);
+  const color = score >= 80 ? "#16a34a" : score >= 60 ? "#d97706" : "#dc2626";
   return (
-    <div className="bg-white text-black p-8 max-w-3xl mx-auto border shadow-sm print:shadow-none print:border-none print:p-0">
-      {/* Header */}
-      <div className="text-center border-b pb-6 mb-6">
-        <h1 className="text-3xl font-bold uppercase tracking-wider">Edunexus High School</h1>
-        <p className="text-sm mt-1 text-gray-500">Academic Report Card</p>
-        <p className="text-sm font-semibold mt-2">{report.academicYear?.name} - {report.term}</p>
-      </div>
+    <div style={{ background: "#f1f5f9", borderRadius: 4, height: 6, width: "100%", overflow: "hidden" }}>
+      <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 4, transition: "width 0.4s" }} />
+    </div>
+  );
+}
 
-      {/* Student Info */}
-      <div className="flex justify-between items-end mb-6">
-        <div>
-          <p><span className="font-semibold">Student Name:</span> {report.student?.name}</p>
-          <p><span className="font-semibold">Class:</span> {report.class?.name}</p>
-        </div>
-        <div className="text-right">
-          <p><span className="font-semibold">Generated On:</span> {format(new Date(report.createdAt), "MMM dd, yyyy")}</p>
-        </div>
-      </div>
+function getRemarks(avg: number): string {
+  if (avg >= 90) return "Outstanding performance. Keep up the excellent work!";
+  if (avg >= 80) return "Very good performance. Continue to strive for excellence.";
+  if (avg >= 70) return "Good performance. There is room for further improvement.";
+  if (avg >= 60) return "Satisfactory performance. More consistent effort is needed.";
+  if (avg >= 50) return "Performance is below average. Significant improvement is required.";
+  return "Poor performance. Urgent attention and support needed.";
+}
 
-      {/* Grades Table */}
-      <table className="w-full border-collapse border border-gray-300 mb-6">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-gray-300 p-2 text-left">Subject</th>
-            <th className="border border-gray-300 p-2 text-center w-24">Score</th>
-            <th className="border border-gray-300 p-2 text-center w-24">Grade</th>
-          </tr>
-        </thead>
-        <tbody>
-          {report.grades?.map((grade: any) => (
-            <tr key={grade._id || grade.subject._id}>
-              <td className="border border-gray-300 p-2">{grade.subject?.name}</td>
-              <td className="border border-gray-300 p-2 text-center">{grade.score}</td>
-              <td className="border border-gray-300 p-2 text-center font-semibold">{grade.grade}</td>
-            </tr>
-          ))}
-          {report.grades?.length === 0 && (
-            <tr>
-              <td colSpan={3} className="border border-gray-300 p-4 text-center text-gray-500">
-                No grades recorded for this term.
-              </td>
-            </tr>
-          )}
-        </tbody>
-        <tfoot>
-          <tr className="bg-gray-50">
-            <td className="border border-gray-300 p-2 font-bold text-right">Overall Average:</td>
-            <td className="border border-gray-300 p-2 text-center font-bold">{report.averageScore}</td>
-            <td className="border border-gray-300 p-2 text-center font-bold text-lg">{report.overallGrade}</td>
-          </tr>
-        </tfoot>
-      </table>
+export const ReportCardView = ({ report, showActions = true }: ReportCardProps) => {
+  const printRef = useRef<HTMLDivElement>(null);
 
-      {/* Footer / Signatures */}
-      <div className="mt-12 flex justify-between pt-8 border-t border-gray-200">
-        <div className="text-center w-48">
-          <div className="border-b border-gray-400 h-8 mb-2"></div>
-          <p className="text-sm text-gray-600">Class Teacher Signature</p>
+  const handlePrint = () => {
+    const printContents = printRef.current?.innerHTML;
+    if (!printContents) return;
+    const win = window.open("", "_blank", "width=900,height=700");
+    if (!win) return;
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Report Card – ${report.student?.name}</title>
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; background: white; }
+            @page { size: A4; margin: 10mm; }
+          </style>
+        </head>
+        <body>${printContents}</body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); win.close(); }, 500);
+  };
+
+  const avg = report.averageScore ?? 0;
+  const gradeCol = gradeColor(report.overallGrade);
+
+  return (
+    <div>
+      {/* Action Buttons */}
+      {showActions && (
+        <div className="flex gap-2 mb-4 justify-end">
+          <Button variant="outline" onClick={handlePrint} className="gap-2">
+            <Printer className="h-4 w-4" />
+            Print / Save PDF
+          </Button>
+          <Button onClick={handlePrint} className="gap-2">
+            <Download className="h-4 w-4" />
+            Download PDF
+          </Button>
         </div>
-        <div className="text-center w-48">
-          <div className="border-b border-gray-400 h-8 mb-2"></div>
-          <p className="text-sm text-gray-600">Principal Signature</p>
+      )}
+
+      {/* Printable Report Card */}
+      <div
+        ref={printRef}
+        style={{
+          background: "white",
+          color: "#1e293b",
+          fontFamily: "'Segoe UI', Arial, sans-serif",
+          maxWidth: 794,
+          margin: "0 auto",
+          padding: 0,
+          borderRadius: 12,
+          overflow: "hidden",
+          boxShadow: "0 4px 32px rgba(0,0,0,0.10)",
+        }}
+      >
+        {/* ── Top accent bar ─────────────────────────────── */}
+        <div style={{ background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 60%, #06b6d4 100%)", height: 8 }} />
+
+        {/* ── Header ─────────────────────────────────────── */}
+        <div style={{ padding: "28px 36px 20px", borderBottom: "2px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {/* Logo circle */}
+            <div style={{
+              width: 60, height: 60, borderRadius: 16,
+              background: "linear-gradient(135deg, #1e40af, #3b82f6)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+            }}>
+              <span style={{ color: "white", fontWeight: 900, fontSize: 22, letterSpacing: -1 }}>EN</span>
+            </div>
+            <div>
+              <div style={{ fontWeight: 900, fontSize: 22, color: "#1e40af", letterSpacing: 0.5 }}>EduNexus High School</div>
+              <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>Excellence · Integrity · Innovation</div>
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ background: "#eff6ff", border: "1.5px solid #bfdbfe", borderRadius: 8, padding: "6px 14px" }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: "#1e40af" }}>ACADEMIC REPORT CARD</div>
+              <div style={{ fontSize: 12, color: "#3b82f6", marginTop: 2 }}>
+                {report.academicYear?.name} · {report.term}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Student Info Row ───────────────────────────── */}
+        <div style={{ padding: "18px 36px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>Student Name</div>
+            <div style={{ fontWeight: 700, fontSize: 16, marginTop: 2 }}>{report.student?.name}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>Class</div>
+            <div style={{ fontWeight: 700, fontSize: 16, marginTop: 2 }}>{report.class?.name}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5 }}>Date Issued</div>
+            <div style={{ fontWeight: 700, fontSize: 16, marginTop: 2 }}>{format(new Date(report.createdAt), "MMM dd, yyyy")}</div>
+          </div>
+        </div>
+
+        {/* ── Performance Summary Banner ─────────────────── */}
+        <div style={{ padding: "18px 36px", background: "linear-gradient(90deg, #eff6ff 0%, #f0fdf4 100%)", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: 24 }}>
+          {/* Big grade circle */}
+          <div style={{
+            width: 72, height: 72, borderRadius: "50%",
+            border: `4px solid ${gradeCol}`,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <span style={{ fontWeight: 900, fontSize: 26, color: gradeCol, lineHeight: 1 }}>{report.overallGrade}</span>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>Overall Average: <span style={{ color: gradeCol }}>{avg}%</span></span>
+              <span style={{ fontSize: 12, color: "#64748b" }}>{report.grades?.length ?? 0} subjects assessed</span>
+            </div>
+            {/* Progress bar */}
+            <div style={{ background: "#e2e8f0", borderRadius: 6, height: 10, width: "100%", overflow: "hidden" }}>
+              <div style={{ width: `${avg}%`, height: "100%", background: avg >= 80 ? "#16a34a" : avg >= 60 ? "#d97706" : "#dc2626", borderRadius: 6 }} />
+            </div>
+            <div style={{ marginTop: 8, fontSize: 12, color: "#475569", fontStyle: "italic" }}>{getRemarks(avg)}</div>
+          </div>
+        </div>
+
+        {/* ── Grades Table ───────────────────────────────── */}
+        <div style={{ padding: "20px 36px" }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#1e40af", marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>
+            Subject Performance Breakdown
+          </div>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: "#1e40af" }}>
+                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "left", borderRadius: "6px 0 0 0" }}>Subject</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "center", width: 120 }}>Score</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "center", width: 80 }}>Grade</th>
+                <th style={{ color: "white", fontWeight: 700, padding: "10px 14px", textAlign: "left", borderRadius: "0 6px 0 0" }}>Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              {report.grades?.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: "20px", textAlign: "center", color: "#94a3b8" }}>No grades recorded for this term.</td>
+                </tr>
+              ) : (
+                report.grades?.map((g: any, i: number) => (
+                  <tr key={g._id || i} style={{ background: i % 2 === 0 ? "#f8fafc" : "white" }}>
+                    <td style={{ padding: "10px 14px", fontWeight: 600 }}>{g.subject?.name ?? g.subject}</td>
+                    <td style={{ padding: "10px 14px", textAlign: "center", fontWeight: 700, fontSize: 15 }}>{g.score}%</td>
+                    <td style={{ padding: "10px 14px", textAlign: "center" }}>
+                      <span style={{
+                        display: "inline-block", fontWeight: 800, fontSize: 13,
+                        color: gradeColor(g.grade), background: `${gradeColor(g.grade)}15`,
+                        border: `1.5px solid ${gradeColor(g.grade)}50`,
+                        borderRadius: 6, padding: "2px 10px"
+                      }}>{g.grade}</span>
+                    </td>
+                    <td style={{ padding: "10px 14px" }}>{scoreBar(g.score)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+            <tfoot>
+              <tr style={{ background: "#eff6ff", borderTop: "2px solid #bfdbfe" }}>
+                <td style={{ padding: "12px 14px", fontWeight: 800, color: "#1e40af" }}>Overall Average</td>
+                <td style={{ padding: "12px 14px", textAlign: "center", fontWeight: 800, fontSize: 16, color: gradeCol }}>{avg}%</td>
+                <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                  <span style={{
+                    display: "inline-block", fontWeight: 900, fontSize: 15,
+                    color: gradeCol, background: `${gradeCol}20`,
+                    border: `2px solid ${gradeCol}`,
+                    borderRadius: 8, padding: "3px 14px"
+                  }}>{report.overallGrade}</span>
+                </td>
+                <td />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* ── Grading Key ────────────────────────────────── */}
+        <div style={{ padding: "0 36px 20px" }}>
+          <div style={{ background: "#f8fafc", borderRadius: 8, padding: "10px 16px", display: "flex", gap: 20, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>GRADING KEY:</span>
+            {[
+              { g: "A", range: "90–100" },
+              { g: "B", range: "80–89" },
+              { g: "C", range: "70–79" },
+              { g: "D", range: "60–69" },
+              { g: "F", range: "Below 60" },
+            ].map(({ g, range }) => (
+              <span key={g} style={{ fontSize: 11, color: "#475569" }}>
+                <span style={{ fontWeight: 800, color: gradeColor(g) }}>{g}</span> = {range}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Signature Section ──────────────────────────── */}
+        <div style={{ padding: "16px 36px 28px", borderTop: "1px solid #e2e8f0" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24 }}>
+            {["Class Teacher", "Principal / Head Teacher", "Parent / Guardian"].map((label) => (
+              <div key={label} style={{ textAlign: "center" }}>
+                <div style={{ borderBottom: "1.5px solid #94a3b8", height: 36, marginBottom: 6 }} />
+                <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Footer ─────────────────────────────────────── */}
+        <div style={{ background: "#1e40af", padding: "10px 36px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>EduNexus High School · Academic Management System</span>
+          <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>Confidential Document</span>
         </div>
       </div>
     </div>
