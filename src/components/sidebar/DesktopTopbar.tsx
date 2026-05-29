@@ -10,9 +10,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 export function DesktopTopbar() {
-  const { user, logout } = useAuth();
+  const { user, setUser } = useAuth();
+  const router = useRouter();
+
+  const logout = async () => {
+    try {
+      await api.post("/users/logout").finally(() => {
+        setUser(null);
+        router.push("/login");
+        toast.success("Logged out successfully");
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+  };
 
   return (
     <div className="hidden md:flex items-center justify-between h-16 px-8 border-b bg-white shrink-0 sticky top-0 z-40">
