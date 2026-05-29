@@ -14,6 +14,19 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const TimetableGrid = ({ schedule, isLoading }: Props) => {
   const [selectedDay, setSelectedDay] = useState<string>("Monday");
 
+  const timeSlots = useMemo(() => {
+    if (!schedule || !Array.isArray(schedule)) return [];
+    const times = new Set<string>();
+    schedule.forEach((day) => {
+      day?.periods?.forEach((period) => {
+        if (period?.startTime) {
+          times.add(period.startTime);
+        }
+      });
+    });
+    return Array.from(times).sort();
+  }, [schedule]);
+
   if (isLoading) {
     return (
       <div className="h-[500px] w-full flex items-center justify-center border rounded-lg bg-card">
@@ -37,18 +50,6 @@ const TimetableGrid = ({ schedule, isLoading }: Props) => {
     );
   }
 
-  const timeSlots = useMemo(() => {
-    if (!schedule || !Array.isArray(schedule)) return [];
-    const times = new Set<string>();
-    schedule.forEach((day) => {
-      day?.periods?.forEach((period) => {
-        if (period?.startTime) {
-          times.add(period.startTime);
-        }
-      });
-    });
-    return Array.from(times).sort();
-  }, [schedule]);
 
   const getRowLabel = (startTime: string) => {
     if (!Array.isArray(schedule)) return startTime;
