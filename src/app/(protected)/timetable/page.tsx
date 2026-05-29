@@ -118,7 +118,7 @@ const Timetable = () => {
         </div>
         {scheduleData.length > 0 && (
           <div className="flex items-center gap-2 print:hidden">
-            {!isStudent && (
+            {isAdmin && (
               <Button variant="outline" size="sm" onClick={handleClear} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Clear Timetable
@@ -150,7 +150,7 @@ const Timetable = () => {
         classId={selectedClass}
         onPeriodUpdated={() => fetchTimetable(selectedClass)}
       />
-      {!isStudent && scheduleData.length > 0 && (
+      {isAdmin && scheduleData.length > 0 && (
         <div className="print:hidden">
           <TimetableStatistics 
             scheduleData={scheduleData} 

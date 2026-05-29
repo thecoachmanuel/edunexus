@@ -79,6 +79,7 @@ export interface period {
   teacher: { _id: string; name: string };
   startTime: string; // e.g., "08:00"
   endTime: string; // e.g., "08:45"
+  name?: string;
 }
 
 export interface schedule {
