@@ -141,6 +141,11 @@ export const sidebardata = {
           url: "/academics/reports",
           roles: ["admin", "teacher", "parent", "student"],
         },
+        {
+          title: "Early Warning",
+          url: "/academics/early-warning",
+          roles: ["admin", "teacher"],
+        },
       ],
     },
     {

@@ -23,6 +23,7 @@ import { AiInsightWidget } from "@/components/dashboard/ai-insight-widget";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AttendanceWidget } from "@/components/dashboard/attendance-widget";
 import { ClassLeaderboardWidget } from "@/components/dashboard/leaderboard-widget";
+import { EarlyWarningWidget } from "@/components/dashboard/early-warning-widget";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -113,6 +114,11 @@ export default function Dashboard() {
         <div className="col-span-12 lg:col-span-8 space-y-4">
           {/* AI WIDGET */}
           <AiInsightWidget role={user?.role} />
+
+          {/* EARLY WARNING SYSTEM (Admin & Teacher) */}
+          {(user?.role === "admin" || user?.role === "teacher") && (
+            <EarlyWarningWidget />
+          )}
 
           {/* RECENT ACTIVITY & UPCOMING CLASSES ROW */}
           <div className="grid gap-4 md:grid-cols-2">

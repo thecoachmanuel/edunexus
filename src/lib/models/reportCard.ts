@@ -58,6 +58,7 @@ const reportCardSchema = new Schema<IReportCard>(
         remark: { type: String },
       },
     ],
+    aiNarrative: { type: String, default: "" },
   },
   { timestamps: true }
 );

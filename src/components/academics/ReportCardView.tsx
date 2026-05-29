@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { format } from "date-fns";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, Sparkles, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 
@@ -44,6 +44,22 @@ function getRemarks(avg: number): string {
 export const ReportCardView = ({ report, showActions = true }: ReportCardProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const [schoolInfo, setSchoolInfo] = React.useState<{name: string, logoUrl: string, motto: string} | null>(null);
+  const [narrative, setNarrative] = useState<string>(report.aiNarrative || "");
+  const [generatingNarrative, setGeneratingNarrative] = useState(false);
+
+  const generateNarrative = async () => {
+    if (!report._id) return;
+    setGeneratingNarrative(true);
+    try {
+      const { data } = await api.post("/ai/report-narrative", { reportCardId: report._id });
+      setNarrative(data.narrative);
+    } catch (e: any) {
+      const errMsg = e?.response?.data?.message || "Failed to generate comment. Try again.";
+      alert(errMsg);
+    } finally {
+      setGeneratingNarrative(false);
+    }
+  };
 
   React.useEffect(() => {
     api.get("/settings/school")
@@ -323,6 +339,41 @@ export const ReportCardView = ({ report, showActions = true }: ReportCardProps) 
                 );
               });
             })()}
+          </div>
+        </div>
+
+        {/* ── AI Teacher's Comment ─────────────────────────── */}
+        <div style={{ padding: "0 36px 20px" }}>
+          <div style={{ background: "#f5f3ff", border: "1.5px solid #ddd6fe", borderRadius: 8, padding: "14px 18px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 12, color: "#7c3aed", textTransform: "uppercase", letterSpacing: 0.5, display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 14 }}>✨</span> Class Teacher&apos;s Comment
+              </div>
+              {showActions && (
+                <button
+                  onClick={generateNarrative}
+                  disabled={generatingNarrative}
+                  style={{
+                    background: "#7c3aed", color: "white", border: "none",
+                    borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600,
+                    cursor: generatingNarrative ? "not-allowed" : "pointer",
+                    opacity: generatingNarrative ? 0.7 : 1,
+                    display: "flex", alignItems: "center", gap: 4,
+                  }}
+                >
+                  {generatingNarrative ? "Generating…" : narrative ? "Regenerate" : "✨ Generate AI Comment"}
+                </button>
+              )}
+            </div>
+            {narrative ? (
+              <p style={{ fontSize: 12, color: "#374151", lineHeight: 1.7, fontStyle: "italic", margin: 0 }}>
+                {narrative}
+              </p>
+            ) : (
+              <p style={{ fontSize: 12, color: "#9ca3af", fontStyle: "italic", margin: 0 }}>
+                {showActions ? "Click \"Generate AI Comment\" to add a personalised teacher's comment." : "No teacher comment recorded."}
+              </p>
+            )}
           </div>
         </div>
 
