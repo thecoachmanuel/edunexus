@@ -1,0 +1,40 @@
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import { Event } from "@/lib/models/event";
+import { requireAuth } from "@/lib/auth/server";
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const user = await requireAuth();
+    if (!user || (user.role !== "admin" && user.role !== "teacher")) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    await connectDB();
+    const body = await req.json();
+
+    const event = await Event.findByIdAndUpdate(params.id, body, { new: true });
+    if (!event) return NextResponse.json({ message: "Event not found" }, { status: 404 });
+
+    return NextResponse.json({ event, message: "Event updated successfully" });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const user = await requireAuth();
+    if (!user || (user.role !== "admin" && user.role !== "teacher")) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    await connectDB();
+    const event = await Event.findByIdAndDelete(params.id);
+    if (!event) return NextResponse.json({ message: "Event not found" }, { status: 404 });
+
+    return NextResponse.json({ message: "Event deleted successfully" });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}

@@ -81,6 +81,22 @@ export const sidebardata = {
       ],
     },
     {
+      title: "Workspace",
+      url: "#",
+      icon: LayoutDashboard,
+      roles: ["admin", "teacher"],
+      items: [
+        {
+          title: "Kanban Board",
+          url: "/tasks",
+        },
+        {
+          title: "Calendar",
+          url: "/calendar",
+        },
+      ],
+    },
+    {
       title: "Academics",
       url: "#", // Parent item, no link
       icon: School,

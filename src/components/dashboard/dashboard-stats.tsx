@@ -14,56 +14,79 @@ interface StatsProps {
 }
 
 export function DashboardStats({ role, data }: StatsProps) {
-  // --- ADMIN VIEW ---
   if (role === "admin") {
     return (
       <>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Students
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalStudents || 0}</div>
-            <p className="text-xs text-muted-foreground">+12% from last year</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Teachers
-            </CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalTeachers || 0}</div>
-            <p className="text-xs text-muted-foreground">Active Staff</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Avg Attendance
-            </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {data.avgAttendance || "0%"}
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-indigo-50 text-indigo-500">
+                <Users className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Students</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.totalStudents || 0}</h3>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">Today's metrics</p>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium flex items-center">
+                +12 This Week <span className="ml-1 text-lg leading-none">↗</span>
+              </span>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Quizzes</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.activeQuizzes || 0}</div>
-            <p className="text-xs text-muted-foreground">Currently ongoing</p>
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-blue-50 text-blue-500">
+                <GraduationCap className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Teachers</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.totalTeachers || 0}</h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium flex items-center">
+                +2 This Week <span className="ml-1 text-lg leading-none">↗</span>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-orange-50 text-orange-500">
+                <Clock className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Avg Attendance</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.avgAttendance || "0%"}</h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium flex items-center">
+                +5% This Week <span className="ml-1 text-lg leading-none">↗</span>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-purple-50 text-purple-500">
+                <BookOpen className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active Quizzes</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.activeQuizzes || 0}</h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium flex items-center">
+                +8 This Week <span className="ml-1 text-lg leading-none">↗</span>
+              </span>
+            </div>
           </CardContent>
         </Card>
       </>
@@ -74,42 +97,76 @@ export function DashboardStats({ role, data }: StatsProps) {
   if (role === "teacher") {
     return (
       <>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">My Classes</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.myClassesCount || 0}</div>
-            <p className="text-xs text-muted-foreground">Assigned sections</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Grading
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.pendingGrading || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Submissions to review
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Next Class</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold truncate">
-              {data.nextClass || "No classes"}
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-indigo-50 text-indigo-500">
+                <Users className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">My Classes</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.myClassesCount || 0}</h3>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {data.nextClassTime || "Enjoy your day!"}
-            </p>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium flex items-center">
+                +2 This Week <span className="ml-1 text-lg leading-none">↗</span>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-orange-50 text-orange-500">
+                <AlertCircle className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Pending Grading</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.pendingGrading || 0}</h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-orange-500 font-medium flex items-center">
+                Needs Review <span className="ml-1 text-lg leading-none">→</span>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-blue-50 text-blue-500">
+                <CalendarDays className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Classes Today</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.classesToday || 0}</h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-blue-500 font-medium flex items-center">
+                Schedule <span className="ml-1 text-lg leading-none">→</span>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-purple-50 text-purple-500">
+                <BookOpen className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Avg Class Score</p>
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.avgClassScore || "0%"}</h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium flex items-center">
+                +3% This Term <span className="ml-1 text-lg leading-none">↗</span>
+              </span>
+            </div>
           </CardContent>
         </Card>
       </>
