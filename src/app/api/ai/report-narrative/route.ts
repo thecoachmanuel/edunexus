@@ -120,7 +120,23 @@ Write a personal teacher's comment (3–5 sentences) for this student's report c
 
     return NextResponse.json({ narrative });
   } catch (error) {
-    console.error("AI Narrative Error:", error);
-    return NextResponse.json({ message: "Failed to generate narrative", error }, { status: 500 });
+    console.error("AI Narrative Error (Using Fallback):", error);
+    
+    // Deterministic Rule-Based Fallback
+    try {
+      const fallbackReport = await ReportCard.findById(reportCardId).populate("student", "name").lean() as any;
+      const fName = fallbackReport?.student?.name?.split(" ")[0] || "The student";
+      const fAvg = fallbackReport?.averageScore || 0;
+      
+      let fallbackNarrative = "";
+      if (fAvg >= 80) fallbackNarrative = `${fName} has demonstrated outstanding academic performance this term. Consistent effort has yielded excellent results across the board. Keep up the excellent work next term!`;
+      else if (fAvg >= 60) fallbackNarrative = `${fName} has shown good performance this term, but there is still room for improvement in weaker subjects. With more focused study time, even better results can be achieved.`;
+      else fallbackNarrative = `${fName}'s performance this term requires urgent attention. Consistent attendance and dedicated study time are highly recommended to ensure improvement next term.`;
+
+      await ReportCard.findByIdAndUpdate(reportCardId, { aiNarrative: fallbackNarrative });
+      return NextResponse.json({ narrative: fallbackNarrative });
+    } catch (fallbackError) {
+      return NextResponse.json({ message: "Failed to generate narrative", error }, { status: 500 });
+    }
   }
 }

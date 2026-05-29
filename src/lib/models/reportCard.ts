@@ -24,6 +24,7 @@ export interface IReportCard extends Document {
   totalStudents: number;   // Total students ranked for this term
   showPosition: boolean;   // Snapshot from GradingConfig at generation time
   gradeThresholds: { grade: string; minScore: number; remark: string }[]; // Grading key
+  aiNarrative: string;
   createdAt: Date;
   updatedAt: Date;
 }
