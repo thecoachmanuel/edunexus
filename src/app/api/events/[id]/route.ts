@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/db";
 import { Event } from "@/lib/models/event";
 import { getAuthUser } from "@/middleware/auth";
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser(req);
     if (!user || (user.role !== "admin" && user.role !== "teacher")) {
@@ -13,7 +13,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     await connectDB();
     const body = await req.json();
 
-    const event = await Event.findByIdAndUpdate(params.id, body, { new: true });
+    const resolvedParams = await params;
+    const event = await Event.findByIdAndUpdate(resolvedParams.id, body, { new: true });
     if (!event) return NextResponse.json({ message: "Event not found" }, { status: 404 });
 
     return NextResponse.json({ event, message: "Event updated successfully" });
@@ -22,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser(req);
     if (!user || (user.role !== "admin" && user.role !== "teacher")) {
@@ -30,7 +31,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     await connectDB();
-    const event = await Event.findByIdAndDelete(params.id);
+    const resolvedParams = await params;
+    const event = await Event.findByIdAndDelete(resolvedParams.id);
     if (!event) return NextResponse.json({ message: "Event not found" }, { status: 404 });
 
     return NextResponse.json({ message: "Event deleted successfully" });
