@@ -23,6 +23,7 @@ export interface IReportCard extends Document {
   position: number;        // Class position e.g. 1, 2, 3
   totalStudents: number;   // Total students ranked for this term
   showPosition: boolean;   // Snapshot from GradingConfig at generation time
+  gradeThresholds: { grade: string; minScore: number; remark: string }[]; // Grading key
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +51,13 @@ const reportCardSchema = new Schema<IReportCard>(
     position: { type: Number, default: 0 },
     totalStudents: { type: Number, default: 0 },
     showPosition: { type: Boolean, default: true },
+    gradeThresholds: [
+      {
+        grade: { type: String, required: true },
+        minScore: { type: Number, required: true },
+        remark: { type: String },
+      },
+    ],
   },
   { timestamps: true }
 );

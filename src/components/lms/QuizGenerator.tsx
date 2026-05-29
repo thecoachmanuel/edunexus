@@ -35,12 +35,16 @@ import type { Class, subject } from "@/types";
 const schema = z.object({
   subject: z.string().min(1, "Subject is required"),
   class: z.string().min(1, "Class is required"),
+  academicYear: z.string().min(1, "Academic Year is required"),
+  term: z.string().min(1, "Term is required"),
   topic: z.string().min(3, "Topic is required"),
   difficulty: z.enum(["Easy", "Medium", "Hard"]),
   count: z.coerce.number().min(1).max(20),
 });
 
 type FormValues = z.infer<typeof schema>;
+
+const TERMS = ["Term 1", "Term 2", "Term 3"];
 
 interface Props {
   open: boolean;
@@ -51,6 +55,7 @@ interface Props {
 const QuizGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
   const [subjects, setSubjects] = useState<subject[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
+  const [years, setYears] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -59,20 +64,34 @@ const QuizGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
       topic: "",
       difficulty: "Medium",
       count: 5,
+      term: "Term 1",
     },
   });
 
   // Fetch Options
   useEffect(() => {
     if (open) {
-      Promise.all([api.get("/subjects"), api.get("/classes")]).then(
-        ([subRes, clsRes]) => {
+      Promise.all([
+        api.get("/subjects"), 
+        api.get("/classes"),
+        api.get("/academic-years?limit=100")
+      ]).then(
+        ([subRes, clsRes, yearRes]) => {
           setSubjects(subRes.data.subjects);
           setClasses(clsRes.data.classes);
+          const yearsList = yearRes.data.years || [];
+          setYears(yearsList);
+          
+          const currentYear = yearsList.find((y: any) => y.isCurrent);
+          if (currentYear) {
+            form.setValue("academicYear", currentYear._id);
+          } else if (yearsList.length > 0) {
+            form.setValue("academicYear", yearsList[0]._id);
+          }
         }
       );
     }
-  }, [open]);
+  }, [open, form]);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -145,6 +164,52 @@ const QuizGenerator = ({ open, onOpenChange, onSuccess }: Props) => {
                         {classes.map((c) => (
                           <SelectItem key={c._id} value={c._id}>
                             {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Controller
+                name="academicYear"
+                control={form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>Academic Year</FieldLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {years.map((y) => (
+                          <SelectItem key={y._id} value={y._id}>
+                            {y.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="term"
+                control={form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>Term</FieldLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TERMS.map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
                           </SelectItem>
                         ))}
                       </SelectContent>

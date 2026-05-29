@@ -50,6 +50,7 @@ interface Props {
   isGenerating: boolean;
   selectedClass: string;
   setSelectedClass: (classId: string) => void;
+  onSettingsChange?: (data: { yearId: string; settings: GenSettings }) => void;
 }
 const GeneratorControls = ({
   onGenerate,
@@ -57,6 +58,7 @@ const GeneratorControls = ({
   isGenerating,
   selectedClass,
   setSelectedClass,
+  onSettingsChange,
 }: Props) => {
   const { user } = useAuth();
   const hideGenerate = user?.role !== "admin";
@@ -102,6 +104,21 @@ const GeneratorControls = ({
     };
     fetchData();
   }, [user]); // re-run when auth resolves
+
+  useEffect(() => {
+    if (onSettingsChange && selectedYear) {
+      onSettingsChange({
+        yearId: selectedYear,
+        settings: {
+          startTime,
+          endTime,
+          periods: parseInt(periods, 10) || 5,
+          periodDuration: parseInt(periodDuration, 10) || 45,
+          breaks,
+        },
+      });
+    }
+  }, [selectedYear, startTime, endTime, periods, periodDuration, breaks]);
 
 
   const addBreak = () => {

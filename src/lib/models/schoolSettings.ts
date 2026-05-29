@@ -6,6 +6,8 @@ export interface ISchoolSettings extends Document {
   accountNumber: string;
   whatsappNumber: string;
   schoolName: string;
+  schoolLogo: string;
+  schoolMotto: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +19,8 @@ const schoolSettingsSchema = new Schema(
     accountNumber: { type: String, default: "" },
     whatsappNumber: { type: String, default: "" },
     schoolName: { type: String, default: "EduNexus School" },
+    schoolLogo: { type: String, default: "" },
+    schoolMotto: { type: String, default: "Excellence · Integrity · Innovation" },
   },
   { timestamps: true }
 );

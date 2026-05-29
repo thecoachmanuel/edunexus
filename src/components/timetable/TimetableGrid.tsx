@@ -162,8 +162,8 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
 
       {/* DESKTOP VIEW */}
       <div className="hidden md:block print:block">
-        <div className="w-full rounded-md border bg-card overflow-auto print:overflow-visible max-h-[70vh] print:max-h-none relative shadow-sm">
-          <div className="w-max min-w-full">
+        <div className="w-full rounded-md border bg-card overflow-auto print:overflow-visible max-h-[70vh] print:max-h-none relative z-0 shadow-sm">
+          <div className="w-max min-w-full print:w-full">
             {/* Header Row */}
             <div className="flex border-b sticky top-0 z-20 bg-background">
               <div className="w-32 shrink-0 border-r p-4 font-bold text-muted-foreground flex items-center justify-center bg-muted/80 sticky left-0 z-30 shadow-[1px_0_0_0_hsl(var(--border))]">
@@ -172,7 +172,7 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
               {DAYS.map((day) => (
                 <div
                   key={day}
-                  className="flex-1 min-w-[200px] border-r p-4 font-bold text-center last:border-r-0 bg-muted/80"
+                  className="flex-1 min-w-[200px] print:min-w-0 border-r p-4 print:p-2 font-bold text-center last:border-r-0 bg-muted/80 text-sm print:text-xs"
                 >
                   {day}
                 </div>
@@ -183,7 +183,7 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
             {timeSlots?.map((time) => (
               <div className="flex border-b last:border-b-0" key={time}>
                 {/* Row Header (Sticky Left) */}
-                <div className="w-32 shrink-0 border-r p-3 text-xs font-semibold text-muted-foreground flex items-center justify-center text-center bg-muted/40 sticky left-0 z-10 shadow-[1px_0_0_0_hsl(var(--border))]">
+                <div className="w-32 print:w-20 shrink-0 border-r p-3 print:p-1 text-xs font-semibold text-muted-foreground flex items-center justify-center text-center bg-muted/40 sticky left-0 z-10 shadow-[1px_0_0_0_hsl(var(--border))]">
                   {getRowLabel(time)}
                 </div>
 
@@ -195,7 +195,7 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
                   return (
                     <div
                       key={`${day}-${time}`}
-                      className={`flex-1 min-w-[200px] border-r p-3 last:border-r-0 hover:bg-muted/10 transition-colors ${isAdmin ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 hover:z-10 relative' : ''}`}
+                      className={`flex-1 min-w-[200px] print:min-w-0 border-r p-3 print:p-1.5 last:border-r-0 hover:bg-muted/10 transition-colors ${isAdmin ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 hover:z-10 relative' : ''}`}
                       onClick={() => handleCellClick(day, time, period)}
                     >
                       {period && period.subject && period.teacher ? (

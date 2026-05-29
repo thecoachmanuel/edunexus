@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import { format } from "date-fns";
 import { Download, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 interface ReportCardProps {
   report: any;
@@ -42,6 +43,25 @@ function getRemarks(avg: number): string {
 
 export const ReportCardView = ({ report, showActions = true }: ReportCardProps) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const [schoolInfo, setSchoolInfo] = React.useState({
+    name: "EduNexus High School",
+    logoUrl: "",
+    motto: "Excellence · Integrity · Innovation",
+  });
+
+  React.useEffect(() => {
+    api.get("/settings/school")
+      .then((res) => {
+        if (res.data?.settings) {
+          setSchoolInfo({
+            name: res.data.settings.schoolName || "EduNexus High School",
+            logoUrl: res.data.settings.schoolLogo || "",
+            motto: res.data.settings.schoolMotto || "Excellence · Integrity · Innovation",
+          });
+        }
+      })
+      .catch((err) => console.error("Failed to load school branding", err));
+  }, []);
 
   const handlePrint = () => {
     const printContents = printRef.current?.innerHTML;
@@ -94,6 +114,7 @@ export const ReportCardView = ({ report, showActions = true }: ReportCardProps) 
           color: "#1e293b",
           fontFamily: "'Segoe UI', Arial, sans-serif",
           maxWidth: 794,
+          minWidth: 794,
           margin: "0 auto",
           padding: 0,
           borderRadius: 12,
@@ -107,18 +128,23 @@ export const ReportCardView = ({ report, showActions = true }: ReportCardProps) 
         {/* ── Header ─────────────────────────────────────── */}
         <div style={{ padding: "28px 36px 20px", borderBottom: "2px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            {/* Logo circle */}
+            {/* Logo */}
             <div style={{
               width: 60, height: 60, borderRadius: 16,
-              background: "linear-gradient(135deg, #1e40af, #3b82f6)",
+              background: schoolInfo.logoUrl ? "transparent" : "linear-gradient(135deg, #1e40af, #3b82f6)",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0,
+              overflow: "hidden",
             }}>
-              <span style={{ color: "white", fontWeight: 900, fontSize: 22, letterSpacing: -1 }}>EN</span>
+              {schoolInfo.logoUrl ? (
+                <img src={schoolInfo.logoUrl} alt="School Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ color: "white", fontWeight: 900, fontSize: 22, letterSpacing: -1 }}>EN</span>
+              )}
             </div>
             <div>
-              <div style={{ fontWeight: 900, fontSize: 22, color: "#1e40af", letterSpacing: 0.5 }}>EduNexus High School</div>
-              <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>Excellence · Integrity · Innovation</div>
+              <div style={{ fontWeight: 900, fontSize: 22, color: "#1e40af", letterSpacing: 0.5 }}>{schoolInfo.name}</div>
+              <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{schoolInfo.motto}</div>
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -259,17 +285,27 @@ export const ReportCardView = ({ report, showActions = true }: ReportCardProps) 
         <div style={{ padding: "0 36px 20px" }}>
           <div style={{ background: "#f8fafc", borderRadius: 8, padding: "10px 16px", display: "flex", gap: 20, flexWrap: "wrap" }}>
             <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>GRADING KEY:</span>
-            {[
-              { g: "A", range: "90–100" },
-              { g: "B", range: "80–89" },
-              { g: "C", range: "70–79" },
-              { g: "D", range: "60–69" },
-              { g: "F", range: "Below 60" },
-            ].map(({ g, range }) => (
-              <span key={g} style={{ fontSize: 11, color: "#475569" }}>
-                <span style={{ fontWeight: 800, color: gradeColor(g) }}>{g}</span> = {range}
-              </span>
-            ))}
+            {(() => {
+              const thresholds = report.gradeThresholds?.length > 0 
+                ? [...report.gradeThresholds].sort((a, b) => b.minScore - a.minScore)
+                : [
+                    { grade: "A", minScore: 75 },
+                    { grade: "B", minScore: 60 },
+                    { grade: "C", minScore: 50 },
+                    { grade: "D", minScore: 40 },
+                    { grade: "F", minScore: 0 },
+                  ];
+              
+              return thresholds.map((t: any, i: number, arr: any[]) => {
+                const maxScore = i === 0 ? 100 : arr[i - 1].minScore - 1;
+                const range = t.minScore === 0 ? `Below ${maxScore + 1}` : `${t.minScore}–${maxScore}`;
+                return (
+                  <span key={t.grade} style={{ fontSize: 11, color: "#475569" }}>
+                    <span style={{ fontWeight: 800, color: gradeColor(t.grade) }}>{t.grade}</span> = {range}
+                  </span>
+                );
+              });
+            })()}
           </div>
         </div>
 
@@ -287,7 +323,7 @@ export const ReportCardView = ({ report, showActions = true }: ReportCardProps) 
 
         {/* ── Footer ─────────────────────────────────────── */}
         <div style={{ background: "#1e40af", padding: "10px 36px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>EduNexus High School · Academic Management System</span>
+          <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>{schoolInfo.name} · Academic Management System</span>
           <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>Confidential Document</span>
         </div>
       </div>

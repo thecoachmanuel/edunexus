@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, topic, difficulty, count, subject, class: classId } = body;
+    const { title, topic, difficulty, count, subject, class: classId, academicYear, term } = body;
 
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       return NextResponse.json(
@@ -83,6 +83,8 @@ export async function POST(req: NextRequest) {
       title,
       subject,
       class: classId,
+      academicYear,
+      term,
       teacher: authUser._id,
       duration: count * 2, // 2 mins per question default
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now

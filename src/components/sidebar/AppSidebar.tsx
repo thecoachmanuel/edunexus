@@ -197,6 +197,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isCollapsed = state === "collapsed";
   const router = useRouter();
 
+  // Dynamic School Settings state
+  const [schoolInfo, setSchoolInfo] = React.useState({
+    name: "Springfield High",
+    logoUrl: "",
+  });
+
+  React.useEffect(() => {
+    // Fetch global school settings for sidebar branding
+    api.get("/settings/school")
+      .then((res) => {
+        if (res.data?.settings) {
+          setSchoolInfo({
+            name: res.data.settings.schoolName || "Springfield High",
+            logoUrl: res.data.settings.schoolLogo || "",
+          });
+        }
+      })
+      .catch((err) => console.error("Failed to load school branding for sidebar", err));
+  }, []);
+
+  const dynamicTeams = [
+    {
+      name: schoolInfo.name,
+      logo: School,
+      logoUrl: schoolInfo.logoUrl,
+    },
+  ];
+
   const userData = {
     name: user?.name || "User",
     email: user?.email || "",
@@ -241,7 +269,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={sidebardata.teams} yearName={year?.name!} />
+        <TeamSwitcher teams={dynamicTeams} yearName={year?.name || ""} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={filteredNav} />

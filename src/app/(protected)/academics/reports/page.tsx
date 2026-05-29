@@ -168,7 +168,7 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="flex-1 space-y-6 p-4 sm:p-8 pt-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Report Cards</h1>
@@ -185,8 +185,8 @@ export default function ReportsPage() {
             <h2 className="font-semibold text-lg flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" /> Generate Reports
             </h2>
-            <form onSubmit={onGenerate} className="flex gap-4 items-end">
-              <div className="w-48">
+            <form onSubmit={onGenerate} className="flex flex-col sm:flex-row flex-wrap gap-4 sm:items-end">
+              <div className="w-full sm:w-48">
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Class</label>
                 <Controller
                   name="classId"
@@ -203,7 +203,7 @@ export default function ReportsPage() {
                   )}
                 />
               </div>
-              <div className="w-48">
+              <div className="w-full sm:w-48">
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Term</label>
                 <Controller
                   name="term"
@@ -220,13 +220,15 @@ export default function ReportsPage() {
                   )}
                 />
               </div>
-              <Button type="submit" disabled={generating || deleting}>
-                {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Generate
-              </Button>
-              <Button type="button" variant="destructive" onClick={handleBatchDeleteByTerm} disabled={generating || deleting}>
-                Clear Term
-              </Button>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button type="submit" disabled={generating || deleting} className="flex-1 sm:flex-none">
+                  {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Generate
+                </Button>
+                <Button type="button" variant="destructive" onClick={handleBatchDeleteByTerm} disabled={generating || deleting} className="flex-1 sm:flex-none">
+                  Clear Term
+                </Button>
+              </div>
             </form>
           </div>
 
@@ -237,8 +239,8 @@ export default function ReportsPage() {
             <h2 className="font-semibold text-lg flex items-center gap-2">
               <Search className="h-5 w-5 text-blue-500" /> Filter Reports
             </h2>
-            <form onSubmit={onFilter} className="flex gap-4 items-end">
-              <div className="w-48">
+            <form onSubmit={onFilter} className="flex flex-col sm:flex-row flex-wrap gap-4 sm:items-end">
+              <div className="w-full sm:w-48">
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Class</label>
                 <Controller
                   name="classId"
@@ -256,12 +258,14 @@ export default function ReportsPage() {
                   )}
                 />
               </div>
-              <Button type="submit" variant="secondary">Filter</Button>
-              {selectedIds.length > 0 && (
-                <Button type="button" variant="destructive" onClick={handleDeleteSelected} disabled={deleting}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete ({selectedIds.length})
-                </Button>
-              )}
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button type="submit" variant="secondary" className="flex-1 sm:flex-none">Filter</Button>
+                {selectedIds.length > 0 && (
+                  <Button type="button" variant="destructive" onClick={handleDeleteSelected} disabled={deleting} className="flex-1 sm:flex-none">
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete ({selectedIds.length})
+                  </Button>
+                )}
+              </div>
             </form>
           </div>
         </div>
@@ -300,7 +304,7 @@ export default function ReportsPage() {
               <div className="flex gap-2 mt-4">
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="flex-1"
                   onClick={() => setSelectedReport(report)}
                 >
                   View Report Card
@@ -322,11 +326,11 @@ export default function ReportsPage() {
 
       {/* Print Modal */}
       <Dialog open={!!selectedReport} onOpenChange={(o) => !o && setSelectedReport(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[95vw] sm:w-full">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>Report Card Preview</DialogTitle>
           </DialogHeader>
-          <div className="print:block" id="printable-report">
+          <div className="print:block overflow-x-auto w-full pb-4" id="printable-report">
             {selectedReport && <ReportCardView report={selectedReport} />}
           </div>
         </DialogContent>

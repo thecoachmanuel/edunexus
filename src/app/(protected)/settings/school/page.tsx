@@ -17,6 +17,8 @@ export default function SchoolSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     schoolName: "",
+    schoolLogo: "",
+    schoolMotto: "",
     bankName: "",
     accountName: "",
     accountNumber: "",
@@ -35,6 +37,8 @@ export default function SchoolSettingsPage() {
         if (data.settings) {
           setFormData({
             schoolName: data.settings.schoolName || "",
+            schoolLogo: data.settings.schoolLogo || "",
+            schoolMotto: data.settings.schoolMotto || "",
             bankName: data.settings.bankName || "",
             accountName: data.settings.accountName || "",
             accountNumber: data.settings.accountNumber || "",
@@ -94,6 +98,25 @@ export default function SchoolSettingsPage() {
                 value={formData.schoolName} 
                 onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })} 
                 placeholder="e.g. EduNexus High School" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>School Logo URL</Label>
+              <Input 
+                value={formData.schoolLogo} 
+                onChange={(e) => setFormData({ ...formData, schoolLogo: e.target.value })} 
+                placeholder="e.g. https://example.com/logo.png" 
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Provide a valid image URL for the school logo.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>School Motto</Label>
+              <Input 
+                value={formData.schoolMotto} 
+                onChange={(e) => setFormData({ ...formData, schoolMotto: e.target.value })} 
+                placeholder="e.g. Excellence · Integrity · Innovation" 
               />
             </div>
           </CardContent>

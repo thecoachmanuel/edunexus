@@ -24,6 +24,7 @@ const Timetable = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
   const [lastUsedSettings, setLastUsedSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
+  const [currentSettings, setCurrentSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
 
   // fetch timetable
   const fetchTimetable = async (classId: string) => {
@@ -93,12 +94,13 @@ const Timetable = () => {
   };
 
   const handleRegenerateWithWeights = async (weights: Record<string, number>) => {
-    if (!lastUsedSettings) {
-      toast.error("Please generate a timetable first before adjusting weights");
+    const baseSettings = lastUsedSettings || currentSettings;
+    if (!baseSettings) {
+      toast.error("Please configure timetable settings first");
       return;
     }
-    const newSettings = { ...lastUsedSettings.settings, subjectWeights: weights };
-    await handleGenerate(selectedClass, lastUsedSettings.yearId, newSettings);
+    const newSettings = { ...baseSettings.settings, subjectWeights: weights };
+    await handleGenerate(selectedClass, baseSettings.yearId, newSettings);
   };
 
   return (
@@ -137,6 +139,7 @@ const Timetable = () => {
             isGenerating={isGenerating}
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
+            onSettingsChange={setCurrentSettings}
           />
         </div>
       )}

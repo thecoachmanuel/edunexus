@@ -87,6 +87,7 @@ async function regenerateReportCards(
         averageScore,
         overallGrade,
         showPosition: cfg.showPositionOnReportCard,
+        gradeThresholds: cfg.gradeThresholds,
         // Position will be updated in bulk below
       },
       { upsert: true, new: true }
@@ -245,10 +246,11 @@ export async function POST(req: NextRequest) {
     const config = await GradingConfig.findOne({ academicYear: academicYearId, term }).lean<any>();
     const quizMaxScore = config?.quizMaxScore ?? 100;
 
-    // Get all exams (quizzes) for this class
-    const exams = await Exam.find({ class: classId }).lean();
+    // Get all exams (quizzes) for this class matching the term and academicYear
+    // NOTE: This requires exams to have been generated with the term and academicYear attached.
+    const exams = await Exam.find({ class: classId, academicYear: academicYearId, term }).lean();
     if (exams.length === 0) {
-      return NextResponse.json({ message: "No quizzes found for this class", populated: 0 });
+      return NextResponse.json({ message: "No quizzes found for this class in the selected term", populated: 0 });
     }
 
     // Build exam → subject map
