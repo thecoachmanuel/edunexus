@@ -1,16 +1,18 @@
 "use client";
+import { useState } from "react";
 import useSWR from "swr";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileDown, Landmark, Send } from "lucide-react";
+import { FileDown, Landmark, Send, Copy, Check } from "lucide-react";
 import { StudentFee } from "@/types";
 import jsPDF from "jspdf";
 import { useAuth } from "@/hooks/AuthProvider";
 
 export default function MyFees() {
   const { user } = useAuth();
+  const [copied, setCopied] = useState(false);
   const { data: feesData } = useSWR("/finance/student-fees");
   const { data: settingsData } = useSWR("/settings/school");
 
@@ -77,14 +79,35 @@ export default function MyFees() {
               </div>
               <div>
                 <p className="font-medium text-muted-foreground mb-1">Account Number</p>
-                <p className="font-semibold text-lg tracking-wider font-mono">{settings.accountNumber}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-lg tracking-wider font-mono">{settings.accountNumber}</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
+                    onClick={() => {
+                      navigator.clipboard.writeText(settings.accountNumber || "");
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    title="Copy Account Number"
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4 text-green-600 animate-in fade-in" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="border rounded-lg overflow-x-auto bg-card">
+      {/* Desktop Table View */}
+      <div className="hidden md:block border rounded-lg overflow-x-auto bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -100,7 +123,7 @@ export default function MyFees() {
           </TableHeader>
           <TableBody>
             {fees.map(f => (
-              <TableRow key={f._id}>
+              <TableRow key={f._id} className="hover:bg-muted/30">
                 <TableCell className="font-medium">{typeof f.feeStructure === "object" ? f.feeStructure.name : ""}</TableCell>
                 {user?.role === "parent" && (
                   <TableCell>{typeof f.student === "object" ? f.student.name : ""}</TableCell>
@@ -110,7 +133,7 @@ export default function MyFees() {
                 <TableCell className="text-green-600">₦{f.amountPaid.toLocaleString()}</TableCell>
                 <TableCell className="text-red-600 font-semibold">₦{f.balance.toLocaleString()}</TableCell>
                 <TableCell>
-                  <Badge variant={f.status === "paid" ? "default" : f.status === "partial" ? "secondary" : "destructive"}>
+                  <Badge variant={f.status === "paid" ? "default" : f.status === "partial" ? "secondary" : "destructive"} className="capitalize">
                     {f.status}
                   </Badge>
                 </TableCell>
@@ -119,7 +142,7 @@ export default function MyFees() {
                     {f.balance > 0 && settings?.whatsappNumber && (
                       <Button 
                         size="sm" 
-                        className="bg-[#25D366] hover:bg-[#128C7E] text-white"
+                        className="bg-[#25D366] hover:bg-[#128C7E] text-white transition-colors"
                         onClick={() => sendWhatsAppReceipt(f)}
                       >
                         <Send className="h-4 w-4 mr-2" />
@@ -142,6 +165,102 @@ export default function MyFees() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="block md:hidden space-y-4">
+        {fees.map(f => {
+          const percentPaid = f.totalAmount > 0 ? Math.min(100, Math.max(0, (f.amountPaid / f.totalAmount) * 100)) : 0;
+          return (
+            <Card key={f._id} className="border bg-card shadow-sm hover:shadow transition-all duration-200">
+              <CardContent className="p-4 space-y-4">
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <h3 className="font-semibold text-base text-foreground leading-snug">
+                      {typeof f.feeStructure === "object" ? f.feeStructure.name : "Fee"}
+                    </h3>
+                    {user?.role === "parent" && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Student: <span className="font-medium text-foreground">{typeof f.student === "object" ? f.student.name : ""}</span>
+                      </p>
+                    )}
+                  </div>
+                  <Badge variant={f.status === "paid" ? "default" : f.status === "partial" ? "secondary" : "destructive"} className="shrink-0 capitalize">
+                    {f.status}
+                  </Badge>
+                </div>
+
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Payment Progress</span>
+                    <span className="font-medium text-foreground">{Math.round(percentPaid)}% Paid</span>
+                  </div>
+                  <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-300 ${f.status === 'paid' ? 'bg-emerald-500' : 'bg-blue-600'}`} 
+                      style={{ width: `${percentPaid}%` }} 
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs pt-2 border-t border-dashed">
+                  <div>
+                    <p className="text-muted-foreground font-medium mb-0.5">Due Date</p>
+                    <p className="font-medium text-foreground">
+                      {typeof f.feeStructure === "object" ? new Date(f.feeStructure.dueDate).toLocaleDateString() : ""}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground font-medium mb-0.5">Total Amount</p>
+                    <p className="font-semibold text-foreground">
+                      ₦{f.totalAmount.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground font-medium mb-0.5">Amount Paid</p>
+                    <p className="font-semibold text-green-600">
+                      ₦{f.amountPaid.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground font-medium mb-0.5">Balance Left</p>
+                    <p className="font-bold text-red-600">
+                      ₦{f.balance.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-3 border-t border-muted">
+                  {f.balance > 0 && settings?.whatsappNumber && (
+                    <Button 
+                      size="sm" 
+                      className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white flex items-center justify-center gap-2 py-5 font-semibold text-xs transition-colors"
+                      onClick={() => sendWhatsAppReceipt(f)}
+                    >
+                      <Send className="h-4 w-4" />
+                      Send Receipt
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`${f.balance > 0 && settings?.whatsappNumber ? "px-3 py-5" : "w-full py-5 font-semibold text-xs"}`}
+                    onClick={() => downloadReceipt(f)} 
+                    title="Download Statement"
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Statement
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        {fees.length === 0 && (
+          <div className="text-center py-10 border rounded-lg bg-card text-muted-foreground">
+            No fees assigned yet.
+          </div>
+        )}
       </div>
     </div>
   );
