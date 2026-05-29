@@ -5,7 +5,7 @@ import { getAuthUser } from "@/middleware/auth";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -19,7 +19,8 @@ export async function POST(
       return NextResponse.json({ message: "Invalid amount" }, { status: 400 });
     }
 
-    const fee = await StudentFee.findById(params.id);
+    const { id } = await params;
+    const fee = await StudentFee.findById(id);
     if (!fee) {
       return NextResponse.json({ message: "Fee not found" }, { status: 404 });
     }
