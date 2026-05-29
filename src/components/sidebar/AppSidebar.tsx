@@ -26,7 +26,7 @@ import {
 import type { UserRole } from "@/types";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/AuthProvider";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -198,12 +198,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
 
   // Dynamic School Settings state
-  const [schoolInfo, setSchoolInfo] = React.useState({
+  const [schoolInfo, setSchoolInfo] = useState({
     name: "Springfield High",
     logoUrl: "",
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Fetch global school settings for sidebar branding
     api.get("/settings/school")
       .then((res) => {
