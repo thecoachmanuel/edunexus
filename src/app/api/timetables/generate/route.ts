@@ -3,6 +3,8 @@ import { connectDB } from "@/lib/db";
 import Class from "@/lib/models/class";
 import User from "@/lib/models/user";
 import Timetable from "@/lib/models/timetable";
+import Subject from "@/lib/models/subject";
+import AcademicYear from "@/lib/models/academicYear";
 import { getAuthUser } from "@/middleware/auth";
 import { logActivity } from "@/lib/utils/activitieslog";
 import { GoogleGenerativeAI } from "@google/generative-ai";
