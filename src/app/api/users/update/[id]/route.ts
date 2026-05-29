@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
   try {
     const params = await props.params;
     await connectDB();
-    const authUser = await getAuthUser(req, ["admin", "teacher"]);
+    const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }

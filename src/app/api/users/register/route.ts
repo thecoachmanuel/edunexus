@@ -6,11 +6,11 @@ import Class from "@/lib/models/class";
 import { getAuthUser } from "@/middleware/auth";
 import { logActivity } from "@/utils/activitieslog";
 
-// POST /api/users/register - Admin & Teacher only
+// POST /api/users/register - Admin only
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    const authUser = await getAuthUser(req, ["admin", "teacher"]);
+    const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }

@@ -284,8 +284,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <TeamSwitcher teams={dynamicTeams} yearName={year?.name || ""} />
+      <SidebarHeader className="pt-6 pb-4 px-6 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:pt-4">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] text-white shadow-md shrink-0">
+            <span className="font-bold text-xl leading-none italic">ia</span>
+          </div>
+          <div className="grid flex-1 text-left text-sm leading-tight transition-all duration-200 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:hidden">
+            <span className="truncate font-bold text-xl text-[#7c3aed] tracking-tight whitespace-nowrap">
+              ia Academy
+            </span>
+          </div>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={filteredNav} />

@@ -10,7 +10,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
   try {
     const params = await props.params;
     await connectDB();
-    const authUser = await getAuthUser(req, ["admin", "teacher"]);
+    const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import subject from "@/lib/models/subject";
 import User from "@/lib/models/user";
+import { getAuthUser } from "@/middleware/auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -48,6 +49,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
+    const authUser = await getAuthUser(req, ["admin"]);
+    if (!authUser) {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
+
     const { name, code, teacher, isActive } = await req.json();
     const subjectExists = await subject.findOne({ code }).lean();
     if (subjectExists) {

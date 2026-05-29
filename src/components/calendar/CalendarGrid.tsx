@@ -126,8 +126,9 @@ export function CalendarGrid() {
         )}
       </div>
 
-      <div className="flex-1 bg-white border rounded-xl overflow-hidden shadow-sm flex flex-col">
-        <div className="grid grid-cols-7 border-b bg-slate-50">
+      <div className="flex-1 bg-white border rounded-xl overflow-x-auto shadow-sm flex flex-col">
+        <div className="min-w-[700px] flex-1 flex flex-col">
+          <div className="grid grid-cols-7 border-b bg-slate-50">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
             <div key={day} className="py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">
               {day}
@@ -163,6 +164,7 @@ export function CalendarGrid() {
               </div>
             );
           })}
+          </div>
         </div>
       </div>
 

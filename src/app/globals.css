@@ -9,7 +9,7 @@
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #475569;
-  --primary: #6366f1;
+  --primary: #7c3aed;
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
   --secondary-foreground: #0f172a;
@@ -21,20 +21,20 @@
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #6366f1;
-  --chart-1: #6366f1;
+  --ring: #7c3aed;
+  --chart-1: #7c3aed;
   --chart-2: #3b82f6;
   --chart-3: #8b5cf6;
   --chart-4: #f59e0b;
   --chart-5: #10b981;
-  --sidebar: #1c2434;
-  --sidebar-foreground: #8a99af;
-  --sidebar-primary: #6366f1;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #7c3aed;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #333a48;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1c2434;
-  --sidebar-ring: #6366f1;
+  --sidebar-accent: #f5f3ff;
+  --sidebar-accent-foreground: #7c3aed;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #7c3aed;
   --font-sans: Outfit, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: monospace;
@@ -197,5 +197,23 @@ body {
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .edu-card {
+    @apply bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .edu-btn-primary {
+    @apply bg-[#7c3aed] text-white hover:bg-[#6d28d9] hover:shadow-md transition-all font-medium rounded-lg;
   }
 }

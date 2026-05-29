@@ -11,8 +11,8 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     const params = await props.params;
     await connectDB();
     
-    // Auth check (admin or teacher)
-    const authUser = await getAuthUser(req, ["admin", "teacher"]);
+    // Auth check (admin only)
+    const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const { name, code, teacher, isActive } = await req.json();

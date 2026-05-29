@@ -99,11 +99,11 @@ export function KanbanBoard() {
         </Button>
       </div>
 
-      <div className="flex-1 flex gap-4 overflow-x-auto pb-4 h-full min-h-[500px]">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-x-auto pb-4 h-full min-h-0 lg:min-h-[500px]">
         {COLUMNS.map((col) => (
           <div
             key={col}
-            className="flex flex-col min-w-[300px] max-w-[300px] bg-slate-100 rounded-xl p-3 h-full"
+            className="flex flex-col w-full lg:min-w-[300px] lg:max-w-[300px] shrink-0 bg-slate-100 rounded-xl p-3 h-[400px] lg:h-full"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col)}
           >

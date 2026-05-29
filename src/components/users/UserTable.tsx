@@ -7,19 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  MoreHorizontal,
   Pencil,
   Trash2,
   Loader2,
-  UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { user } from "@/types";
@@ -55,21 +45,26 @@ const UserTable = ({
     setEditingUser(user);
     setIsFormOpen(true);
   };
+  const getAvatarColor = (name: string) => {
+    const colors = ["bg-indigo-100 text-indigo-700", "bg-purple-100 text-purple-700", "bg-blue-100 text-blue-700", "bg-emerald-100 text-emerald-700", "bg-orange-100 text-orange-700", "bg-pink-100 text-pink-700"];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
   return (
-    <div className="border rounded-md">
+    <div className="edu-card overflow-hidden">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            {role === "teacher" && <TableHead>Subjects</TableHead>}
-            {/* Show Class only for students */}
-            {role === "student" && <TableHead>Class</TableHead>}
-            {role === "parent" && <TableHead>Children</TableHead>}
-            <TableHead className="text-right">Actions</TableHead>
+        <TableHeader className="bg-slate-50 border-b border-slate-100">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="text-xs font-bold text-slate-500 uppercase tracking-wider py-4">Name</TableHead>
+            <TableHead className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email</TableHead>
+            {role === "teacher" && <TableHead className="text-xs font-bold text-slate-500 uppercase tracking-wider">Subjects</TableHead>}
+            {role === "student" && <TableHead className="text-xs font-bold text-slate-500 uppercase tracking-wider">Class</TableHead>}
+            {role === "parent" && <TableHead className="text-xs font-bold text-slate-500 uppercase tracking-wider">Children</TableHead>}
+            <TableHead className="text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="divide-y divide-slate-50">
           {loading ? (
             <TableRow>
               <TableCell colSpan={4} className="h-24 text-center">
@@ -87,14 +82,19 @@ const UserTable = ({
             </TableRow>
           ) : (
             users.map((user) => (
-              <TableRow key={user._id}>
-                <TableCell className="font-medium flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-                    <UserIcon className="h-4 w-4 text-slate-500" />
+              <TableRow key={user._id} className="hover:bg-slate-50/50 transition-colors group">
+                <TableCell className="py-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${getAvatarColor(user.name)}`}>
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800">{user.name}</p>
+                      <p className="text-xs text-slate-500 capitalize">{user.role}</p>
+                    </div>
                   </div>
-                  {user.name}
                 </TableCell>
-                <TableCell>{user.email}</TableCell>
+                <TableCell className="text-slate-600 font-medium">{user.email}</TableCell>
                 {role === "teacher" && (
                   <TableCell>
                     {user.teacherSubject?.length ? (
@@ -140,29 +140,28 @@ const UserTable = ({
                     )}
                   </TableCell>
                 )}
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleEdit(user)}>
-                        <Pencil className="mr-2 h-4 w-4" /> Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => {
-                          setDeleteId(user._id);
-                          setIsDeleteOpen(true);
-                        }}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <TableCell className="text-right py-4">
+                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full"
+                      onClick={() => handleEdit(user)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full"
+                      onClick={() => {
+                        setDeleteId(user._id);
+                        setIsDeleteOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))

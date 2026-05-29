@@ -17,75 +17,67 @@ export function DashboardStats({ role, data }: StatsProps) {
   if (role === "admin") {
     return (
       <>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-sm hover:-translate-y-1 transition-all border-none bg-[#f5f3ff] overflow-hidden group">
           <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-indigo-50 text-indigo-500">
-                <Users className="h-7 w-7" />
-              </div>
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Students</p>
-                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.totalStudents || 0}</h3>
+                <p className="text-sm font-bold text-[#7c3aed]/80 uppercase tracking-wider mb-1">Students</p>
+                <h3 className="text-3xl font-black text-[#6d28d9]">{data.totalStudents || 0}</h3>
+              </div>
+              <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-white shadow-sm text-[#7c3aed] group-hover:scale-110 transition-transform">
+                <Users className="h-8 w-8" />
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-500 font-medium flex items-center">
-                +12 This Week <span className="ml-1 text-lg leading-none">↗</span>
-              </span>
+            <div className="mt-4 flex items-center text-sm font-semibold text-[#7c3aed]">
+              +12 This Week <span className="ml-1 text-lg leading-none">↗</span>
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-sm hover:-translate-y-1 transition-all border-none bg-blue-50 overflow-hidden group">
           <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-blue-50 text-blue-500">
-                <GraduationCap className="h-7 w-7" />
-              </div>
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Teachers</p>
-                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.totalTeachers || 0}</h3>
+                <p className="text-sm font-bold text-blue-600/80 uppercase tracking-wider mb-1">Teachers</p>
+                <h3 className="text-3xl font-black text-blue-700">{data.totalTeachers || 0}</h3>
+              </div>
+              <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-white shadow-sm text-blue-500 group-hover:scale-110 transition-transform">
+                <GraduationCap className="h-8 w-8" />
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-500 font-medium flex items-center">
-                +2 This Week <span className="ml-1 text-lg leading-none">↗</span>
-              </span>
+            <div className="mt-4 flex items-center text-sm font-semibold text-blue-600">
+              +2 This Week <span className="ml-1 text-lg leading-none">↗</span>
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-sm hover:-translate-y-1 transition-all border-none bg-orange-50 overflow-hidden group">
           <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-orange-50 text-orange-500">
-                <Clock className="h-7 w-7" />
-              </div>
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Attendance</p>
-                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.avgAttendance || "0%"}</h3>
+                <p className="text-sm font-bold text-orange-600/80 uppercase tracking-wider mb-1">Avg Attendance</p>
+                <h3 className="text-3xl font-black text-orange-700">{data.avgAttendance || "0%"}</h3>
+              </div>
+              <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-white shadow-sm text-orange-500 group-hover:scale-110 transition-transform">
+                <Clock className="h-8 w-8" />
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-500 font-medium flex items-center">
-                +5% This Week <span className="ml-1 text-lg leading-none">↗</span>
-              </span>
+            <div className="mt-4 flex items-center text-sm font-semibold text-orange-600">
+              +5% This Week <span className="ml-1 text-lg leading-none">↗</span>
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-sm hover:-translate-y-1 transition-all border-none bg-emerald-50 overflow-hidden group">
           <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-purple-50 text-purple-500">
-                <BookOpen className="h-7 w-7" />
-              </div>
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Quizzes</p>
-                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.activeQuizzes || 0}</h3>
+                <p className="text-sm font-bold text-emerald-600/80 uppercase tracking-wider mb-1">Active Quizzes</p>
+                <h3 className="text-3xl font-black text-emerald-700">{data.activeQuizzes || 0}</h3>
+              </div>
+              <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-white shadow-sm text-emerald-500 group-hover:scale-110 transition-transform">
+                <BookOpen className="h-8 w-8" />
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-500 font-medium flex items-center">
-                +8 This Week <span className="ml-1 text-lg leading-none">↗</span>
-              </span>
+            <div className="mt-4 flex items-center text-sm font-semibold text-emerald-600">
+              +8 This Week <span className="ml-1 text-lg leading-none">↗</span>
             </div>
           </CardContent>
         </Card>
