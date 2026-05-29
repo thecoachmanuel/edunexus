@@ -5,6 +5,9 @@ import Attendance from "@/lib/models/attendance";
 import Exam from "@/lib/models/exam";
 import StudentFee from "@/lib/models/studentFee";
 import ReportCard from "@/lib/models/reportCard";
+import Class from "@/lib/models/class";
+import Subject from "@/lib/models/subject";
+import FeeStructure from "@/lib/models/feeStructure";
 import jwt from "jsonwebtoken";
 
 export async function GET(req: NextRequest) {
