@@ -127,21 +127,21 @@ export default function Dashboard() {
                       statsData.recentActivity.map((item: any, i: number) => (
                         <div key={i} className="flex items-center justify-between py-2 border-b last:border-0 pb-3">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-slate-200 overflow-hidden shrink-0">
-                              <div className="h-full w-full bg-slate-300 flex items-center justify-center text-slate-500 text-xs font-bold">
+                            <div className="h-10 w-10 rounded-full bg-slate-200 dark:bg-muted overflow-hidden shrink-0">
+                              <div className="h-full w-full bg-slate-300 dark:bg-muted flex items-center justify-center text-slate-500 dark:text-muted-foreground text-xs font-bold">
                                 {item.name.charAt(0)}
                               </div>
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-slate-800">{item.name} <span className="font-normal text-slate-600">{item.action}</span></p>
-                              {item.sub && <p className="text-xs text-slate-500">{item.sub}</p>}
+                              <p className="text-sm font-semibold text-slate-800 dark:text-foreground">{item.name} <span className="font-normal text-slate-600 dark:text-muted-foreground">{item.action}</span></p>
+                              {item.sub && <p className="text-xs text-slate-500 dark:text-muted-foreground">{item.sub}</p>}
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className={`text-[10px] font-semibold px-2 py-0.5 rounded-md inline-block mb-1 ${item.color || "bg-gray-100 text-gray-600"}`}>
+                            <div className={`text-[10px] font-semibold px-2 py-0.5 rounded-md inline-block mb-1 ${item.color || "bg-gray-100 text-gray-600 dark:bg-muted dark:text-muted-foreground"}`}>
                               ✓ {item.status || "Activity"}
                             </div>
-                            <p className="text-xs text-slate-400 block">{item.time}</p>
+                            <p className="text-xs text-slate-400 dark:text-muted-foreground block">{item.time}</p>
                           </div>
                         </div>
                       ))
@@ -163,18 +163,18 @@ export default function Dashboard() {
                 <div className="space-y-3 mt-2">
                   {statsData?.upcomingClasses?.length > 0 ? (
                     statsData.upcomingClasses.map((cls: any, i: number) => (
-                      <div key={i} className="flex items-center justify-between border border-slate-100 rounded-lg p-3 hover:bg-slate-50 transition-colors">
+                      <div key={i} className="flex items-center justify-between border border-slate-100 dark:border-border rounded-lg p-3 hover:bg-slate-50 dark:hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-4">
-                          <div className="flex flex-col items-center justify-center border-l-4 border-indigo-500 bg-indigo-50 px-3 py-1 rounded-r-md min-w-[70px]">
-                            <span className="text-sm font-bold text-indigo-900">{cls.time}</span>
-                            <span className="text-xs font-semibold text-indigo-600">{cls.period}</span>
+                          <div className="flex flex-col items-center justify-center border-l-4 border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 px-3 py-1 rounded-r-md min-w-[70px]">
+                            <span className="text-sm font-bold text-indigo-900 dark:text-indigo-200">{cls.time}</span>
+                            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">{cls.period}</span>
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-800">{cls.title}</p>
-                            <p className="text-xs text-slate-500">{cls.sub}</p>
+                            <p className="text-sm font-bold text-slate-800 dark:text-foreground">{cls.title}</p>
+                            <p className="text-xs text-slate-500 dark:text-muted-foreground">{cls.sub}</p>
                           </div>
                         </div>
-                        <div className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
+                        <div className="text-xs font-medium text-slate-400 dark:text-muted-foreground bg-slate-100 dark:bg-muted px-2 py-1 rounded-md">
                           {cls.diff}
                         </div>
                       </div>

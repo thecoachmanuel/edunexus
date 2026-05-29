@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Timetable from "@/lib/models/timetable";
+import { getAuthUser } from "@/middleware/auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -30,6 +31,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
+    const authUser = await getAuthUser(req, ["admin"]);
+    if (!authUser) {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
+
     const { classId, academicYear, schedule } = await req.json();
 
     const existingTimetable = await Timetable.findOne({ class: classId, academicYear }).lean();

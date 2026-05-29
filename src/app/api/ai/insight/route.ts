@@ -5,6 +5,10 @@ import { connectDB } from "@/lib/db";
 import User from "@/lib/models/user";
 import Class from "@/lib/models/class";
 import Exam from "@/lib/models/exam";
+import Attendance from "@/lib/models/attendance";
+import Submission from "@/lib/models/submission";
+import Task from "@/lib/models/task";
+import { Event } from "@/lib/models/event";
 import { getAuthUser } from "@/middleware/auth";
 import { aiRateLimiter } from "@/lib/rate-limit";
 
@@ -34,18 +38,49 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Gather some basic context to make the insight somewhat relevant
+    // Gather rich context to make the insight highly relevant and specific
     let contextData = "";
+    
     if (authUser.role === "admin") {
       const totalStudents = await User.countDocuments({ role: "student" });
       const totalTeachers = await User.countDocuments({ role: "teacher" });
       const activeExams = await Exam.countDocuments({ isActive: true });
-      contextData = `Role: Administrator. System has ${totalStudents} students, ${totalTeachers} teachers, and ${activeExams} active exams.`;
+      const upcomingEvents = await Event.countDocuments({ startDate: { $gte: new Date() } });
+      const pendingTasks = await Task.countDocuments({ status: { $ne: "Done" } });
+      
+      contextData = `Role: Administrator. 
+      System snapshot: ${totalStudents} students, ${totalTeachers} teachers, ${activeExams} active quizzes running, ${upcomingEvents} upcoming events scheduled, and ${pendingTasks} overall pending kanban tasks in the workspace.`;
+      
     } else if (authUser.role === "teacher") {
       const myClassesCount = await Class.countDocuments({ classTeacher: authUser._id });
-      contextData = `Role: Teacher. Manages ${myClassesCount} classes.`;
+      const myExams = await Exam.find({ teacher: authUser._id }).select("_id").lean();
+      const myExamIds = myExams.map((exam) => exam._id);
+      const pendingGrading = await Submission.countDocuments({ exam: { $in: myExamIds }, score: 0 });
+      const myTasks = await Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } });
+      const myEvents = await Event.countDocuments({ startDate: { $gte: new Date() } });
+      
+      contextData = `Role: Teacher. Name: ${authUser.name}.
+      Current load: Managing ${myClassesCount} classes. You have ${pendingGrading} student quiz submissions pending your grading, ${myTasks} assigned kanban tasks pending, and ${myEvents} upcoming school events.`;
+      
     } else if (authUser.role === "student") {
-      contextData = `Role: Student. Name: ${authUser.name}.`;
+      const upcomingExams = await Exam.countDocuments({ class: authUser.studentClass, isActive: true, dueDate: { $gte: new Date() } });
+      
+      // Calculate attendance
+      const studentAttendance = await Attendance.find({ "records.student": authUser._id }).lean();
+      let totalMyRecords = 0;
+      let myPresentRecords = 0;
+      studentAttendance.forEach((att: any) => {
+        const rec = att.records.find((r: any) => r.student.toString() === authUser._id.toString());
+        if (rec) {
+          totalMyRecords++;
+          if (rec.status === "Present" || rec.status === "Late") myPresentRecords++;
+        }
+      });
+      const attendanceRate = totalMyRecords === 0 ? "100%" : `${Math.round((myPresentRecords / totalMyRecords) * 100)}%`;
+      const myTasks = await Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } });
+
+      contextData = `Role: Student. Name: ${authUser.name}.
+      Current status: You have ${upcomingExams} upcoming quizzes due, a current attendance rate of ${attendanceRate}, and ${myTasks} personal kanban tasks to complete.`;
     }
 
     const prompt = `
