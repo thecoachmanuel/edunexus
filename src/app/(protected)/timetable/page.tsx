@@ -185,6 +185,11 @@ const Timetable = () => {
           console.error(`Failed to generate for ${cls.name}:`, error);
           failCount++;
         }
+        
+        // Add a 5 second delay between requests to prevent hitting Gemini API rate limits (15 RPM)
+        if (i < classesToGenerate.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
       }
       
       if (failCount === 0) {

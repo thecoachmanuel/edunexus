@@ -266,6 +266,13 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 
       } catch (err: any) {
         console.error(`[Timetable] Attempt ${attempts} failed:`, err.message);
+        
+        // If we hit a rate limit (429) or quota error, back off heavily before retrying
+        if (err.message.toLowerCase().includes("quota") || err.message.includes("429")) {
+          console.log("[Timetable] AI Quota/Rate Limit hit. Backing off for 15 seconds...");
+          await new Promise(resolve => setTimeout(resolve, 15000));
+        }
+        
         if (attempts === maxAttempts) {
           throw err;
         }
