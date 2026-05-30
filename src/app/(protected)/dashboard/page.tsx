@@ -125,7 +125,7 @@ export default function Dashboard() {
           )}
 
           {/* RECENT ACTIVITY & UPCOMING CLASSES ROW */}
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1">
             {/* UPCOMING CLASSES CARD */}
             <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
