@@ -52,8 +52,6 @@ interface Props {
   selectedClass: string;
   setSelectedClass: (classId: string) => void;
   onSettingsChange?: (data: { yearId: string; settings: GenSettings }) => void;
-  onGenerateAll?: (yearId: string, settings: GenSettings) => Promise<void>;
-  isGeneratingAll?: boolean;
 }
 const GeneratorControls = ({
   onGenerate,
@@ -62,8 +60,6 @@ const GeneratorControls = ({
   selectedClass,
   setSelectedClass,
   onSettingsChange,
-  onGenerateAll,
-  isGeneratingAll = false,
 }: Props) => {
   const { user } = useAuth();
   const hideGenerate = user?.role !== "admin";
@@ -164,22 +160,6 @@ const GeneratorControls = ({
     onClassChange(val);
   };
 
-  const handleGenerateAllClick = () => {
-    if (!selectedYear || !selectedTerm) {
-      toast.error("Please select an Academic Year and Term");
-      return;
-    }
-    if (onGenerateAll) {
-      onGenerateAll(selectedYear, {
-        startTime,
-        endTime,
-        periods: parseInt(periods, 10) || 5,
-        periodDuration: parseInt(periodDuration, 10) || 45,
-        breaks,
-        term: selectedTerm,
-      });
-    }
-  };
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
@@ -378,9 +358,9 @@ const GeneratorControls = ({
               <Button
                 className="w-full mt-2"
                 onClick={handleGenerateClick}
-                disabled={isGenerating || isGeneratingAll || !selectedClass || !selectedYear}
+                disabled={isGenerating || !selectedClass || !selectedYear}
               >
-                {isGenerating && !isGeneratingAll ? (
+                {isGenerating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing Schedule...
                   </>
@@ -390,33 +370,6 @@ const GeneratorControls = ({
                   </>
                 )}
               </Button>
-              
-              {onGenerateAll && (
-                <div className="mt-4 pt-4 border-t">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <h4 className="text-sm font-semibold">Bulk Generation</h4>
-                      <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-                        Automatically generate timetables for ALL classes sequentially. 
-                        This prevents teacher clashes across the entire school.
-                      </p>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      onClick={handleGenerateAllClick}
-                      disabled={isGenerating || isGeneratingAll || !selectedYear}
-                    >
-                      {isGeneratingAll ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating All...
-                        </>
-                      ) : (
-                        "Generate All Classes"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
             </>
           )}
       </CardContent>
