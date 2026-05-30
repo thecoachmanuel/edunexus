@@ -196,7 +196,7 @@ function StudentDetailSheet({
 }) {
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-xl overflow-y-auto px-6 sm:px-8">
         <SheetHeader>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <SheetTitle className="flex items-center gap-2">

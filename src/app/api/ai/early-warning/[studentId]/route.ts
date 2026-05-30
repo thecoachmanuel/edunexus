@@ -16,7 +16,7 @@ export async function GET(
 ) {
   try {
     await connectDB();
-    const authUser = await getAuthUser(req, ["admin", "teacher"]);
+    const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }

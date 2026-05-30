@@ -297,7 +297,7 @@ export default function EarlyWarningPage() {
 
       {/* Intervention Plan Modal */}
       <Dialog open={planModalOpen} onOpenChange={(o) => { if (!o) { setPlanModalOpen(false); } }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-violet-500" />
@@ -317,8 +317,8 @@ export default function EarlyWarningPage() {
               </div>
             ) : plan ? (
               <div className="space-y-4">
-                <div className="bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20 rounded-lg p-4">
-                  <p className="text-xs font-semibold text-violet-600 dark:text-violet-400 uppercase mb-2 flex items-center gap-1.5">
+                <div className="bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+                  <p className="text-xs font-semibold text-violet-600 dark:text-violet-400 uppercase mb-2 flex items-center gap-1.5 shrink-0">
                     <Sparkles className="h-3.5 w-3.5" /> AI Recommendation
                   </p>
                   <div className="text-sm text-foreground leading-relaxed whitespace-pre-line">

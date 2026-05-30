@@ -144,7 +144,7 @@ export const sidebardata = {
         {
           title: "Early Warning",
           url: "/academics/early-warning",
-          roles: ["admin", "teacher"],
+          roles: ["admin"],
         },
       ],
     },

@@ -18,12 +18,12 @@ interface RiskFactor {
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
-    const authUser = await getAuthUser(req, ["admin", "teacher"]);
+    const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }
 
-    // Determine scope: admin sees all students, teacher sees students in their classes
+    // Determine scope: admin sees all students
     let studentQuery: any = { role: "student" };
     if (authUser.role === "teacher") {
       const myClasses = await Class.find({ classTeacher: authUser._id }).select("_id students").lean();

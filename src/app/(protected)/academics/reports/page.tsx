@@ -180,7 +180,9 @@ export default function ReportsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Report Cards</h1>
           <p className="text-muted-foreground">
-            View and generate academic report cards for students.
+            {isAdminOrTeacher 
+              ? "View and generate academic report cards for students." 
+              : "View and print academic report cards for your children."}
           </p>
         </div>
       </div>
@@ -357,9 +359,9 @@ export default function ReportsPage() {
           </DialogHeader>
           <div className="print:block overflow-x-auto w-full pb-4" id="printable-report">
             {selectedReport && filterForm.getValues().term === "Annual" ? (
-               <AnnualReportCardView report={selectedReport} />
+               <AnnualReportCardView report={selectedReport} showActions={isAdminOrTeacher} />
             ) : (
-               selectedReport && <ReportCardView report={selectedReport} />
+               selectedReport && <ReportCardView report={selectedReport} showActions={isAdminOrTeacher} />
             )}
           </div>
         </DialogContent>
