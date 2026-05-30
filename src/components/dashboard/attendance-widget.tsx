@@ -14,7 +14,7 @@ export function AttendanceWidget({ role }: AttendanceWidgetProps) {
 
   if (isLoading) {
     return (
-      <Card className="h-[350px] flex flex-col justify-center items-center">
+      <Card className="h-[350px] flex flex-col justify-center items-center shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-sm text-muted-foreground mt-4">Loading attendance...</p>
       </Card>
@@ -23,7 +23,7 @@ export function AttendanceWidget({ role }: AttendanceWidgetProps) {
 
   if (!data || data.length === 0) {
     return (
-      <Card>
+      <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
         <CardHeader>
           <CardTitle className="text-lg font-medium flex items-center gap-2">
             <CalendarRange className="h-5 w-5" />
@@ -40,7 +40,7 @@ export function AttendanceWidget({ role }: AttendanceWidgetProps) {
   const isStudent = role === "student";
 
   return (
-    <Card>
+    <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
       <CardHeader>
         <CardTitle className="text-lg font-medium flex items-center gap-2">
           <CalendarRange className="h-5 w-5" />

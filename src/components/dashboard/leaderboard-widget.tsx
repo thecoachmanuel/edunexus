@@ -14,7 +14,7 @@ interface LeaderboardItem {
 export function ClassLeaderboardWidget({ data }: { data?: LeaderboardItem[] }) {
   if (!data || data.length === 0) {
     return (
-      <Card>
+      <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-yellow-500" />
@@ -42,7 +42,7 @@ export function ClassLeaderboardWidget({ data }: { data?: LeaderboardItem[] }) {
   };
 
   return (
-    <Card>
+    <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Trophy className="h-5 w-5 text-yellow-500" />

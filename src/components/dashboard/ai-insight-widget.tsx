@@ -30,7 +30,7 @@ export function AiInsightWidget({ role }: Props) {
   };
 
   return (
-    <Card className="bg-linear-to-br from-green-50 to-white border dark:from-green-800 shadow-sm overflow-hidden relative">
+    <Card className="bg-linear-to-br from-green-50 to-white border dark:from-green-800 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] dark:shadow-none overflow-hidden relative">
       {/* Decorative Background Icon */}
       <BrainCircuit className="absolute -right-6 -bottom-6 h-32 w-32 text-violet-100/50" />
 

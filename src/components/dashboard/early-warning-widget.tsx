@@ -11,7 +11,7 @@ export function EarlyWarningWidget() {
 
   if (isLoading) {
     return (
-      <Card className="border-none shadow-sm">
+      <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
         <CardContent className="p-6">
           <div className="h-24 flex items-center justify-center">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
@@ -25,7 +25,7 @@ export function EarlyWarningWidget() {
   const hasRisk = summary.highRisk > 0 || summary.atRisk > 0;
 
   return (
-    <Card className={`border-none shadow-sm hover:shadow-md transition-shadow overflow-hidden relative ${hasRisk ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10" : "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10"}`}>
+    <Card className={`shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none overflow-hidden relative ${hasRisk ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10" : "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10"}`}>
       <div className={`absolute top-0 left-0 right-0 h-1 ${hasRisk ? "bg-gradient-to-r from-amber-400 to-red-500" : "bg-gradient-to-r from-green-400 to-emerald-500"}`} />
       
       <CardHeader className="flex flex-row items-center justify-between pb-2 pt-5">
