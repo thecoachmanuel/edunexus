@@ -10,9 +10,10 @@ import GeneratorControls, {
 } from "@/components/timetable/GeneratorControls";
 import TimetableGrid from "@/components/timetable/TimetableGrid";
 import TimetableStatistics from "@/components/timetable/TimetableStatistics";
+import TimetableAuditor from "@/components/timetable/TimetableAuditor";
 
 import { Button } from "@/components/ui/button";
-import { Printer, Trash2, Loader2 } from "lucide-react";
+import { Printer, Trash2, Loader2, ShieldCheck } from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -33,7 +34,7 @@ const Timetable = () => {
   const [generateAllProgress, setGenerateAllProgress] = useState({ current: 0, total: 0, currentClassName: "" });
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
-  const [viewMode, setViewMode] = useState<"class" | "teacher">("class");
+  const [viewMode, setViewMode] = useState<"class" | "teacher" | "audit">("class");
   const [teachers, setTeachers] = useState<{_id: string; name: string}[]>([]);
   // Track the currently-viewed term so fetchTimetable always fetches the right one
   const [selectedTerm, setSelectedTerm] = useState<string>("");
@@ -264,9 +265,29 @@ const Timetable = () => {
         )}
       </div>
       {isAdmin && (
-        <div className="flex gap-2 print:hidden mb-4">
-          <Button variant={viewMode === "class" ? "default" : "outline"} onClick={() => setViewMode("class")}>Class View</Button>
-          <Button variant={viewMode === "teacher" ? "default" : "outline"} onClick={() => setViewMode("teacher")}>Teacher View</Button>
+        <div className="flex bg-muted p-1 rounded-md mb-4 md:mb-0 w-fit">
+          <Button 
+            variant={viewMode === "class" ? "default" : "ghost"} 
+            size="sm" 
+            onClick={() => setViewMode("class")}
+          >
+            Class View
+          </Button>
+          <Button 
+            variant={viewMode === "teacher" ? "default" : "ghost"} 
+            size="sm" 
+            onClick={() => setViewMode("teacher")}
+          >
+            Teacher View
+          </Button>
+          <Button 
+            variant={viewMode === "audit" ? "default" : "ghost"} 
+            size="sm" 
+            onClick={() => setViewMode("audit")}
+            className="flex items-center gap-2 text-amber-600 hover:text-amber-700"
+          >
+            <ShieldCheck className="h-4 w-4" /> Auditor
+          </Button>
         </div>
       )}
       {!isViewOnly && viewMode === "class" && (
@@ -280,6 +301,15 @@ const Timetable = () => {
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
             onSettingsChange={handleSettingsChange}
+          />
+        </div>
+      )}
+
+      {viewMode === "audit" && isAdmin && (
+        <div className="print:hidden pb-4">
+          <TimetableAuditor 
+            yearId={currentSettings?.yearId || lastUsedSettings?.yearId || ""}
+            term={currentSettings?.settings?.term || selectedTerm}
           />
         </div>
       )}
