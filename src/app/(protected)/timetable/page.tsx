@@ -29,6 +29,8 @@ const Timetable = () => {
   const [scheduleData, setScheduleData] = useState<schedule[]>([]);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+  const [generateAllProgress, setGenerateAllProgress] = useState({ current: 0, total: 0, currentClassName: "" });
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [viewMode, setViewMode] = useState<"class" | "teacher">("class");
@@ -145,6 +147,64 @@ const Timetable = () => {
     }
   };
 
+  const handleGenerateAll = async (yearId: string, settings: GenSettings) => {
+    try {
+      // Fetch all classes
+      const { data } = await api.get("/classes?limit=1000");
+      const classesToGenerate = data.classes || [];
+      
+      if (classesToGenerate.length === 0) {
+        toast.error("No classes found to generate timetables for.");
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to generate timetables for all ${classesToGenerate.length} classes sequentially? This will take a few minutes.`)) {
+        return;
+      }
+
+      setIsGeneratingAll(true);
+      setLastUsedSettings({ yearId, settings });
+      setSelectedTerm(settings.term);
+      
+      let successCount = 0;
+      let failCount = 0;
+      
+      for (let i = 0; i < classesToGenerate.length; i++) {
+        const cls = classesToGenerate[i];
+        setGenerateAllProgress({ current: i + 1, total: classesToGenerate.length, currentClassName: cls.name });
+        
+        try {
+          await api.post("/timetables/generate", {
+            classId: cls._id,
+            academicYearId: yearId,
+            term: settings.term,
+            settings,
+          });
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to generate for ${cls.name}:`, error);
+          failCount++;
+        }
+      }
+      
+      if (failCount === 0) {
+        toast.success(`Successfully generated all ${successCount} timetables!`);
+      } else {
+        toast.warning(`Generated ${successCount} timetables, but ${failCount} failed. Check console for details.`);
+      }
+      
+      // Refresh the currently selected class timetable
+      if (selectedClass) {
+        await fetchTimetable(selectedClass, "class", settings.term);
+      }
+    } catch (error: any) {
+      toast.error("Bulk generation failed to start.");
+    } finally {
+      setIsGeneratingAll(false);
+      setGenerateAllProgress({ current: 0, total: 0, currentClassName: "" });
+    }
+  };
+
   const handleRegenerateWithWeights = async (weights: Record<string, number>) => {
     const baseSettings = lastUsedSettings || currentSettings;
     if (!baseSettings) {
@@ -201,8 +261,10 @@ const Timetable = () => {
         <div className="print:hidden">
           <GeneratorControls
             onGenerate={handleGenerate}
+            onGenerateAll={handleGenerateAll}
             onClassChange={(classId) => fetchTimetable(classId, "class")}
             isGenerating={isGenerating}
+            isGeneratingAll={isGeneratingAll}
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
             onSettingsChange={handleSettingsChange}
@@ -264,6 +326,34 @@ const Timetable = () => {
             isGenerating={isGenerating}
             isAdmin={isAdmin}
           />
+        </div>
+      )}
+      
+      {/* Progress Modal Overlay for Bulk Generation */}
+      {isGeneratingAll && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <Card className="w-full max-w-md shadow-lg border-primary/20">
+            <CardHeader>
+              <CardTitle>Bulk Generating Timetables</CardTitle>
+              <CardDescription>Generating school schedule class by class to prevent teacher clashes. Please do not close this window.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between text-sm font-medium">
+                <span>Class: <span className="text-primary">{generateAllProgress.currentClassName}</span></span>
+                <span>{generateAllProgress.current} / {generateAllProgress.total}</span>
+              </div>
+              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-300 ease-out" 
+                  style={{ width: `${(generateAllProgress.current / Math.max(1, generateAllProgress.total)) * 100}%` }}
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center pt-2">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span>AI is optimizing schedules sequentially...</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

@@ -159,7 +159,8 @@ ${isUsingFallbackTeachers ? "3. No teacher-subject mapping available — assign 
 4. Breaks: ${breaksDescription}. For break periods set subject=null, teacher=null, and name to the break name.
 5. Do NOT create free/empty periods — every non-break slot MUST have a subject and teacher.
 6. Avoid teacher clashes using the TEACHER CLASH MAP above.
-7. IMPORTANT: "subject" and "teacher" values MUST be the exact 24-character hex ObjectId strings from the "id" fields in RESOURCES. Do NOT use names.
+7. CRITICAL: Every period in a single day MUST have a UNIQUE startTime and endTime. Do NOT schedule multiple subjects/teachers for the exact same time slot in this class.
+8. IMPORTANT: "subject" and "teacher" values MUST be the exact 24-character hex ObjectId strings from the "id" fields in RESOURCES. Do NOT use names.
 
 OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 {
