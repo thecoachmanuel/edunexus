@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
                 overallGrade: (latestReport as any).overallGrade,
                 grades: ((latestReport as any).grades || []).map((g: any) => ({
                   subject: g.subject?.name || "Subject",
-                  score: g.score,
+                  score: g.aggregateScore || 0,
                   grade: g.grade,
                 })),
               }

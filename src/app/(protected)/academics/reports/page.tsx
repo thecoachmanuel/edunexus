@@ -103,7 +103,10 @@ export default function ReportsPage() {
     try {
       await api.delete(`/reports/${id}`);
       toast.success("Report card deleted successfully");
-      fetchReports(filterForm.getValues().classId === "all" ? undefined : filterForm.getValues().classId);
+      fetchReports(
+        filterForm.getValues().classId === "all" ? undefined : filterForm.getValues().classId, 
+        filterForm.getValues().term
+      );
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to delete report card");
     }
