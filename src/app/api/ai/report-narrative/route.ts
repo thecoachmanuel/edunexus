@@ -10,7 +10,14 @@ import { aiRateLimiter } from "@/lib/rate-limit";
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
 
 export async function POST(req: NextRequest) {
+  let reportCardId: string | null = null;
   try {
+    const body = await req.json();
+    reportCardId = body.reportCardId;
+    if (!reportCardId) {
+      return NextResponse.json({ message: "reportCardId is required" }, { status: 400 });
+    }
+
     await connectDB();
     const authUser = await getAuthUser(req, ["admin", "teacher"]);
     if (!authUser) {
@@ -27,11 +34,6 @@ export async function POST(req: NextRequest) {
 
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       return NextResponse.json({ message: "Google Gemini API Key is missing" }, { status: 500 });
-    }
-
-    const { reportCardId } = await req.json();
-    if (!reportCardId) {
-      return NextResponse.json({ message: "reportCardId is required" }, { status: 400 });
     }
 
     // Fetch the full report card with populated data
