@@ -87,7 +87,10 @@ export default function ReportsPage() {
     };
 
     loadClasses();
-    fetchReports();
+    fetchReports(
+      filterForm.getValues().classId === "all" ? undefined : filterForm.getValues().classId, 
+      filterForm.getValues().term
+    );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -187,68 +190,72 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {isAdminOrTeacher && (
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-md border flex flex-col md:flex-row gap-8">
-          {/* Generation Section */}
-          <div className="flex-1 space-y-4">
-            <h2 className="font-semibold text-lg flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" /> Generate Reports
-            </h2>
-            <form onSubmit={onGenerate} className="flex flex-col sm:flex-row flex-wrap gap-4 sm:items-end">
-              <div className="w-full sm:w-48">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Class</label>
-                <Controller
-                  name="classId"
-                  control={generateForm.control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger><SelectValue placeholder="Select Class" /></SelectTrigger>
-                      <SelectContent>
-                        {classes.map((c) => (
-                          <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              <div className="w-full sm:w-48">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Term</label>
-                <Controller
-                  name="term"
-                  control={generateForm.control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Term 1">Term 1</SelectItem>
-                        <SelectItem value="Term 2">Term 2</SelectItem>
-                        <SelectItem value="Term 3">Term 3</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button type="submit" disabled={generating || deleting} className="flex-1 sm:flex-none">
-                  {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Generate
-                </Button>
-                <Button type="button" variant="destructive" onClick={handleBatchDeleteByTerm} disabled={generating || deleting} className="flex-1 sm:flex-none">
-                  Clear Term
-                </Button>
-              </div>
-            </form>
-          </div>
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-md border flex flex-col md:flex-row gap-8">
+        {isAdminOrTeacher && (
+          <>
+            {/* Generation Section */}
+            <div className="flex-1 space-y-4">
+              <h2 className="font-semibold text-lg flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" /> Generate Reports
+              </h2>
+              <form onSubmit={onGenerate} className="flex flex-col sm:flex-row flex-wrap gap-4 sm:items-end">
+                <div className="w-full sm:w-48">
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Class</label>
+                  <Controller
+                    name="classId"
+                    control={generateForm.control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger><SelectValue placeholder="Select Class" /></SelectTrigger>
+                        <SelectContent>
+                          {classes.map((c) => (
+                            <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="w-full sm:w-48">
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Term</label>
+                  <Controller
+                    name="term"
+                    control={generateForm.control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Term 1">Term 1</SelectItem>
+                          <SelectItem value="Term 2">Term 2</SelectItem>
+                          <SelectItem value="Term 3">Term 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button type="submit" disabled={generating || deleting} className="flex-1 sm:flex-none">
+                    {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Generate
+                  </Button>
+                  <Button type="button" variant="destructive" onClick={handleBatchDeleteByTerm} disabled={generating || deleting} className="flex-1 sm:flex-none">
+                    Clear Term
+                  </Button>
+                </div>
+              </form>
+            </div>
 
-          <div className="hidden md:block w-px bg-border" />
+            <div className="hidden md:block w-px bg-border" />
+          </>
+        )}
 
-          {/* Filter Section */}
-          <div className="flex-1 space-y-4">
-            <h2 className="font-semibold text-lg flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-500" /> Filter Reports
-            </h2>
-            <form onSubmit={onFilter} className="flex flex-col sm:flex-row flex-wrap gap-4 sm:items-end">
+        {/* Filter Section */}
+        <div className="flex-1 space-y-4">
+          <h2 className="font-semibold text-lg flex items-center gap-2">
+            <Search className="h-5 w-5 text-blue-500" /> Filter Reports
+          </h2>
+          <form onSubmit={onFilter} className="flex flex-col sm:flex-row flex-wrap gap-4 sm:items-end">
+            {isAdminOrTeacher && (
               <div className="w-full sm:w-48">
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Class</label>
                 <Controller
@@ -285,18 +292,17 @@ export default function ReportsPage() {
                   )}
                 />
               </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button type="submit" variant="secondary" className="flex-1 sm:flex-none">Filter</Button>
-                {selectedIds.length > 0 && (
-                  <Button type="button" variant="destructive" onClick={handleDeleteSelected} disabled={deleting} className="flex-1 sm:flex-none">
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete ({selectedIds.length})
-                  </Button>
-                )}
-              </div>
-            </form>
-          </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button type="submit" variant="secondary" className="flex-1 sm:flex-none">Filter</Button>
+              {isAdminOrTeacher && selectedIds.length > 0 && (
+                <Button type="button" variant="destructive" onClick={handleDeleteSelected} disabled={deleting} className="flex-1 sm:flex-none">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete ({selectedIds.length})
+                </Button>
+              )}
+            </div>
+          </form>
         </div>
-      )}
+      </div>
 
       {/* Reports Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -306,7 +312,7 @@ export default function ReportsPage() {
           </div>
         ) : reports.length === 0 ? (
           <div className="col-span-full py-12 text-center text-muted-foreground border rounded-md">
-            No report cards found. Generate some above.
+            No report cards found. {isAdminOrTeacher && "Generate some above."}
           </div>
         ) : (
           reports.map((report) => (

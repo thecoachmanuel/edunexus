@@ -115,8 +115,8 @@ export default function Dashboard() {
           {/* AI WIDGET */}
           <AiInsightWidget role={user?.role} />
 
-          {/* EARLY WARNING SYSTEM (Admin & Teacher) */}
-          {(user?.role === "admin" || user?.role === "teacher") && (
+          {/* EARLY WARNING SYSTEM (Admin Only) */}
+          {user?.role === "admin" && (
             <EarlyWarningWidget />
           )}
 

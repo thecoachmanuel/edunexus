@@ -131,10 +131,10 @@ export async function POST(req: NextRequest) {
         const average = data.totalScore / data.count;
         grades.push({
           subject: subjectId,
-          score: Math.round(average),
+          aggregateScore: Math.round(average),
           grade: calculateGrade(average),
         });
-        totalAverageSum += average;
+        totalAverageSum += Math.round(average);
         subjectCount++;
       }
 
@@ -148,6 +148,7 @@ export async function POST(req: NextRequest) {
         academicYear: academicYearId,
         term,
         grades,
+        totalScore: totalAverageSum,
         averageScore: overallAverage,
         overallGrade,
       };
