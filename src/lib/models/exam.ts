@@ -10,6 +10,7 @@ export interface IQuestion {
 }
 
 export interface IExam extends Document {
+  school: mongoose.Types.ObjectId;
   title: string;
   subject: mongoose.Types.ObjectId;
   class: mongoose.Types.ObjectId;
@@ -24,6 +25,7 @@ export interface IExam extends Document {
 
 const examSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     title: { type: String, required: true },
     subject: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
     class: { type: Schema.Types.ObjectId, ref: "Class", required: true },

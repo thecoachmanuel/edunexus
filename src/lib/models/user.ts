@@ -11,6 +11,7 @@ export enum UserRole {
 export type userRoles = "admin" | "teacher" | "student" | "parent";
 
 export interface IUser extends Document {
+  school: mongoose.Types.ObjectId;
   name: string;
   email: string;
   password: string;
@@ -24,6 +25,7 @@ export interface IUser extends Document {
 
 const userSchema: Schema<IUser> = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },

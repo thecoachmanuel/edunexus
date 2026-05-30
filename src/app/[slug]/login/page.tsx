@@ -4,17 +4,19 @@ import UniversalUserForm from "@/components/auth/UniversalUserForm";
 import { useAuth } from "@/hooks/AuthProvider";
 import { School } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const Login = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const params = useParams();
+  
   useEffect(() => {
     if (user && !loading) {
-      router.replace("/dashboard");
+      router.replace(`/${params.slug}/dashboard`);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, params.slug]);
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">

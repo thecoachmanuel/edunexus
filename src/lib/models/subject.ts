@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISubject extends Document {
+  school: mongoose.Types.ObjectId;
   name: string; // "Mathematics"
   code: string; // "MATH101"
   teacher?: mongoose.Types.ObjectId[]; // Default teacher for this subject
@@ -9,6 +10,7 @@ export interface ISubject extends Document {
 
 const subjectSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     name: { type: String, required: true },
     code: { type: String, required: true, unique: true },
     teacher: [{ type: Schema.Types.ObjectId, ref: "User" }],

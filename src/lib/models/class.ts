@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 // Interface for TypeScript to know the structure
 export interface IClass extends Document {
+  school: mongoose.Types.ObjectId;
   name: string; // e.g., "Grade 10"
   academicYear: mongoose.Types.ObjectId; // Link to "2024-2025"
   classTeacher: mongoose.Types.ObjectId; // The main teacher in charge
@@ -12,6 +13,7 @@ export interface IClass extends Document {
 
 const classSchema = new Schema<IClass>(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     name: {
       type: String,
       required: [true, "Class name is required"],

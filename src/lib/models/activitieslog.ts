@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IActivityLog extends Document {
+  school: mongoose.Types.ObjectId;
   user: string; // Who did it?
   action: string; // "Created Exam", "Registered Student"
   details?: string; // optional additional details
@@ -10,6 +11,7 @@ export interface IActivityLog extends Document {
 // types don't need to be defined in the schema more so here where we define user as string instead of objectId
 const activitiesLogSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     user: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     action: { type: String, required: true },
     details: { type: String },

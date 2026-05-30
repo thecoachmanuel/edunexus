@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IStudentResult extends Document {
+  school: mongoose.Types.ObjectId;
   student: mongoose.Types.ObjectId;
   subject: mongoose.Types.ObjectId;
   class: mongoose.Types.ObjectId;
@@ -29,6 +30,7 @@ export interface IStudentResult extends Document {
 
 const studentResultSchema = new Schema<IStudentResult>(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     student: { type: Schema.Types.ObjectId, ref: "User", required: true },
     subject: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
     class: { type: Schema.Types.ObjectId, ref: "Class", required: true },

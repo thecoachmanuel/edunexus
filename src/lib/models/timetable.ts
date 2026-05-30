@@ -14,6 +14,7 @@ export interface IDaySchedule {
 }
 
 export interface ITimetable extends Document {
+  school: mongoose.Types.ObjectId;
   class: mongoose.Types.ObjectId;
   academicYear: mongoose.Types.ObjectId;
   term?: string; // e.g. "Term 1"
@@ -23,6 +24,7 @@ export interface ITimetable extends Document {
 
 const timetableSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     class: { type: Schema.Types.ObjectId, ref: "Class", required: true },
     academicYear: {
       type: Schema.Types.ObjectId,

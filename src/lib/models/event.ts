@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IEvent extends Document {
+  school: mongoose.Types.ObjectId;
   title: string;
   description: string;
   startDate: Date;
@@ -8,11 +9,11 @@ export interface IEvent extends Document {
   type: "Academic" | "Holiday" | "Exam" | "Meeting";
   audience: "All" | "Teachers" | "Students" | "Parents";
   createdBy: mongoose.Types.ObjectId;
-  school?: mongoose.Types.ObjectId;
 }
 
 const eventSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     title: { type: String, required: true },
     description: { type: String, default: "" },
     startDate: { type: Date, required: true },
@@ -28,7 +29,6 @@ const eventSchema = new Schema(
       default: "All",
     },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    school: { type: Schema.Types.ObjectId, ref: "SchoolSettings" },
   },
   { timestamps: true }
 );

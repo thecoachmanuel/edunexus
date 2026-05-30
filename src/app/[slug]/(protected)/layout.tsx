@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/AuthProvider";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { toast } from "sonner";
@@ -13,23 +13,24 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   const { loading, user, year } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace("/login");
+        router.replace(`/${params.slug}/login`);
       } else if (!year) {
         if (user.role === "admin") {
-          if (pathname !== "/settings/academic-years") {
+          if (pathname !== `/${params.slug}/settings/academic-years`) {
             toast.warning("Please configure an active Academic Year first.");
-            router.replace("/settings/academic-years");
+            router.replace(`/${params.slug}/settings/academic-years`);
           }
         } else {
-          router.replace("/login");
+          router.replace(`/${params.slug}/login`);
         }
       }
     }
-  }, [loading, user, year, pathname, router]);
+  }, [loading, user, year, pathname, router, params.slug]);
 
   if (loading) {
     return (

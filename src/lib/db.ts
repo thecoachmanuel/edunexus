@@ -17,8 +17,15 @@ import "@/lib/models/studentFee";
 import "@/lib/models/studentResult";
 import "@/lib/models/subject";
 import "@/lib/models/submission";
+import "@/lib/models/task";
 import "@/lib/models/timetable";
 import "@/lib/models/user";
+import "@/lib/models/school";
+import "@/lib/models/plan";
+import "@/lib/models/subscription";
+import "@/lib/models/invoiceLog";
+import "@/lib/models/supportTicket";
+import "@/lib/models/superAdmin";
 
 const MONGODB_URI = process.env.MONGO_URL as string;
 

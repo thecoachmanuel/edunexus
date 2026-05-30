@@ -9,6 +9,7 @@ export interface ITransaction {
 }
 
 export interface IStudentFee extends Document {
+  school: mongoose.Types.ObjectId;
   student: mongoose.Types.ObjectId;
   feeStructure: mongoose.Types.ObjectId;
   class: mongoose.Types.ObjectId;
@@ -23,6 +24,7 @@ export interface IStudentFee extends Document {
 }
 
 const transactionSchema = new Schema({
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
   amount: { type: Number, required: true },
   date: { type: Date, default: Date.now },
   method: {

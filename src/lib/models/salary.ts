@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISalary extends Document {
+  school: mongoose.Types.ObjectId;
   employee: mongoose.Types.ObjectId;
   academicYear: mongoose.Types.ObjectId;
   month: number; // 1-12
@@ -19,6 +20,7 @@ export interface ISalary extends Document {
 
 const salarySchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     employee: { type: Schema.Types.ObjectId, ref: "User", required: true },
     academicYear: {
       type: Schema.Types.ObjectId,

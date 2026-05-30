@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISchoolSettings extends Document {
+  school: mongoose.Types.ObjectId;
   bankName: string;
   accountName: string;
   accountNumber: string;
@@ -14,6 +15,7 @@ export interface ISchoolSettings extends Document {
 
 const schoolSettingsSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     bankName: { type: String, default: "" },
     accountName: { type: String, default: "" },
     accountNumber: { type: String, default: "" },

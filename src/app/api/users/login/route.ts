@@ -2,17 +2,30 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/user";
+import School from "@/lib/models/school";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { email, password } = await req.json();
-    let user = await User.findOne({ email });
+    const { email, password, slug } = await req.json();
+
+    // Find school by slug to scope the login
+    let schoolId: string | undefined;
+    if (slug) {
+      const school = await School.findOne({ slug, isActive: true });
+      if (!school) {
+        return NextResponse.json({ message: "School not found or inactive." }, { status: 404 });
+      }
+      schoolId = school._id.toString();
+    }
+
+    // Find user — scoped by school if slug provided
+    let user = await User.findOne(schoolId ? { email, school: schoolId } : { email });
 
     let isAuthorized = false;
 
-    // Admin Env Override
+    // Admin Env Override (legacy for initial setup)
     if (
       process.env.ADMIN_EMAIL &&
       process.env.ADMIN_PASSWORD &&
@@ -20,20 +33,23 @@ export async function POST(req: Request) {
       password === process.env.ADMIN_PASSWORD
     ) {
       if (!user) {
-        user = await User.create({
-          name: "Super Admin",
-          email: process.env.ADMIN_EMAIL,
-          password: process.env.ADMIN_PASSWORD,
-          role: "admin",
-          isActive: true,
-        });
+        const anySchool = schoolId || (await School.findOne())?._id.toString();
+        if (anySchool) {
+          user = await User.create({
+            school: anySchool,
+            name: "Admin",
+            email: process.env.ADMIN_EMAIL,
+            password: process.env.ADMIN_PASSWORD,
+            role: "admin",
+            isActive: true,
+          });
+        }
       } else if (user.role !== "admin") {
         user.role = "admin";
         await user.save();
       }
       isAuthorized = true;
     } else {
-      // Normal DB Check
       if (user && (await user.matchPassword(password))) {
         isAuthorized = true;
       }
@@ -41,7 +57,10 @@ export async function POST(req: Request) {
 
     if (isAuthorized && user) {
       const token = jwt.sign(
-        { userId: user.id.toString() },
+        {
+          userId: user.id.toString(),
+          schoolId: user.school?.toString(),
+        },
         process.env.JWT_SECRET as string,
         { expiresIn: "30d", algorithm: "HS512" }
       );
@@ -53,7 +72,7 @@ export async function POST(req: Request) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+        maxAge: 30 * 24 * 60 * 60,
         path: "/",
       });
 
@@ -65,6 +84,7 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json({ message: "Server Error", error }, { status: 500 });
   }
 }

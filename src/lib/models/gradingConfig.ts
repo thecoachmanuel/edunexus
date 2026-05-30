@@ -7,6 +7,7 @@ export interface IGradeThreshold {
 }
 
 export interface IGradingConfig extends Document {
+  school: mongoose.Types.ObjectId;
   academicYear: mongoose.Types.ObjectId;
   term: string;                 // e.g. "Term 1"
   // Score weights (must total 100)
@@ -36,6 +37,7 @@ const gradeThresholdSchema = new Schema<IGradeThreshold>(
 
 const gradingConfigSchema = new Schema<IGradingConfig>(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     academicYear: { type: Schema.Types.ObjectId, ref: "AcademicYear", required: true },
     term: { type: String, required: true },
     quizWeight: { type: Number, default: 10 },
@@ -59,8 +61,8 @@ const gradingConfigSchema = new Schema<IGradingConfig>(
   { timestamps: true }
 );
 
-// One config per year+term
-gradingConfigSchema.index({ academicYear: 1, term: 1 }, { unique: true });
+// One config per school + year + term
+gradingConfigSchema.index({ school: 1, academicYear: 1, term: 1 }, { unique: true });
 
 export default (
   mongoose.models.GradingConfig ||

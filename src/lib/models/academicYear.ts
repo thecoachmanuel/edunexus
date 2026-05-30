@@ -7,6 +7,7 @@ export interface ITerm {
 }
 
 export interface IAcademicYear extends Document {
+  school: mongoose.Types.ObjectId;
   name: string; // "2026-2027"
   fromYear: Date; // Derived/fallback
   toYear: Date; // Derived/fallback
@@ -24,6 +25,7 @@ const termSchema = new Schema({
 
 const academicYearSchema = new Schema<IAcademicYear>(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     name: { type: String, required: true },
     fromYear: { type: Date, required: true },
     toYear: { type: Date, required: true },

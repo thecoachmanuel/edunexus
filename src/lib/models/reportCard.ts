@@ -12,6 +12,7 @@ export interface IGrade {
 }
 
 export interface IReportCard extends Document {
+  school: mongoose.Types.ObjectId;
   student: mongoose.Types.ObjectId;
   class: mongoose.Types.ObjectId;
   academicYear: mongoose.Types.ObjectId;
@@ -31,6 +32,7 @@ export interface IReportCard extends Document {
 
 const reportCardSchema = new Schema<IReportCard>(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     student: { type: Schema.Types.ObjectId, ref: "User", required: true },
     class: { type: Schema.Types.ObjectId, ref: "Class", required: true },
     academicYear: { type: Schema.Types.ObjectId, ref: "AcademicYear", required: true },

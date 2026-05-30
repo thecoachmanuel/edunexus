@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IMaterial extends Document {
+  school: mongoose.Types.ObjectId;
   title: string;
   description?: string;
   type: string; // "Document", "Video", "Link", "Other"
@@ -14,6 +15,7 @@ export interface IMaterial extends Document {
 
 const materialSchema = new Schema<IMaterial>(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     title: {
       type: String,
       required: [true, "Title is required"],

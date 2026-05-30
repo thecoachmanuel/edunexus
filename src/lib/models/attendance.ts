@@ -7,6 +7,7 @@ export interface IAttendanceRecord {
 }
 
 export interface IAttendance extends Document {
+  school: mongoose.Types.ObjectId;
   date: Date; // Stored as midnight UTC for the specific day
   class: mongoose.Types.ObjectId;
   academicYear: mongoose.Types.ObjectId;
@@ -18,6 +19,7 @@ export interface IAttendance extends Document {
 
 const attendanceSchema = new Schema<IAttendance>(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     date: { type: Date, required: true },
     class: { type: Schema.Types.ObjectId, ref: "Class", required: true },
     academicYear: { type: Schema.Types.ObjectId, ref: "AcademicYear", required: true },

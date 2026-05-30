@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IFeeStructure extends Document {
+  school: mongoose.Types.ObjectId;
   name: string;
   amount: number;
   class: mongoose.Types.ObjectId;
@@ -14,6 +15,7 @@ export interface IFeeStructure extends Document {
 
 const feeStructureSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     name: { type: String, required: true },
     amount: { type: Number, required: true },
     class: { type: Schema.Types.ObjectId, ref: "Class", required: true },

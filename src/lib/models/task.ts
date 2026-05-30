@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ITask extends Document {
+  school: mongoose.Types.ObjectId;
   title: string;
   description: string;
   status: "Todo" | "In Progress" | "Review" | "Done";
@@ -8,11 +9,11 @@ export interface ITask extends Document {
   assignee?: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   dueDate?: Date;
-  school?: mongoose.Types.ObjectId;
 }
 
 const taskSchema = new Schema(
   {
+    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     title: { type: String, required: true },
     description: { type: String, default: "" },
     status: {
@@ -28,7 +29,6 @@ const taskSchema = new Schema(
     assignee: { type: Schema.Types.ObjectId, ref: "User" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     dueDate: { type: Date },
-    school: { type: Schema.Types.ObjectId, ref: "SchoolSettings" },
   },
   { timestamps: true }
 );

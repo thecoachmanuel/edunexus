@@ -24,7 +24,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { UserRole } from "@/types";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/hooks/AuthProvider";
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -205,6 +205,8 @@ export const sidebardata = {
         { title: "Analytics", url: "/analytics" },
         { title: "School Settings", url: "/settings/school" },
         { title: "Academic Years", url: "/settings/academic-years" },
+        { title: "Billing & Subscription", url: "/billing" },
+        { title: "Support Center", url: "/support" },
         // { title: "Roles & Permissions", url: "/settings/roles" },
       ],
     },
@@ -217,6 +219,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const router = useRouter();
+  const params = useParams();
 
   // Dynamic School Settings state
   const [schoolInfo, setSchoolInfo] = useState({
@@ -258,28 +261,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return sidebardata.navMain
       .filter((item) => !item.roles || item.roles.includes(userRole))
       .map((item) => {
-        const isChildActive = item.items?.some((sub) => sub.url === pathname);
-        const isMainActive = item.url === pathname;
+        const itemUrl = item.url === "#" ? "#" : `/${params.slug}${item.url}`;
+        const isChildActive = item.items?.some((sub) => `/${params.slug}${sub.url}` === pathname);
+        const isMainActive = itemUrl === pathname;
         return {
           ...item,
+          url: itemUrl,
           isActive: isMainActive || isChildActive,
           items: item.items
             ?.filter(
               (subItem) => !subItem.roles || subItem.roles.includes(userRole),
             )
-            .map((subItem) => ({
-              ...subItem,
-              isActive: subItem.url === pathname,
-            })),
+            .map((subItem) => {
+              const subItemUrl = `/${params.slug}${subItem.url}`;
+              return {
+                ...subItem,
+                url: subItemUrl,
+                isActive: subItemUrl === pathname,
+              };
+            }),
         };
       });
-  }, [pathname, userRole]);
+  }, [pathname, userRole, params.slug]);
 
   const logout = async () => {
     try {
       await api.post("/users/logout").finally(() => {
         setUser(null);
-        router.push("/login");
+        router.push(`/${params.slug}/login`);
         toast.success("Logged out successfully");
       });
     } catch (error) {

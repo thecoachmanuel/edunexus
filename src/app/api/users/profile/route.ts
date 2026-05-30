@@ -3,6 +3,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/user";
 import jwt from "jsonwebtoken";
+import { getSchoolFeatures } from "@/lib/utils/planEnforcer";
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,12 +17,25 @@ export async function GET(req: NextRequest) {
     const user = await User.findById(decoded.userId).select("-password").lean();
 
     if (user) {
+      let schoolContext = null;
+      if (user.school) {
+        const planInfo = await getSchoolFeatures(user.school.toString());
+        schoolContext = {
+          _id: user.school,
+          features: planInfo.features,
+          isTrial: planInfo.isTrial,
+          status: planInfo.status,
+          planName: planInfo.planName
+        };
+      }
+
       return NextResponse.json({
         user: {
           _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
+          schoolContext,
         },
       });
     } else {

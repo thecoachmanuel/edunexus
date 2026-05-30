@@ -18,6 +18,7 @@ import { CustomInput } from "@/components/global/CustomInput";
 import { api } from "@/lib/api";
 import { CustomSelect } from "@/components/global/CustomSelect";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 // import { useAuth } from "@/hooks/AuthProvider";
 import { CustomMultiSelect } from "@/components/global/CustomMultiSelect";
 
@@ -73,6 +74,7 @@ type FormValues = z.infer<ReturnType<typeof createSchema>>;
 const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
   const isUpdate = type === "update";
   const isLogin = type === "login";
+  const params = useParams();
   // const { setUser } = useAuth();
 
   const [classes, setClasses] = useState<Class[]>([]);
@@ -194,11 +196,10 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
         const { data: user } = await api.post("/users/login", {
           email: data.email,
           password: data.password,
+          slug: params.slug,
         });
-        //   todo: set user context
-        console.log(user);
         toast.success("Logged in successfully");
-        window.location.href = "/dashboard";
+        window.location.href = `/${params.slug}/dashboard`;
       } else if (type === "create") {
         await api.post("/users/register", payload);
         toast.success("Account created successfully!");
