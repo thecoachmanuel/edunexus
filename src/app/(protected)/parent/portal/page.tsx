@@ -20,6 +20,7 @@ import {
   ChevronUp,
   FileText,
   Loader2,
+  XCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,31 +138,76 @@ function ChildCard({ child }: { child: ChildData }) {
             </CardContent>
           </Card>
 
-          {/* Upcoming Quizzes */}
+          {/* Quizzes Tracker */}
           <Card className="border shadow-none">
             <CardHeader className="pb-2 flex flex-row items-center gap-2">
               <BookOpen className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-semibold">Upcoming Quizzes</CardTitle>
+              <CardTitle className="text-sm font-semibold">Quizzes</CardTitle>
             </CardHeader>
             <CardContent>
-              {child.upcomingQuizzes.length === 0 ? (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  No quizzes due soon
+              <div className="space-y-4">
+                {/* Missing Quizzes */}
+                {child.missingQuizzes && child.missingQuizzes.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-rose-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" /> Missing
+                    </h4>
+                    <ul className="space-y-2">
+                      {child.missingQuizzes.map((q) => (
+                        <li key={q._id} className="flex items-start gap-2 text-sm bg-rose-50 dark:bg-rose-950/20 p-2 rounded-md border border-rose-100 dark:border-rose-900/50">
+                          <XCircle className="h-3.5 w-3.5 mt-0.5 text-rose-500 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-rose-700 dark:text-rose-400 truncate">{q.title}</p>
+                            <p className="text-xs text-rose-500/80">Past due: {format(new Date(q.dueDate), "MMM d, yyyy")}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Upcoming Quizzes */}
+                <div>
+                  <h4 className="text-xs font-semibold text-amber-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> Upcoming
+                  </h4>
+                  {child.upcomingQuizzes.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No upcoming quizzes.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {child.upcomingQuizzes.map((q) => (
+                        <li key={q._id} className="flex items-start gap-2 text-sm">
+                          <Clock className="h-3.5 w-3.5 mt-0.5 text-amber-500 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{q.title}</p>
+                            <p className="text-xs text-muted-foreground">Due: {format(new Date(q.dueDate), "MMM d, yyyy")}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-              ) : (
-                <ul className="space-y-2">
-                  {child.upcomingQuizzes.map((q) => (
-                    <li key={q._id} className="flex items-start gap-2 text-sm">
-                      <Clock className="h-3.5 w-3.5 mt-0.5 text-amber-500 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="font-medium truncate">{q.title}</p>
-                        <p className="text-xs text-muted-foreground">Due: {format(new Date(q.dueDate), "MMM d, yyyy")}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+
+                {/* Completed Quizzes */}
+                {child.completedQuizzes && child.completedQuizzes.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-emerald-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> Completed
+                    </h4>
+                    <ul className="space-y-2">
+                      {child.completedQuizzes.map((q) => (
+                        <li key={q._id} className="flex items-start justify-between text-sm">
+                          <div className="flex items-start gap-2 min-w-0">
+                            <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-emerald-500 shrink-0" />
+                            <p className="font-medium truncate">{q.title}</p>
+                          </div>
+                          <Badge variant="outline" className="text-xs shrink-0">{q.score} pts</Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 

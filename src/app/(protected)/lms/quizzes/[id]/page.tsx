@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import type { exam, Submission } from "@/types";
 import QuizRadio from "@/components/lms/QuizRadio";
 import QuestionEditor from "@/components/lms/QuestionEditor";
@@ -228,7 +229,22 @@ const Quiz = () => {
         </>
       )}
 
-      {isEditing ? (
+      {isTeacher && !isEditing ? (
+        <div className="mt-6">
+          <Tabs defaultValue="questions" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="questions">Questions</TabsTrigger>
+              <TabsTrigger value="submissions">Submissions</TabsTrigger>
+            </TabsList>
+            <TabsContent value="questions">
+              <QuestionsList exam={exam} isTeacher={isTeacher} answers={answers} setAnswers={setAnswers} submission={submission} />
+            </TabsContent>
+            <TabsContent value="submissions">
+              <SubmissionsTab examId={id} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      ) : isEditing ? (
         <QuestionEditor
           exam={exam}
           onSuccess={() => {
@@ -238,52 +254,11 @@ const Quiz = () => {
           onCancel={() => setIsEditing(false)}
         />
       ) : (
-        <div className="space-y-6">
-        {exam.questions.map((q: any, index: number) => (
-          <Card key={q._id}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium flex flex-col sm:flex-row sm:items-start gap-2">
-                <div className="flex gap-2 flex-1">
-                  <span className="text-muted-foreground">{index + 1}.</span>
-                  <span>{q.questionText}</span>
-                </div>
-                <span className="sm:ml-auto w-fit text-xs font-normal text-muted-foreground bg-secondary px-2 py-1 rounded whitespace-nowrap">
-                  {q.points} pts
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isTeacher ? (
-                <ul className="space-y-2">
-                  {q.options.map((opt: string, i: number) => (
-                    <li
-                      key={i}
-                      className={`p-3 rounded-md border flex items-center gap-2 ${
-                        opt === q.correctAnswer
-                          ? "bg-primary font-medium"
-                          : "bg-black/20 dark:bg-black/70"
-                      }`}
-                    >
-                      {opt === q.correctAnswer && (
-                        <CheckCircle className="h-4 w-4" />
-                      )}
-                      {opt}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <QuizRadio
-                  answers={answers}
-                  question={q}
-                  setAnswers={setAnswers}
-                  submission={submission}
-                />
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        <div className="mt-6">
+          <QuestionsList exam={exam} isTeacher={isTeacher} answers={answers} setAnswers={setAnswers} submission={submission} />
+        </div>
       )}
+
       {!isEditing && (
         <div className="flex justify-end gap-4 pt-4">
         {isStudent && !submission && (
@@ -302,6 +277,159 @@ const Quiz = () => {
         )}
       </div>
       )}
+    </div>
+  );
+};
+
+// Extracted QuestionsList to keep code clean
+const QuestionsList = ({ exam, isTeacher, answers, setAnswers, submission }: any) => {
+  return (
+    <div className="space-y-6">
+      {exam.questions.map((q: any, index: number) => (
+        <Card key={q._id}>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-medium flex flex-col sm:flex-row sm:items-start gap-2">
+              <div className="flex gap-2 flex-1">
+                <span className="text-muted-foreground">{index + 1}.</span>
+                <span>{q.questionText}</span>
+              </div>
+              <span className="sm:ml-auto w-fit text-xs font-normal text-muted-foreground bg-secondary px-2 py-1 rounded whitespace-nowrap">
+                {q.points} pts
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isTeacher ? (
+              <ul className="space-y-2">
+                {q.options.map((opt: string, i: number) => (
+                  <li
+                    key={i}
+                    className={`p-3 rounded-md border flex items-center gap-2 ${
+                      opt === q.correctAnswer
+                        ? "bg-primary font-medium"
+                        : "bg-black/20 dark:bg-black/70"
+                    }`}
+                  >
+                    {opt === q.correctAnswer && (
+                      <CheckCircle className="h-4 w-4" />
+                    )}
+                    {opt}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <QuizRadio
+                answers={answers}
+                question={q}
+                setAnswers={setAnswers}
+                submission={submission}
+              />
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+// Submissions tracking tab
+import { Users, XCircle } from "lucide-react";
+const SubmissionsTab = ({ examId }: { examId: string }) => {
+  const { data: tracking, isLoading } = useSWR(`/exams/${examId}/tracking`);
+
+  if (isLoading) {
+    return (
+      <div className="h-40 flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!tracking) return <p>Failed to load tracking data.</p>;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{tracking.totalStudents}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-emerald-600">{tracking.submissions?.length || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Not Completed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-rose-600">{tracking.missingStudents?.length || 0}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-emerald-500" />
+              Completed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {tracking.submissions?.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No submissions yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {tracking.submissions?.map((sub: any) => (
+                  <li key={sub._id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">{sub.student.name}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(sub.submittedAt).toLocaleString()}</span>
+                    </div>
+                    <Badge variant={sub.percentage >= 50 ? "default" : "destructive"}>
+                      {sub.score}/{sub.totalPoints} ({sub.percentage}%)
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-rose-500" />
+              Not Completed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {tracking.missingStudents?.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">All students have submitted!</p>
+            ) : (
+              <ul className="space-y-3">
+                {tracking.missingStudents?.map((student: any) => (
+                  <li key={student._id} className="flex items-center gap-3 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/50 rounded-lg">
+                    <div className="h-8 w-8 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 font-medium">
+                      {student.name.charAt(0)}
+                    </div>
+                    <span className="font-medium text-sm">{student.name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

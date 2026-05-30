@@ -49,16 +49,24 @@ export async function GET(req: NextRequest) {
         });
         const attendanceRate = totalDays === 0 ? 100 : Math.round((presentDays / totalDays) * 100);
 
-        // 2. Upcoming quizzes
-        const upcomingQuizzes = await Exam.find({
+        // 2. Quizzes (Upcoming, Missing, Completed)
+        const allQuizzes = await Exam.find({
           class: child.studentClass?._id,
-          isActive: true,
-          dueDate: { $gte: new Date() },
         })
           .sort({ dueDate: 1 })
-          .limit(3)
-          .select("title dueDate")
+          .select("title dueDate isActive")
           .lean();
+
+        const childSubmissions = await Submission.find({ student: child._id })
+          .populate("exam", "title")
+          .lean();
+        
+        const submittedExamIds = new Set(childSubmissions.map((s: any) => s.exam?._id?.toString()));
+
+        const now = new Date();
+        const upcomingQuizzes = allQuizzes.filter((q: any) => q.isActive && new Date(q.dueDate) >= now && !submittedExamIds.has(q._id.toString())).slice(0, 3);
+        const missingQuizzes = allQuizzes.filter((q: any) => q.isActive && new Date(q.dueDate) < now && !submittedExamIds.has(q._id.toString())).slice(0, 3);
+        const completedQuizzes = childSubmissions.slice(0, 3);
 
         // 3. Fee summary
         const fees = await StudentFee.find({ student: child._id })
@@ -89,6 +97,17 @@ export async function GET(req: NextRequest) {
             _id: q._id.toString(),
             title: q.title,
             dueDate: q.dueDate,
+          })),
+          missingQuizzes: missingQuizzes.map((q: any) => ({
+            _id: q._id.toString(),
+            title: q.title,
+            dueDate: q.dueDate,
+          })),
+          completedQuizzes: completedQuizzes.map((s: any) => ({
+            _id: s._id.toString(),
+            examId: s.exam?._id?.toString(),
+            title: s.exam?.title || "Quiz",
+            score: s.score,
           })),
           fees: {
             totalOwed,
