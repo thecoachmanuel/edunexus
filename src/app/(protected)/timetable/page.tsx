@@ -181,12 +181,19 @@ const Timetable = () => {
             settings,
           });
           successCount++;
-        } catch (error) {
-          console.error(`Failed to generate for ${cls.name}:`, error);
-          failCount++;
+        } catch (error: any) {
+          if (error.response?.status === 429) {
+            toast.warning("AI Quota Limit hit! Pausing for 60 seconds before retrying this class...", { duration: 10000 });
+            await new Promise(resolve => setTimeout(resolve, 60000));
+            i--; // Retry the same class
+            continue;
+          } else {
+            console.error(`Failed to generate for ${cls.name}:`, error);
+            failCount++;
+          }
         }
         
-        // Add a 5 second delay between requests to prevent hitting Gemini API rate limits (15 RPM)
+        // Add a 5 second delay between successful requests to prevent hitting rate limits
         if (i < classesToGenerate.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 5000));
         }

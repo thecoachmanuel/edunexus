@@ -186,97 +186,105 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 
     const isValidObjectId = (id: any) => typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id);
 
-    while (attempts < maxAttempts) {
-      attempts++;
-      console.log(`[Timetable] Attempt ${attempts}: Sending prompt to Gemini...`);
+    try {
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`[Timetable] Attempt ${attempts}: Sending prompt to Gemini...`);
 
-      try {
-        const generateWithTimeout = Promise.race([
-          activeModel.generateContent(currentPrompt),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("AI request timed out after 90 seconds.")), 90000)
-          ),
-        ]);
+        try {
+          const generateWithTimeout = Promise.race([
+            activeModel.generateContent(currentPrompt),
+            new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error("AI request timed out after 90 seconds.")), 90000)
+            ),
+          ]);
 
-        const result = await generateWithTimeout as Awaited<ReturnType<typeof activeModel.generateContent>>;
-        const text = result.response.text();
+          const result = await generateWithTimeout as Awaited<ReturnType<typeof activeModel.generateContent>>;
+          const text = result.response.text();
 
-        if (!text || text.trim().length === 0) {
-          throw new Error("AI returned an empty response.");
-        }
+          if (!text || text.trim().length === 0) {
+            throw new Error("AI returned an empty response.");
+          }
 
-        const jsonStart = text.indexOf("{");
-        const jsonEnd = text.lastIndexOf("}");
-        if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
-          throw new Error("No JSON object found in AI response");
-        }
+          const jsonStart = text.indexOf("{");
+          const jsonEnd = text.lastIndexOf("}");
+          if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+            throw new Error("No JSON object found in AI response");
+          }
 
-        const jsonString = text.substring(jsonStart, jsonEnd + 1);
-        const aiSchedule = JSON.parse(jsonString);
+          const jsonString = text.substring(jsonStart, jsonEnd + 1);
+          const aiSchedule = JSON.parse(jsonString);
 
-        if (!aiSchedule || !Array.isArray(aiSchedule.schedule)) {
-          throw new Error("AI response did not contain a valid schedule array.");
-        }
+          if (!aiSchedule || !Array.isArray(aiSchedule.schedule)) {
+            throw new Error("AI response did not contain a valid schedule array.");
+          }
 
-        // --- Step 5: Validate and Sanitize ---
-        let validationError = "";
-        
-        const sanitizedSchedule = aiSchedule.schedule.map((day: any) => {
-          return {
-            day: day.day,
-            periods: (day.periods || []).map((period: any) => {
-              const isBreak = !!period.name && !isValidObjectId(period.subject) && !isValidObjectId(period.teacher);
-              
-              let subject = isValidObjectId(period.subject) ? period.subject : null;
-              let teacher = isValidObjectId(period.teacher) ? period.teacher : null;
-              
-              if (!isBreak && (!subject || !teacher)) {
-                validationError += `Missing valid ObjectId for subject or teacher on ${day.day} at ${period.startTime}. `;
-              }
-              
-              // Validate mathematical clash
-              if (teacher && teacherClashMap[teacher]) {
-                const clash = teacherClashMap[teacher].find(c => c.day === day.day && c.startTime === period.startTime);
-                if (clash) {
-                  validationError += `CRITICAL CLASH: Teacher ${teacher} is already booked on ${day.day} at ${period.startTime} in another class. You MUST choose a different teacher. `;
+          // --- Step 5: Validate and Sanitize ---
+          let validationError = "";
+          
+          const sanitizedSchedule = aiSchedule.schedule.map((day: any) => {
+            return {
+              day: day.day,
+              periods: (day.periods || []).map((period: any) => {
+                const isBreak = !!period.name && !isValidObjectId(period.subject) && !isValidObjectId(period.teacher);
+                
+                let subject = isValidObjectId(period.subject) ? period.subject : null;
+                let teacher = isValidObjectId(period.teacher) ? period.teacher : null;
+                
+                if (!isBreak && (!subject || !teacher)) {
+                  validationError += `Missing valid ObjectId for subject or teacher on ${day.day} at ${period.startTime}. `;
                 }
-              }
-              
-              return {
-                subject,
-                teacher,
-                startTime: period.startTime,
-                endTime: period.endTime,
-                name: period.name || null,
-              };
-            }),
-          };
-        });
+                
+                // Validate mathematical clash
+                if (teacher && teacherClashMap[teacher]) {
+                  const clash = teacherClashMap[teacher].find(c => c.day === day.day && c.startTime === period.startTime);
+                  if (clash) {
+                    validationError += `CRITICAL CLASH: Teacher ${teacher} is already booked on ${day.day} at ${period.startTime} in another class. You MUST choose a different teacher. `;
+                  }
+                }
+                
+                return {
+                  subject,
+                  teacher,
+                  startTime: period.startTime,
+                  endTime: period.endTime,
+                  name: period.name || null,
+                };
+              }),
+            };
+          });
 
-        // Check if there are validation errors
-        if (validationError && attempts < maxAttempts) {
-          console.log(`[Timetable] Validation failed on attempt ${attempts}: ${validationError}`);
-          currentPrompt += `\n\nVALIDATION FAILED ON PREVIOUS ATTEMPT. Fix these issues: ${validationError}`;
-          continue; // Retry with feedback
-        }
+          // Check if there are validation errors
+          if (validationError && attempts < maxAttempts) {
+            console.log(`[Timetable] Validation failed on attempt ${attempts}: ${validationError}`);
+            currentPrompt += `\n\nVALIDATION FAILED ON PREVIOUS ATTEMPT. Fix these issues: ${validationError}`;
+            continue; // Retry with feedback
+          }
 
-        // If valid or out of attempts
-        finalSanitizedSchedule = sanitizedSchedule;
-        break;
+          // If valid or out of attempts
+          finalSanitizedSchedule = sanitizedSchedule;
+          break;
 
-      } catch (err: any) {
-        console.error(`[Timetable] Attempt ${attempts} failed:`, err.message);
-        
-        // If we hit a rate limit (429) or quota error, back off heavily before retrying
-        if (err.message.toLowerCase().includes("quota") || err.message.includes("429")) {
-          console.log("[Timetable] AI Quota/Rate Limit hit. Backing off for 15 seconds...");
-          await new Promise(resolve => setTimeout(resolve, 15000));
-        }
-        
-        if (attempts === maxAttempts) {
-          throw err;
+        } catch (err: any) {
+          console.error(`[Timetable] Attempt ${attempts} failed:`, err.message);
+          
+          // If we hit a rate limit (429) or quota error, back off heavily before retrying
+          if (err.message.toLowerCase().includes("quota") || err.message.includes("429") || err.message.includes("503")) {
+            console.log("[Timetable] AI Quota/Rate Limit hit. Backing off for 15 seconds...");
+            await new Promise(resolve => setTimeout(resolve, 15000));
+          }
+          
+          if (attempts === maxAttempts) {
+            throw err;
+          }
         }
       }
+    } catch (routeErr: any) {
+      console.error("[Timetable] Generation completely failed:", routeErr.message);
+      if (routeErr.message && (routeErr.message.toLowerCase().includes("quota") || routeErr.message.includes("429") || routeErr.message.includes("503"))) {
+        return NextResponse.json({ message: "AI Quota Exceeded. Please wait before generating more." }, { status: 429 });
+      }
+      return NextResponse.json({ message: "Generation failed due to server error", error: routeErr.message }, { status: 500 });
     }
 
     if (!finalSanitizedSchedule) {
