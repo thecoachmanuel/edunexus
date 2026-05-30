@@ -10,6 +10,7 @@ import Class from "@/lib/models/class";
 import Subject from "@/lib/models/subject";
 import FeeStructure from "@/lib/models/feeStructure";
 import AcademicYear from "@/lib/models/academicYear";
+import Submission from "@/lib/models/submission";
 import jwt from "jsonwebtoken";
 
 export async function GET(req: NextRequest) {
