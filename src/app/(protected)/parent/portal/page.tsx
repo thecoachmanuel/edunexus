@@ -40,6 +40,8 @@ interface ChildData {
     attendanceRate: number;
   };
   upcomingQuizzes: { _id: string; title: string; dueDate: string }[];
+  missingQuizzes?: { _id: string; title: string; dueDate: string }[];
+  completedQuizzes?: { _id: string; title: string; score: number }[];
   fees: {
     totalOwed: number;
     totalPaid: number;
