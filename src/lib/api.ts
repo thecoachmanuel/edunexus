@@ -6,12 +6,17 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// Automatically retry failed requests (e.g. cold starts, network blips)
+// Retry on network errors and 504 gateway timeouts only.
+// We deliberately do NOT retry 500 errors — AI generation failures are not
+// transient and retrying would fire multiple expensive AI calls silently.
+// We also never retry POST /timetables/generate (costly AI endpoint).
 axiosRetry(api, {
-  retries: 3, // number of retries
-  retryDelay: axiosRetry.exponentialDelay, // exponential backoff
+  retries: 2,
+  retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
-    // Retry on network errors or 5xx server errors
-    return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response?.status === 500 || error.response?.status === 504;
+    const url = error.config?.url || "";
+    if (url.includes("timetables/generate")) return false; // never retry AI calls
+    const status = error.response?.status;
+    return axiosRetry.isNetworkError(error) || status === 504;
   },
 });
