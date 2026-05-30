@@ -29,6 +29,8 @@ const Timetable = () => {
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
+  // Track the currently-viewed term so fetchTimetable always fetches the right one
+  const [selectedTerm, setSelectedTerm] = useState<string>("");
   const [parentClasses, setParentClasses] = useState<{_id: string; name: string}[]>([]);
   const [lastUsedSettings, setLastUsedSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
   const [currentSettings, setCurrentSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
@@ -46,19 +48,23 @@ const Timetable = () => {
     }).catch(() => {});
   }, [user, isParent]);
 
-  // fetch timetable
-  const fetchTimetable = async (classId: string) => {
+  // fetch timetable — accepts an optional term override so post-generate fetch
+  // always retrieves the term that was just generated.
+  const fetchTimetable = async (classId: string, term?: string) => {
     if (!classId) return;
 
     try {
       setLoadingSchedule(true);
-      const { data } = await api.get(`/timetables/${classId}`);
+      const termParam = term || selectedTerm;
+      const url = termParam
+        ? `/timetables/${classId}?term=${encodeURIComponent(termParam)}`
+        : `/timetables/${classId}`;
+      const { data } = await api.get(url);
       setScheduleData(data.schedule || []);
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
         setScheduleData([]);
         if (!isAdmin) {
-          // Only show toast if user isn't admin (admins expect empty on new classes)
           toast("No schedule found for this class", { icon: "📅" });
         }
       } else {
@@ -74,7 +80,10 @@ const Timetable = () => {
     if (!confirm("Are you sure you want to clear the timetable for this class?")) return;
 
     try {
-      await api.delete(`/timetables/${selectedClass}`);
+      const termParam = selectedTerm
+        ? `?term=${encodeURIComponent(selectedTerm)}`
+        : "";
+      await api.delete(`/timetables/${selectedClass}${termParam}`);
       toast.success("Timetable cleared successfully");
       setScheduleData([]);
     } catch (error: any) {
@@ -82,31 +91,35 @@ const Timetable = () => {
     }
   };
 
-  // auto fetch using useEffect
+  // auto fetch when class changes
   useEffect(() => {
     if (selectedClass) {
       fetchTimetable(selectedClass);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClass]);
 
   const handleGenerate = async (
-    selectedClass: string,
+    classId: string,
     yearId: string,
     settings: GenSettings
   ) => {
     try {
       setLastUsedSettings({ yearId, settings });
       setIsGenerating(true);
+      // Keep track of the term being generated so we can fetch it after
+      setSelectedTerm(settings.term);
+
       const { data } = await api.post("/timetables/generate", {
-        classId: selectedClass,
+        classId,
         academicYearId: yearId,
         term: settings.term,
         settings,
       });
 
       toast.success(data.message || "Timetable generated successfully!");
-      // Fetch fresh from the DB to ensure all Mongoose populates are fully resolved
-      await fetchTimetable(selectedClass);
+      // Fetch using the exact term just generated
+      await fetchTimetable(classId, settings.term);
       setIsGenerating(false);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Generation failed");
@@ -122,6 +135,12 @@ const Timetable = () => {
     }
     const newSettings = { ...baseSettings.settings, subjectWeights: weights };
     await handleGenerate(selectedClass, baseSettings.yearId, newSettings);
+  };
+
+  // When settings change in GeneratorControls, keep the local term in sync
+  const handleSettingsChange = (data: { yearId: string; settings: GenSettings }) => {
+    setCurrentSettings(data);
+    setSelectedTerm(data.settings.term);
   };
 
   return (
@@ -158,11 +177,11 @@ const Timetable = () => {
         <div className="print:hidden">
           <GeneratorControls
             onGenerate={handleGenerate}
-            onClassChange={fetchTimetable}
+            onClassChange={(classId) => fetchTimetable(classId)}
             isGenerating={isGenerating}
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
-            onSettingsChange={setCurrentSettings}
+            onSettingsChange={handleSettingsChange}
           />
         </div>
       )}
