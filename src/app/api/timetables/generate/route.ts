@@ -306,14 +306,14 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
     }));
 
     // --- Step 7: Save (atomic upsert) ---
-    console.log("[Timetable] Saving sanitized schedule with", sanitizedSchedule.length, "days...");
+    console.log("[Timetable] Saving sanitized schedule with", finalSanitizedSchedule.length, "days...");
     const updatedTimetable = await Timetable.findOneAndUpdate(
       { class: classId, academicYear: academicYearId, term },
       {
         class: classId,
         academicYear: academicYearId,
         term,
-        schedule: sanitizedSchedule,
+        schedule: finalSanitizedSchedule,
       },
       { new: true, upsert: true }
     );
