@@ -12,11 +12,11 @@ import TimetableGrid from "@/components/timetable/TimetableGrid";
 import TimetableStatistics from "@/components/timetable/TimetableStatistics";
 
 import { Button } from "@/components/ui/button";
-import { Printer, Trash2 } from "lucide-react";
+import { Printer, Trash2, Loader2 } from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const Timetable = () => {
   const { user } = useAuth();

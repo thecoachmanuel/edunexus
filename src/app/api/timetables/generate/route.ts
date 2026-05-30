@@ -175,76 +175,134 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 }
     `.trim();
 
-    // --- Step 4: Call Gemini ---
+    // --- Step 4: Call Gemini with Retries ---
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
+    const activeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    // NOTE: gemini-2.5-flash uses thinking mode — do NOT set responseMimeType: "application/json"
-    // as it conflicts with the thinking budget and can cause the request to hang or return empty.
-    // We extract JSON from the plain text response instead.
-    const activeModel = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-    });
+    let attempts = 0;
+    const maxAttempts = 3;
+    let currentPrompt = prompt;
+    let finalSanitizedSchedule: any = null;
 
-    console.log("[Timetable] Sending prompt to Gemini (prompt length:", prompt.length, ")...");
-
-    // Wrap in a 90-second timeout so the route never hangs indefinitely
-    const generateWithTimeout = Promise.race([
-      activeModel.generateContent(prompt),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("AI request timed out after 90 seconds. Please try again.")), 90000)
-      ),
-    ]);
-
-    const result = await generateWithTimeout as Awaited<ReturnType<typeof activeModel.generateContent>>;
-    const text = result.response.text();
-    console.log("[Timetable] AI response received, length:", text.length);
-
-    if (!text || text.trim().length === 0) {
-      return NextResponse.json(
-        { message: "AI returned an empty response. Please try again." },
-        { status: 500 }
-      );
-    }
-
-    // --- Step 5: Parse AI response ---
-    let aiSchedule: any;
-    try {
-      // Extract the JSON object from the response text (handles markdown code fences, preamble, etc.)
-      const jsonStart = text.indexOf("{");
-      const jsonEnd = text.lastIndexOf("}");
-      if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
-        throw new Error("No JSON object found in AI response");
-      }
-      const jsonString = text.substring(jsonStart, jsonEnd + 1);
-      aiSchedule = JSON.parse(jsonString);
-    } catch (parseError: any) {
-      console.error("AI response JSON parsing failed. Raw text (first 500 chars):", text.substring(0, 500), parseError);
-      return NextResponse.json(
-        { message: "AI returned an invalid timetable format. Please try again.", error: parseError?.message },
-        { status: 500 }
-      );
-    }
-
-    if (!aiSchedule || !Array.isArray(aiSchedule.schedule)) {
-      console.error("AI Response lacks schedule array:", JSON.stringify(aiSchedule).substring(0, 300));
-      return NextResponse.json(
-        { message: "AI response did not contain a valid schedule. Please try again." },
-        { status: 500 }
-      );
-    }
-
-    // --- Step 6: Sanitize — reject non-ObjectId values for subject/teacher ---
     const isValidObjectId = (id: any) => typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id);
 
-    const sanitizedSchedule = aiSchedule.schedule.map((day: any) => ({
-      day: day.day,
-      periods: (day.periods || []).map((period: any) => ({
-        subject: isValidObjectId(period.subject) ? period.subject : null,
-        teacher: isValidObjectId(period.teacher) ? period.teacher : null,
-        startTime: period.startTime,
-        endTime: period.endTime,
-        name: period.name || null,
-      })),
+    while (attempts < maxAttempts) {
+      attempts++;
+      console.log(`[Timetable] Attempt ${attempts}: Sending prompt to Gemini...`);
+
+      try {
+        const generateWithTimeout = Promise.race([
+          activeModel.generateContent(currentPrompt),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("AI request timed out after 90 seconds.")), 90000)
+          ),
+        ]);
+
+        const result = await generateWithTimeout as Awaited<ReturnType<typeof activeModel.generateContent>>;
+        const text = result.response.text();
+
+        if (!text || text.trim().length === 0) {
+          throw new Error("AI returned an empty response.");
+        }
+
+        const jsonStart = text.indexOf("{");
+        const jsonEnd = text.lastIndexOf("}");
+        if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+          throw new Error("No JSON object found in AI response");
+        }
+
+        const jsonString = text.substring(jsonStart, jsonEnd + 1);
+        const aiSchedule = JSON.parse(jsonString);
+
+        if (!aiSchedule || !Array.isArray(aiSchedule.schedule)) {
+          throw new Error("AI response did not contain a valid schedule array.");
+        }
+
+        // --- Step 5: Validate and Sanitize ---
+        let validationError = "";
+        
+        const sanitizedSchedule = aiSchedule.schedule.map((day: any) => {
+          return {
+            day: day.day,
+            periods: (day.periods || []).map((period: any) => {
+              const isBreak = !!period.name && !isValidObjectId(period.subject) && !isValidObjectId(period.teacher);
+              
+              let subject = isValidObjectId(period.subject) ? period.subject : null;
+              let teacher = isValidObjectId(period.teacher) ? period.teacher : null;
+              
+              if (!isBreak && (!subject || !teacher)) {
+                validationError += `Missing valid ObjectId for subject or teacher on ${day.day} at ${period.startTime}. `;
+              }
+              
+              // Validate mathematical clash
+              if (teacher && teacherClashMap[teacher]) {
+                const clash = teacherClashMap[teacher].find(c => c.day === day.day && c.startTime === period.startTime);
+                if (clash) {
+                  validationError += `CRITICAL CLASH: Teacher ${teacher} is already booked on ${day.day} at ${period.startTime} in another class. You MUST choose a different teacher. `;
+                }
+              }
+              
+              return {
+                subject,
+                teacher,
+                startTime: period.startTime,
+                endTime: period.endTime,
+                name: period.name || null,
+              };
+            }),
+          };
+        });
+
+        // Check if there are validation errors
+        if (validationError && attempts < maxAttempts) {
+          console.log(`[Timetable] Validation failed on attempt ${attempts}: ${validationError}`);
+          currentPrompt += `\n\nVALIDATION FAILED ON PREVIOUS ATTEMPT. Fix these issues: ${validationError}`;
+          continue; // Retry with feedback
+        }
+
+        // If valid or out of attempts
+        finalSanitizedSchedule = sanitizedSchedule;
+        break;
+
+      } catch (err: any) {
+        console.error(`[Timetable] Attempt ${attempts} failed:`, err.message);
+        if (attempts === maxAttempts) {
+          throw err;
+        }
+      }
+    }
+
+    if (!finalSanitizedSchedule) {
+      return NextResponse.json(
+        { message: "AI failed to generate a valid timetable after multiple attempts. Please try again." },
+        { status: 500 }
+      );
+    }
+
+    // --- Step 6: Graceful Fallback (Study Hall) ---
+    // If the AI ran out of attempts and still left flaws, we convert them to Study/Free Periods
+    // rather than throwing a complete error or saving a database clash.
+    finalSanitizedSchedule = finalSanitizedSchedule.map((day: any) => ({
+      ...day,
+      periods: day.periods.map((period: any) => {
+        const isBreak = !!period.name && !period.subject && !period.teacher;
+        let isClashing = false;
+        
+        if (period.teacher && teacherClashMap[period.teacher]) {
+          isClashing = teacherClashMap[period.teacher].some(c => c.day === day.day && c.startTime === period.startTime);
+        }
+        
+        if (!isBreak && (!period.subject || !period.teacher || isClashing)) {
+          // Fallback
+          return {
+            ...period,
+            subject: null,
+            teacher: null,
+            name: "Study / Free Period"
+          };
+        }
+        return period;
+      })
     }));
 
     // --- Step 7: Save (atomic upsert) ---
