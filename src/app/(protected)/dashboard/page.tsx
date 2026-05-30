@@ -126,6 +126,39 @@ export default function Dashboard() {
 
           {/* RECENT ACTIVITY & UPCOMING CLASSES ROW */}
           <div className="grid gap-4 md:grid-cols-2">
+            {/* UPCOMING CLASSES CARD */}
+            <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-lg font-bold">Upcoming Events</CardTitle>
+                <Link href="/calendar" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">View Calendar</Link>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mt-2">
+                  {statsData?.upcomingClasses?.length > 0 ? (
+                    statsData.upcomingClasses.map((cls: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between border border-slate-100 dark:border-border rounded-lg p-3 hover:bg-slate-50 dark:hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-center justify-center border-l-4 border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 px-3 py-1 rounded-r-md min-w-[70px]">
+                            <span className="text-sm font-bold text-indigo-900 dark:text-indigo-200">{cls.time}</span>
+                            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">{cls.period}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800 dark:text-foreground">{cls.title}</p>
+                            <p className="text-xs text-slate-500 dark:text-muted-foreground">{cls.sub}</p>
+                          </div>
+                        </div>
+                        <div className="text-xs font-medium text-slate-400 dark:text-muted-foreground bg-slate-100 dark:bg-muted px-2 py-1 rounded-md">
+                          {cls.diff}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">No upcoming events scheduled.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* RECENT ACTIVITY CARD */}
             {user?.role === "admin" && (
               <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
@@ -164,39 +197,6 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             )}
-
-            {/* UPCOMING CLASSES CARD */}
-            <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-bold">Upcoming Events</CardTitle>
-                <Link href="/calendar" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">View Calendar</Link>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mt-2">
-                  {statsData?.upcomingClasses?.length > 0 ? (
-                    statsData.upcomingClasses.map((cls: any, i: number) => (
-                      <div key={i} className="flex items-center justify-between border border-slate-100 dark:border-border rounded-lg p-3 hover:bg-slate-50 dark:hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                          <div className="flex flex-col items-center justify-center border-l-4 border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 px-3 py-1 rounded-r-md min-w-[70px]">
-                            <span className="text-sm font-bold text-indigo-900 dark:text-indigo-200">{cls.time}</span>
-                            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">{cls.period}</span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-800 dark:text-foreground">{cls.title}</p>
-                            <p className="text-xs text-slate-500 dark:text-muted-foreground">{cls.sub}</p>
-                          </div>
-                        </div>
-                        <div className="text-xs font-medium text-slate-400 dark:text-muted-foreground bg-slate-100 dark:bg-muted px-2 py-1 rounded-md">
-                          {cls.diff}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-slate-500">No upcoming events scheduled.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
