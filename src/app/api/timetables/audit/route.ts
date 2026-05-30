@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import dbConnect from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import Timetable from "@/lib/models/timetable";
+import { getAuthUser } from "@/middleware/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-    }
+    await connectDB();
+    const authUser = await getAuthUser(req, ["admin"]);
+    if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const academicYearId = searchParams.get("academicYearId");
@@ -19,7 +17,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "Missing academicYearId or term" }, { status: 400 });
     }
 
-    await dbConnect();
+
 
     // Populate class, teacher, subject for rich data
     const allTimetables = await Timetable.find({ academicYear: academicYearId, term })
