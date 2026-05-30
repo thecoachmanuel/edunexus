@@ -59,7 +59,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="flex-1 flex flex-col">
+      <div className="space-y-6 p-8 pt-6 pb-6">
       {/* --- HEADER --- */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-2">
         <div>
@@ -108,8 +109,11 @@ export default function Dashboard() {
         <DashboardStats role={user?.role || "student"} data={statsData} />
       </div>
 
+      </div>
+
       {/* --- MAIN CONTENT GRID --- */}
-      <div className="grid gap-6 md:grid-cols-12">
+      <div className="flex-1 bg-white dark:bg-background/95 rounded-t-3xl border-t p-8 shadow-sm">
+        <div className="grid gap-6 md:grid-cols-12 max-w-7xl mx-auto">
         {/* LEFT COLUMN (Content) */}
         <div className="col-span-12 lg:col-span-8 space-y-4">
           {/* AI WIDGET */}
@@ -202,6 +206,7 @@ export default function Dashboard() {
 
           {/* CLASS LEADERBOARD WIDGET */}
           <ClassLeaderboardWidget data={statsData?.leaderboard} />
+        </div>
         </div>
       </div>
     </div>
