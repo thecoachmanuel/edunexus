@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Sanitize AI schedule to prevent Cast/Validation Errors on non-ObjectId values (like "Break", "Lunch", "None", or empty strings)
-    const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+    const isValidObjectId = (id: any) => typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
 
     const sanitizedSchedule = aiSchedule.schedule.map((day: any) => ({
       day: day.day,

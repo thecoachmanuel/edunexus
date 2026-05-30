@@ -83,6 +83,7 @@ export async function GET(req: NextRequest) {
           name: child.name,
           email: child.email,
           className: child.studentClass?.name || "No Class",
+          classId: child.studentClass?._id?.toString() || null,
           attendance: { totalDays, presentDays, attendanceRate },
           upcomingQuizzes: upcomingQuizzes.map((q: any) => ({
             _id: q._id.toString(),

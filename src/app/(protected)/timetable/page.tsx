@@ -13,18 +13,38 @@ import TimetableStatistics from "@/components/timetable/TimetableStatistics";
 
 import { Button } from "@/components/ui/button";
 import { Printer, Trash2 } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Timetable = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const isStudent = user?.role === "student";
+  const isParent = user?.role === "parent";
+  const isViewOnly = isStudent || isParent;
 
   const [scheduleData, setScheduleData] = useState<schedule[]>([]);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
+  const [parentClasses, setParentClasses] = useState<{_id: string; name: string}[]>([]);
   const [lastUsedSettings, setLastUsedSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
   const [currentSettings, setCurrentSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
+
+  // For parents: auto-load their children's classes
+  useEffect(() => {
+    if (!user || !isParent) return;
+    api.get("/parent/portal").then(({ data }) => {
+      const classes = (data.children || [])
+        .filter((c: any) => c.className && c._id)
+        .map((c: any) => ({ _id: c.classId || c._id, name: `${c.name} (${c.className})` }));
+      setParentClasses(classes);
+      // Auto-select first child's class
+      if (classes.length > 0) setSelectedClass(classes[0]._id);
+    }).catch(() => {});
+  }, [user, isParent]);
 
   // fetch timetable
   const fetchTimetable = async (classId: string) => {
@@ -80,6 +100,7 @@ const Timetable = () => {
       const { data } = await api.post("/timetables/generate", {
         classId: selectedClass,
         academicYearId: yearId,
+        term: settings.term,
         settings,
       });
 
@@ -113,6 +134,8 @@ const Timetable = () => {
           <p className="text-muted-foreground print:hidden">
             {isStudent
               ? "View your weekly class schedule."
+              : isParent
+              ? "View your children's weekly class schedule."
               : "View or manage weekly schedules."}
           </p>
         </div>
@@ -131,7 +154,7 @@ const Timetable = () => {
           </div>
         )}
       </div>
-      {!isStudent && (
+      {!isViewOnly && (
         <div className="print:hidden">
           <GeneratorControls
             onGenerate={handleGenerate}
@@ -143,6 +166,26 @@ const Timetable = () => {
           />
         </div>
       )}
+      {/* Parent class picker */}
+      {isParent && parentClasses.length > 0 && (
+        <Card className="print:hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium shrink-0">View schedule for:</span>
+              <Select value={selectedClass} onValueChange={(v) => { setSelectedClass(v); fetchTimetable(v); }}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Select child" />
+                </SelectTrigger>
+                <SelectContent>
+                  {parentClasses.map((c) => (
+                    <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <TimetableGrid 
         schedule={scheduleData} 
         isLoading={loadingSchedule} 
@@ -150,7 +193,7 @@ const Timetable = () => {
         classId={selectedClass}
         onPeriodUpdated={() => fetchTimetable(selectedClass)}
       />
-      {!isStudent && scheduleData.length > 0 && (
+      {!isViewOnly && scheduleData.length > 0 && (
         <div className="print:hidden">
           <TimetableStatistics 
             scheduleData={scheduleData} 

@@ -12,7 +12,12 @@ import { Event } from "@/lib/models/event";
 import { getAuthUser } from "@/middleware/auth";
 import { aiRateLimiter } from "@/lib/rate-limit";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
+// Deterministic fallback insights keyed by role
+const FALLBACK_INSIGHTS: Record<string, string> = {
+  admin: "Review your attendance trends this week — early identification of chronic absenteeism helps you intervene before it impacts academic performance. Consider scheduling a briefing with class teachers on their most recent results.",
+  teacher: "Take a moment to review your students' recent quiz submissions. Timely feedback significantly improves learning outcomes and helps students stay on track before the next assessment.",
+  student: "Consistency is key — make sure you've reviewed your notes from the last class before your next quiz. Students who revise regularly score up to 30% higher than those who cram.",
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }
 
-    // Apply Rate Limiting (10 requests per minute per user)
+    // Rate limiting
     const rateLimit = aiRateLimiter.check(authUser._id.toString());
     if (!rateLimit.success) {
       return NextResponse.json(
@@ -32,41 +37,47 @@ export async function POST(req: NextRequest) {
     }
 
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      return NextResponse.json(
-        { message: "Google Gemini API Key is missing" },
-        { status: 500 }
-      );
+      // Return a deterministic fallback if no API key configured
+      const fallback = FALLBACK_INSIGHTS[authUser.role] || FALLBACK_INSIGHTS.teacher;
+      return NextResponse.json({ text: fallback });
     }
 
-    // Gather rich context to make the insight highly relevant and specific
+    // Gather context data
     let contextData = "";
-    
+
     if (authUser.role === "admin") {
-      const totalStudents = await User.countDocuments({ role: "student" });
-      const totalTeachers = await User.countDocuments({ role: "teacher" });
-      const activeExams = await Exam.countDocuments({ isActive: true });
-      const upcomingEvents = await Event.countDocuments({ startDate: { $gte: new Date() } });
-      const pendingTasks = await Task.countDocuments({ status: { $ne: "Done" } });
-      
-      contextData = `Role: Administrator. 
-      System snapshot: ${totalStudents} students, ${totalTeachers} teachers, ${activeExams} active quizzes running, ${upcomingEvents} upcoming events scheduled, and ${pendingTasks} overall pending kanban tasks in the workspace.`;
-      
+      const [totalStudents, totalTeachers, activeExams, upcomingEvents, pendingTasks] =
+        await Promise.all([
+          User.countDocuments({ role: "student" }),
+          User.countDocuments({ role: "teacher" }),
+          Exam.countDocuments({ isActive: true }),
+          Event.countDocuments({ startDate: { $gte: new Date() } }),
+          Task.countDocuments({ status: { $ne: "Done" } }),
+        ]);
+
+      contextData = `Role: Administrator. System snapshot: ${totalStudents} students, ${totalTeachers} teachers, ${activeExams} active quizzes running, ${upcomingEvents} upcoming events scheduled, and ${pendingTasks} overall pending kanban tasks.`;
+
     } else if (authUser.role === "teacher") {
-      const myClassesCount = await Class.countDocuments({ classTeacher: authUser._id });
-      const myExams = await Exam.find({ teacher: authUser._id }).select("_id").lean();
-      const myExamIds = myExams.map((exam) => exam._id);
-      const pendingGrading = await Submission.countDocuments({ exam: { $in: myExamIds }, score: 0 });
-      const myTasks = await Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } });
-      const myEvents = await Event.countDocuments({ startDate: { $gte: new Date() } });
-      
-      contextData = `Role: Teacher. Name: ${authUser.name}.
-      Current load: Managing ${myClassesCount} classes. You have ${pendingGrading} student quiz submissions pending your grading, ${myTasks} assigned kanban tasks pending, and ${myEvents} upcoming school events.`;
-      
+      const [myClassesCount, myExams, myTasks, myEvents] = await Promise.all([
+        Class.countDocuments({ classTeacher: authUser._id }),
+        Exam.find({ teacher: authUser._id }).select("_id").lean(),
+        Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } }),
+        Event.countDocuments({ startDate: { $gte: new Date() } }),
+      ]);
+      const pendingGrading = await Submission.countDocuments({
+        exam: { $in: myExams.map((e) => e._id) },
+        score: 0,
+      });
+
+      contextData = `Role: Teacher. Name: ${authUser.name}. Managing ${myClassesCount} classes. ${pendingGrading} student submissions pending grading, ${myTasks} assigned tasks pending, ${myEvents} upcoming school events.`;
+
     } else if (authUser.role === "student") {
-      const upcomingExams = await Exam.countDocuments({ class: authUser.studentClass, isActive: true, dueDate: { $gte: new Date() } });
-      
-      // Calculate attendance
-      const studentAttendance = await Attendance.find({ "records.student": authUser._id }).lean();
+      const [upcomingExams, studentAttendance, myTasks] = await Promise.all([
+        Exam.countDocuments({ class: authUser.studentClass, isActive: true, dueDate: { $gte: new Date() } }),
+        Attendance.find({ "records.student": authUser._id }).lean(),
+        Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } }),
+      ]);
+
       let totalMyRecords = 0;
       let myPresentRecords = 0;
       studentAttendance.forEach((att: any) => {
@@ -77,10 +88,8 @@ export async function POST(req: NextRequest) {
         }
       });
       const attendanceRate = totalMyRecords === 0 ? "100%" : `${Math.round((myPresentRecords / totalMyRecords) * 100)}%`;
-      const myTasks = await Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } });
 
-      contextData = `Role: Student. Name: ${authUser.name}.
-      Current status: You have ${upcomingExams} upcoming quizzes due, a current attendance rate of ${attendanceRate}, and ${myTasks} personal kanban tasks to complete.`;
+      contextData = `Role: Student. Name: ${authUser.name}. ${upcomingExams} upcoming quizzes due, attendance rate: ${attendanceRate}, ${myTasks} personal tasks to complete.`;
     }
 
     const prompt = `
@@ -93,13 +102,42 @@ export async function POST(req: NextRequest) {
       Keep it to 2-3 sentences maximum.
     `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(prompt);
-    const textResponse = result.response.text();
+    try {
+      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const result = await model.generateContent(prompt);
+      const textResponse = result.response.text();
+      return NextResponse.json({ text: textResponse });
+    } catch (aiError: any) {
+      // Gracefully fall back to a deterministic insight rather than crashing
+      console.warn("AI INSIGHT: Gemini API failed, using fallback.", aiError?.message);
+      const errMsg = aiError?.message || String(aiError);
+      const isOverloaded = errMsg.includes("503") || errMsg.includes("overloaded") || errMsg.includes("high demand");
+      const isQuota = errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("rate");
 
-    return NextResponse.json({ text: textResponse });
-  } catch (error) {
-    console.error("AI INSIGHT ERROR", error);
-    return NextResponse.json({ message: "Server Error", error }, { status: 500 });
+      if (isOverloaded) {
+        // Still return a useful insight even when AI is down
+        return NextResponse.json({
+          text: FALLBACK_INSIGHTS[authUser.role] || FALLBACK_INSIGHTS.teacher,
+          notice: "AI model temporarily busy — showing cached insight.",
+        });
+      }
+      if (isQuota) {
+        return NextResponse.json({
+          text: FALLBACK_INSIGHTS[authUser.role] || FALLBACK_INSIGHTS.teacher,
+          notice: "AI quota reached — showing cached insight.",
+        });
+      }
+
+      // Unknown AI error — still return fallback, don't throw 500 to frontend
+      return NextResponse.json({
+        text: FALLBACK_INSIGHTS[authUser.role] || FALLBACK_INSIGHTS.teacher,
+      });
+    }
+  } catch (error: any) {
+    console.error("AI INSIGHT DB/AUTH ERROR", error?.message || error);
+    return NextResponse.json({ message: "Server error. Please try again." }, { status: 500 });
   }
 }
+
+

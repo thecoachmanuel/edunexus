@@ -37,6 +37,7 @@ export interface GenSettings {
   periods: number;
   periodDuration: number;
   breaks: BreakSetting[];
+  term: string;
   subjectWeights?: Record<string, number>;
 }
 
@@ -65,6 +66,7 @@ const GeneratorControls = ({
   const [classes, setClasses] = useState<Class[]>([]);
   const [years, setYears] = useState<academicYear[]>([]);
   const [selectedYear, setSelectedYear] = useState("");
+  const [selectedTerm, setSelectedTerm] = useState("Term 1");
   const [loadingData, setLoadingData] = useState(false);
   // Time Settings
   const [startTime, setStartTime] = useState("08:00");
@@ -88,12 +90,14 @@ const GeneratorControls = ({
         const yearsList: academicYear[] = yearRes.data.years || [];
         setYears(yearsList);
 
-        // Auto-select the current academic year
+        // Auto-select the current academic year and term
         const currentYear = yearsList.find((y) => y.isCurrent);
         if (currentYear?._id) {
           setSelectedYear(currentYear._id);
+          if ((currentYear as any).activeTerm) {
+            setSelectedTerm((currentYear as any).activeTerm);
+          }
         } else if (yearsList.length > 0) {
-          // Fall back to the first year if none is marked current
           setSelectedYear(yearsList[0]._id);
         }
       } catch (error) {
@@ -115,10 +119,11 @@ const GeneratorControls = ({
           periods: parseInt(periods, 10) || 5,
           periodDuration: parseInt(periodDuration, 10) || 45,
           breaks,
+          term: selectedTerm,
         },
       });
     }
-  }, [selectedYear, startTime, endTime, periods, periodDuration, breaks]);
+  }, [selectedYear, selectedTerm, startTime, endTime, periods, periodDuration, breaks]);
 
 
   const addBreak = () => {
@@ -136,8 +141,8 @@ const GeneratorControls = ({
   };
 
   const handleGenerateClick = () => {
-    if (!selectedClass || !selectedYear) {
-      toast.error("Please select both a Class and Academic Year");
+    if (!selectedClass || !selectedYear || !selectedTerm) {
+      toast.error("Please select a Class, Academic Year and Term");
       return;
     }
     onGenerate(selectedClass, selectedYear, {
@@ -146,6 +151,7 @@ const GeneratorControls = ({
       periods: parseInt(periods, 10) || 5,
       periodDuration: parseInt(periodDuration, 10) || 45,
       breaks,
+      term: selectedTerm,
     });
   };
 
@@ -176,7 +182,7 @@ const GeneratorControls = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label>Academic Year</Label>
             <Select
@@ -193,6 +199,17 @@ const GeneratorControls = ({
                     {y.name}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Term</Label>
+            <Select value={selectedTerm} onValueChange={setSelectedTerm} disabled={loadingData}>
+              <SelectTrigger><SelectValue placeholder="Select Term" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Term 1">Term 1</SelectItem>
+                <SelectItem value="Term 2">Term 2</SelectItem>
+                <SelectItem value="Term 3">Term 3</SelectItem>
               </SelectContent>
             </Select>
           </div>
