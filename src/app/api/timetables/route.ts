@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
     const timetables = await Timetable.find(query)
       .populate("class", "name")
       .populate("academicYear", "name")
-      .populate("schedule.subject", "name code")
-      .populate("schedule.teacher", "name email")
+      .populate("schedule.periods.subject", "name code")
+      .populate("schedule.periods.teacher", "name email")
       .lean();
 
     return NextResponse.json(timetables);
