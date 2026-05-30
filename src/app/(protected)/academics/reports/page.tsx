@@ -274,8 +274,9 @@ export default function ReportsPage() {
                   )}
                 />
               </div>
-              <div className="w-full sm:w-48">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Term</label>
+            )}
+            <div className="w-full sm:w-48">
+              <label className="text-xs font-semibold text-muted-foreground mb-1 block">Term</label>
                 <Controller
                   name="term"
                   control={filterForm.control}
