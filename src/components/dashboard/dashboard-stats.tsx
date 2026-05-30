@@ -17,7 +17,7 @@ export function DashboardStats({ role, data }: StatsProps) {
   if (role === "admin") {
     return (
       <>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-indigo-50 text-indigo-500">
@@ -35,7 +35,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-blue-50 text-blue-500">
@@ -53,7 +53,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-orange-50 text-orange-500">
@@ -71,7 +71,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-purple-50 text-purple-500">
@@ -97,7 +97,7 @@ export function DashboardStats({ role, data }: StatsProps) {
   if (role === "teacher") {
     return (
       <>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-indigo-50 text-indigo-500">
@@ -115,7 +115,7 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-orange-50 text-orange-500">
@@ -133,25 +133,30 @@ export function DashboardStats({ role, data }: StatsProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-blue-50 text-blue-500">
                 <CalendarDays className="h-7 w-7" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Classes Today</p>
-                <h3 className="text-3xl font-bold tracking-tight text-foreground">{data.classesToday || 0}</h3>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-muted-foreground truncate">Next Period</p>
+                <h3 className="text-xl font-bold tracking-tight text-foreground truncate" title={data.nextClass || "None"}>
+                  {data.nextClass || "None"}
+                </h3>
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
+            <div className="mt-4 flex items-center justify-between text-sm">
               <span className="text-blue-500 font-medium flex items-center">
-                Schedule <span className="ml-1 text-lg leading-none">→</span>
+                {data.nextClassTime ? `At ${data.nextClassTime}` : "No upcoming classes today"}
               </span>
+              <a href="/timetable" className="text-indigo-600 hover:text-indigo-800 font-medium ml-2 shrink-0">
+                Schedule →
+              </a>
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow border-none">
+        <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] hover:shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)] transition-shadow border-none dark:shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-purple-50 text-purple-500">

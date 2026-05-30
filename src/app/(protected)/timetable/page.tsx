@@ -21,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 const Timetable = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const isTeacher = user?.role === "teacher";
   const isStudent = user?.role === "student";
   const isParent = user?.role === "parent";
   const isViewOnly = isStudent || isParent;
@@ -29,11 +30,23 @@ const Timetable = () => {
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
+  const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [viewMode, setViewMode] = useState<"class" | "teacher">("class");
+  const [teachers, setTeachers] = useState<{_id: string; name: string}[]>([]);
   // Track the currently-viewed term so fetchTimetable always fetches the right one
   const [selectedTerm, setSelectedTerm] = useState<string>("");
   const [parentClasses, setParentClasses] = useState<{_id: string; name: string}[]>([]);
   const [lastUsedSettings, setLastUsedSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
   const [currentSettings, setCurrentSettings] = useState<{yearId: string, settings: GenSettings} | null>(null);
+
+  useEffect(() => {
+    if (isTeacher) setViewMode("teacher");
+    if (isAdmin) {
+      api.get("/users?role=teacher").then(({ data }) => {
+        setTeachers(data.users || []);
+      }).catch(() => {});
+    }
+  }, [isTeacher, isAdmin]);
 
   // For parents: auto-load their children's classes
   useEffect(() => {
@@ -50,22 +63,23 @@ const Timetable = () => {
 
   // fetch timetable — accepts an optional term override so post-generate fetch
   // always retrieves the term that was just generated.
-  const fetchTimetable = async (classId: string, term?: string) => {
-    if (!classId) return;
+  const fetchTimetable = async (id: string, mode: "class" | "teacher", term?: string) => {
+    if (!id && mode === "class") return;
 
     try {
       setLoadingSchedule(true);
       const termParam = term || selectedTerm;
-      const url = termParam
-        ? `/timetables/${classId}?term=${encodeURIComponent(termParam)}`
-        : `/timetables/${classId}`;
+      const url = mode === "class"
+        ? (termParam ? `/timetables/${id}?term=${encodeURIComponent(termParam)}` : `/timetables/${id}`)
+        : `/timetables/teacher/${id}`;
+        
       const { data } = await api.get(url);
       setScheduleData(data.schedule || []);
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
         setScheduleData([]);
         if (!isAdmin) {
-          toast("No schedule found for this class", { icon: "📅" });
+          toast("No schedule found", { icon: "📅" });
         }
       } else {
         toast.error("Failed to load timetable");
@@ -91,13 +105,17 @@ const Timetable = () => {
     }
   };
 
-  // auto fetch when class changes
+  // auto fetch when selection changes
   useEffect(() => {
-    if (selectedClass) {
-      fetchTimetable(selectedClass);
+    if (viewMode === "teacher" && isTeacher) {
+      fetchTimetable("me", "teacher");
+    } else if (viewMode === "teacher" && selectedTeacher) {
+      fetchTimetable(selectedTeacher, "teacher");
+    } else if (viewMode === "class" && selectedClass) {
+      fetchTimetable(selectedClass, "class");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedClass]);
+  }, [selectedClass, selectedTeacher, viewMode, isTeacher]);
 
   const handleGenerate = async (
     classId: string,
@@ -119,7 +137,7 @@ const Timetable = () => {
 
       toast.success(data.message || "Timetable generated successfully!");
       // Fetch using the exact term just generated
-      await fetchTimetable(classId, settings.term);
+      await fetchTimetable(classId, "class", settings.term);
       setIsGenerating(false);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Generation failed");
@@ -173,11 +191,17 @@ const Timetable = () => {
           </div>
         )}
       </div>
-      {!isViewOnly && (
+      {isAdmin && (
+        <div className="flex gap-2 print:hidden mb-4">
+          <Button variant={viewMode === "class" ? "default" : "outline"} onClick={() => setViewMode("class")}>Class View</Button>
+          <Button variant={viewMode === "teacher" ? "default" : "outline"} onClick={() => setViewMode("teacher")}>Teacher View</Button>
+        </div>
+      )}
+      {!isViewOnly && viewMode === "class" && (
         <div className="print:hidden">
           <GeneratorControls
             onGenerate={handleGenerate}
-            onClassChange={(classId) => fetchTimetable(classId)}
+            onClassChange={(classId) => fetchTimetable(classId, "class")}
             isGenerating={isGenerating}
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
@@ -185,13 +209,32 @@ const Timetable = () => {
           />
         </div>
       )}
+      {isAdmin && viewMode === "teacher" && (
+        <Card className="print:hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium shrink-0">Select Teacher:</span>
+              <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Select teacher" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map((t) => (
+                    <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {/* Parent class picker */}
       {isParent && parentClasses.length > 0 && (
         <Card className="print:hidden">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium shrink-0">View schedule for:</span>
-              <Select value={selectedClass} onValueChange={(v) => { setSelectedClass(v); fetchTimetable(v); }}>
+              <Select value={selectedClass} onValueChange={(v) => { setSelectedClass(v); fetchTimetable(v, "class"); }}>
                 <SelectTrigger className="w-64">
                   <SelectValue placeholder="Select child" />
                 </SelectTrigger>
@@ -210,9 +253,10 @@ const Timetable = () => {
         isLoading={loadingSchedule} 
         isAdmin={isAdmin}
         classId={selectedClass}
-        onPeriodUpdated={() => fetchTimetable(selectedClass)}
+        isTeacherView={viewMode === "teacher"}
+        onPeriodUpdated={() => viewMode === "class" ? fetchTimetable(selectedClass, "class") : fetchTimetable(selectedTeacher || "me", "teacher")}
       />
-      {!isViewOnly && scheduleData.length > 0 && (
+      {!isViewOnly && viewMode === "class" && scheduleData.length > 0 && (
         <div className="print:hidden">
           <TimetableStatistics 
             scheduleData={scheduleData} 

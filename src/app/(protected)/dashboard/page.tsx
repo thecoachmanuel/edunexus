@@ -124,7 +124,7 @@ export default function Dashboard() {
           <div className="grid gap-4 md:grid-cols-2">
             {/* RECENT ACTIVITY CARD */}
             {user?.role === "admin" && (
-              <Card className="shadow-sm border-none">
+              <Card className="shadow-[0px_2px_4px_0px_rgba(0,0,0,0.02)] border-none dark:shadow-none">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-bold">Recent Activity</CardTitle>
                   <Link href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">View All</Link>

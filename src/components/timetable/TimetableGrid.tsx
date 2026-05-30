@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User as UserIcon, CalendarDays } from "lucide-react";
+import { Clock, User as UserIcon, CalendarDays, Users } from "lucide-react";
 import type { schedule } from "@/types";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import EditPeriodDialog from "./EditPeriodDialog";
@@ -11,11 +11,12 @@ interface Props {
   isAdmin?: boolean;
   classId?: string;
   onPeriodUpdated?: () => void;
+  isTeacherView?: boolean;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated }: Props) => {
+const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated, isTeacherView }: Props) => {
   const [selectedDay, setSelectedDay] = useState<string>("Monday");
   const [editState, setEditState] = useState({
     isOpen: false,
@@ -139,9 +140,11 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
                               </Badge>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <UserIcon className="h-3 w-3 shrink-0" />
+                              {isTeacherView ? <Users className="h-3 w-3 shrink-0" /> : <UserIcon className="h-3 w-3 shrink-0" />}
                               <span className="truncate">
-                                {typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : "Teacher Missing"}
+                                {isTeacherView 
+                                  ? ((period as any).class?.name || "Class Missing") 
+                                  : (typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : "Teacher Missing")}
                               </span>
                             </div>
                           </div>
@@ -211,9 +214,11 @@ const TimetableGrid = ({ schedule, isLoading, isAdmin, classId, onPeriodUpdated 
                             </h4>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto pt-2 border-t border-dashed">
-                            <UserIcon className="h-3 w-3 shrink-0" />
-                            <span className="truncate" title={typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : ""}>
-                              {typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : "Teacher Missing"}
+                            {isTeacherView ? <Users className="h-3 w-3 shrink-0" /> : <UserIcon className="h-3 w-3 shrink-0" />}
+                            <span className="truncate" title={isTeacherView ? ((period as any).class?.name || "") : (typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : "")}>
+                              {isTeacherView 
+                                ? ((period as any).class?.name || "Class Missing") 
+                                : (typeof period.teacher === "object" && period.teacher?.name ? period.teacher.name : "Teacher Missing")}
                             </span>
                           </div>
                         </div>
