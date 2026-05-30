@@ -158,7 +158,7 @@ function RegisterForm() {
           <h1 className="text-2xl font-black mb-1">Create your school account</h1>
           <p className="text-white/40 text-sm mb-8">
             Already have an account?{" "}
-            <span className="text-violet-400 text-sm">Enter your school URL to log in</span>
+            <Link href="/login" className="text-violet-400 text-sm hover:underline font-medium">Find your school to log in</Link>
           </p>
 
           {error && (

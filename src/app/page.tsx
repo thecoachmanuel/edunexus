@@ -81,6 +81,13 @@ export default function LandingPage() {
             >
               Start Free Trial
             </Link>
+            <div className="text-white/20">|</div>
+            <Link
+              href="/login"
+              className="text-white/60 hover:text-white text-sm font-medium transition-colors"
+            >
+              School Login
+            </Link>
           </div>
 
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white/70">
@@ -310,6 +317,8 @@ export default function LandingPage() {
             <a href="#" className="hover:text-white/60 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white/60 transition-colors">Terms of Service</a>
             <a href="#" className="hover:text-white/60 transition-colors">Contact</a>
+            <span className="text-white/10">|</span>
+            <Link href="/saas-admin/login" className="hover:text-violet-400 transition-colors">Super Admin</Link>
           </div>
         </div>
       </footer>

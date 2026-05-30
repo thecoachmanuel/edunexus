@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     // First check against environment variables (Source of truth)
     if (envEmail && envPassword && email === envEmail && password === envPassword) {
-      admin = await SuperAdmin.findOne({ role: "super_admin" });
+      admin = await SuperAdmin.findOne({ email: envEmail });
       if (!admin) {
         admin = await SuperAdmin.create({
           name: "EduNexus Super Admin",
@@ -26,8 +26,6 @@ export async function POST(req: Request) {
           isActive: true,
         });
       } else {
-        // Update DB to reflect env email
-        admin.email = envEmail;
         admin.lastLoginAt = new Date();
         await admin.save();
       }
@@ -64,7 +62,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    console.error("Super Admin Login Error:", error);
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Server error" }, { status: 500 });
   }
 }
