@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/AuthProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import axios from "axios";
 import {
   GraduationCap, ArrowRight, CheckCircle2, Eye, EyeOff, Loader2,
