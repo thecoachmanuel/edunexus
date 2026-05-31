@@ -36,7 +36,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const currentAdmin = await getSuperAuthUser(req, ["super_admin"]);
     if (!currentAdmin) return NextResponse.json({ message: "Unauthorized. Requires super_admin role." }, { status: 401 });
 
-    if (id === currentAdmin.user._id.toString()) {
+    if (id === currentAdmin.superAdminId) {
       return NextResponse.json({ message: "Cannot delete yourself" }, { status: 400 });
     }
 
