@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { useAuth } from "@/hooks/AuthProvider";
 import useSWR from "swr";
 import Link from "next/link";
@@ -26,9 +27,20 @@ import { ClassLeaderboardWidget } from "@/components/dashboard/leaderboard-widge
 import { EarlyWarningWidget } from "@/components/dashboard/early-warning-widget";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const router = useRouter();
-  const { data: statsData, isLoading: loading } = useSWR(user ? "/dashboard/stats" : null);
+  const params = useParams();
+  const slug = params.slug as string;
+  // Ensure user belongs to this slug
+  useEffect(() => {
+    if (user && user.slug !== slug) {
+      // Clear stale auth and redirect to login
+      setUser(null);
+      router.replace(`/${slug}/login`);
+    }
+  }, [user, slug, router, setUser]);
+
+  const { data: statsData, isLoading: loading } = useSWR(user ? `/dashboard/stats?slug=${slug}` : null);
 
   // Parents have their own portal — redirect them immediately
   useEffect(() => {
