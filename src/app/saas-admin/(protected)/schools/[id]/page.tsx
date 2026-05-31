@@ -23,6 +23,9 @@ export default function SchoolDetail({ params }: { params: Promise<{ id: string 
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [selectedPlanSlug, setSelectedPlanSlug] = useState("");
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: "", email: "", slug: "" });
+
   useEffect(() => {
     fetchData();
   }, [id]);
@@ -34,6 +37,11 @@ export default function SchoolDetail({ params }: { params: Promise<{ id: string 
         axios.get("/api/superadmin/plans")
       ]);
       setSchool(schoolRes.data.school);
+      setEditForm({
+        name: schoolRes.data.school.name,
+        email: schoolRes.data.school.email,
+        slug: schoolRes.data.school.slug,
+      });
       setPlans(plansRes.data.plans);
     } catch (err: any) {
       if (err.response?.status === 401) router.push("/saas-admin/login");
@@ -82,6 +90,37 @@ export default function SchoolDetail({ params }: { params: Promise<{ id: string 
       await fetchData();
     } catch (err) {
       alert("Failed to extend trial");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateDetails = async () => {
+    setSaving(true);
+    try {
+      await axios.patch(`/api/superadmin/schools/${id}`, {
+        action: "update_details",
+        ...editForm
+      });
+      await fetchData();
+      setIsEditing(false);
+    } catch (err) {
+      alert("Failed to update school details");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!confirm("Are you sure you want to reset the admin password for this school?")) return;
+    setSaving(true);
+    try {
+      const res = await axios.patch(`/api/superadmin/schools/${id}`, {
+        action: "reset_admin_password"
+      });
+      alert(`Password reset successful!\nNew Password: ${res.data.newPassword}\nAdmin Email: ${res.data.adminEmail}\n\nPlease copy and securely send this to the school admin.`);
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to reset password");
     } finally {
       setSaving(false);
     }
@@ -141,12 +180,48 @@ export default function SchoolDetail({ params }: { params: Promise<{ id: string 
         {/* Left Column: Details */}
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-            <h3 className="font-bold text-lg mb-6 flex items-center gap-2"><Building2 className="w-5 h-5 text-violet-400" /> School Profile</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-lg flex items-center gap-2"><Building2 className="w-5 h-5 text-violet-400" /> School Profile</h3>
+              <div className="flex gap-2">
+                <button onClick={handleResetPassword} disabled={saving} className="text-xs px-3 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg transition-colors">
+                  Reset Admin Password
+                </button>
+                {isEditing ? (
+                  <button onClick={handleUpdateDetails} disabled={saving} className="text-xs px-3 py-1.5 bg-violet-500 text-white rounded-lg transition-colors">
+                    Save Details
+                  </button>
+                ) : (
+                  <button onClick={() => setIsEditing(true)} className="text-xs px-3 py-1.5 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
+                    Edit Details
+                  </button>
+                )}
+              </div>
+            </div>
             
             <div className="grid sm:grid-cols-2 gap-6">
               <div>
                 <label className="text-xs text-white/40 uppercase tracking-wider">Email Address</label>
-                <div className="text-sm mt-1">{school.email}</div>
+                {isEditing ? (
+                  <input type="email" value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm" />
+                ) : (
+                  <div className="text-sm mt-1">{school.email}</div>
+                )}
+              </div>
+              <div>
+                <label className="text-xs text-white/40 uppercase tracking-wider">School Name</label>
+                {isEditing ? (
+                  <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm" />
+                ) : (
+                  <div className="text-sm mt-1">{school.name}</div>
+                )}
+              </div>
+              <div>
+                <label className="text-xs text-white/40 uppercase tracking-wider">School Slug (URL)</label>
+                {isEditing ? (
+                  <input type="text" value={editForm.slug} onChange={e => setEditForm({...editForm, slug: e.target.value})} className="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm" />
+                ) : (
+                  <div className="text-sm mt-1 font-mono">edunexus.ng/{school.slug}</div>
+                )}
               </div>
               <div>
                 <label className="text-xs text-white/40 uppercase tracking-wider">Onboarded At</label>

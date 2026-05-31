@@ -75,6 +75,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ message: `Plan changed to ${plan.name}` });
     }
 
+    if (action === "update_details") {
+      const { name, email, slug } = body;
+      if (name) school.name = name;
+      if (email) school.email = email;
+      if (slug) school.slug = slug;
+      await school.save();
+      return NextResponse.json({ message: "School details updated", school });
+    }
+
+    if (action === "reset_admin_password") {
+      const User = require("@/lib/models/user").default;
+      const bcrypt = require("bcryptjs");
+      const adminUser = await User.findOne({ school: id, role: "admin" });
+      if (!adminUser) return NextResponse.json({ message: "No admin user found for this school" }, { status: 404 });
+      
+      const newPassword = Math.random().toString(36).slice(-8) + "!";
+      adminUser.password = newPassword; // Will be hashed by pre-save middleware
+      await adminUser.save();
+      
+      return NextResponse.json({ 
+        message: "Password reset successful", 
+        newPassword,
+        adminEmail: adminUser.email 
+      });
+    }
+
     if (typeof isActive === "boolean") {
       school.isActive = isActive;
       await school.save();

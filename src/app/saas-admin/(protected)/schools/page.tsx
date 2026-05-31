@@ -115,7 +115,9 @@ export default function SchoolsManagement() {
           <div key={school._id} className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] space-y-3">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <div className="font-semibold text-sm">{school.name}</div>
+                <Link href={`/saas-admin/schools/${school._id}`} className="font-semibold text-sm hover:text-violet-400 transition-colors">
+                  {school.name}
+                </Link>
                 <div className="text-white/30 text-xs font-mono mt-0.5">/{school.slug}</div>
               </div>
               <button
@@ -183,7 +185,9 @@ export default function SchoolsManagement() {
               {filteredSchools.map((school) => (
                 <tr key={school._id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-5 py-4">
-                    <div className="font-semibold text-sm">{school.name}</div>
+                    <Link href={`/saas-admin/schools/${school._id}`} className="font-semibold text-sm hover:text-violet-400 transition-colors">
+                      {school.name}
+                    </Link>
                     <div className="text-white/30 text-xs mt-0.5 font-mono">/{school.slug}</div>
                   </td>
                   <td className="px-5 py-4 text-sm text-white/60 whitespace-nowrap">
