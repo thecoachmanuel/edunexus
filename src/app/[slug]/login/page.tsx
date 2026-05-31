@@ -124,7 +124,12 @@ export default function SchoolLoginPage() {
 
             {schoolInfo ? (
               <>
-
+                {schoolInfo.logo && (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto mb-4 border border-white/10 bg-white/5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={schoolInfo.logo} alt={`${schoolInfo.name} Logo`} className="w-full h-full object-cover" />
+                  </div>
+                )}
                 <h1 className="text-2xl font-black text-foreground">{schoolInfo.name}</h1>
                 <p className="text-foreground/40 text-sm mt-1">Staff &amp; Admin Portal</p>
               </>
@@ -226,9 +231,6 @@ export default function SchoolLoginPage() {
         <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-indigo-600/10 rounded-full blur-3xl" />
 
         <div className="relative text-center space-y-6 px-12">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-violet-600/30 to-indigo-600/30 border border-violet-500/20 flex items-center justify-center">
-            <School className="w-10 h-10 text-violet-400" />
-          </div>
           <div>
             <h2 className="text-3xl font-black text-foreground leading-tight">
               Welcome to <br />
