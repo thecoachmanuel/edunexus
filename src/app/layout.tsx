@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased font-sans">
         <ThemeProvider
-          defaultTheme="system"
+          defaultTheme="dark"
           storageKey="vite-ui-theme"
         >
           <SWRProvider>

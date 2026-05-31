@@ -96,12 +96,7 @@ export default function SchoolLoginPage() {
         <div className="w-full max-w-sm">
           {/* Brand / school header */}
           <div className="mb-10 text-center">
-            <div className="flex items-center justify-center gap-2.5 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                <GraduationCap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-white font-extrabold text-xl tracking-tight">EduNexus</span>
-            </div>
+
 
             {schoolInfo ? (
               <>
@@ -177,15 +172,9 @@ export default function SchoolLoginPage() {
 
           <div className="mt-8 text-center text-xs text-white/30 space-y-2">
             <p>
-              Wrong school?{" "}
-              <Link href="/login" className="text-violet-400 hover:underline">
-                Find your school
-              </Link>
-            </p>
-            <p>
-              Not registered yet?{" "}
-              <Link href="/register" className="text-violet-400 hover:underline">
-                Register your school
+              Powered by{" "}
+              <Link href="/" className="text-violet-400 hover:underline">
+                EduNexus
               </Link>
             </p>
           </div>
