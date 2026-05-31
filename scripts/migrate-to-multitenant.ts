@@ -22,7 +22,7 @@ async function migrate() {
     const result = await db.collection("schools").insertOne({
       name: "EduNexus Academy",
       slug: "edunexus",
-      email: "admin@edunexus.io",
+      email: "admin@edunexus.ng",
       country: "Nigeria",
       isActive: true,
       isVerified: true,

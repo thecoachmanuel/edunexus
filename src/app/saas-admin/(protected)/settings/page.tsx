@@ -71,7 +71,7 @@ export default function PlatformSettings() {
               
               <div>
                 <label className="block text-xs font-semibold text-white/50 mb-1">Support Email</label>
-                <input type="email" defaultValue="support@edunexus.io" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
+                <input type="email" defaultValue="support@edunexus.ng" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:border-violet-500/50" />
               </div>
               
               <div className="pt-4">
@@ -156,7 +156,7 @@ export default function PlatformSettings() {
 
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-sm text-violet-400">https://edunexus.io/api/webhooks/paystack</span>
+                  <span className="font-mono text-sm text-violet-400">https://edunexus.ng/api/webhooks/paystack</span>
                   <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-xs">Active</span>
                 </div>
                 <div className="text-xs text-white/40 mb-3">Listening for: invoice.create, invoice.payment_failed, charge.success</div>

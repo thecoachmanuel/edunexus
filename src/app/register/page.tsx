@@ -217,7 +217,7 @@ function RegisterForm() {
               <label className="block text-xs font-semibold text-white/50 mb-2 uppercase tracking-wider">Your School URL</label>
               <div className="relative">
                 <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-                <div className="absolute left-10 top-1/2 -translate-y-1/2 text-white/20 text-sm pointer-events-none">edunexus.io/</div>
+                <div className="absolute left-10 top-1/2 -translate-y-1/2 text-white/20 text-sm pointer-events-none">edunexus.ng/</div>
                 <input
                   name="slug"
                   value={form.slug}

@@ -111,7 +111,7 @@ export default function SchoolDetail({ params }: { params: Promise<{ id: string 
             </div>
             <div>
               <h2 className="text-2xl font-bold">{school.name}</h2>
-              <div className="text-white/40 text-sm font-mono mt-0.5">edunexus.io/{school.slug}</div>
+              <div className="text-white/40 text-sm font-mono mt-0.5">edunexus.ng/{school.slug}</div>
             </div>
           </div>
         </div>
