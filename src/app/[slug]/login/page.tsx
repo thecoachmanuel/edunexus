@@ -124,9 +124,7 @@ export default function SchoolLoginPage() {
 
             {schoolInfo ? (
               <>
-                <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl font-black text-violet-400 shadow-inner">
-                  {schoolInfo.name.charAt(0)}
-                </div>
+
                 <h1 className="text-2xl font-black text-foreground">{schoolInfo.name}</h1>
                 <p className="text-foreground/40 text-sm mt-1">Staff &amp; Admin Portal</p>
               </>

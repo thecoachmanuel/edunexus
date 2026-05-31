@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/hooks/AuthProvider";
 import axios from "axios";
 import {
   GraduationCap, ArrowRight, CheckCircle2, Eye, EyeOff, Loader2,
@@ -20,6 +18,10 @@ interface Plan {
 }
 
 function RegisterForm() {
+  const { setUser } = useAuth();
+  React.useEffect(() => {
+    setUser(null);
+  }, []);
   const searchParams = useSearchParams();
   const router = useRouter();
   const planFromUrl = searchParams.get("plan") || "starter";
