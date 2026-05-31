@@ -7,7 +7,9 @@ import {
   GraduationCap, ArrowRight, CheckCircle2, Eye, EyeOff, Loader2,
   Building2, Mail, User, KeyRound, Globe, Sparkles
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+
 
 interface Plan {
   _id: string;
