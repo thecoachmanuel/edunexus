@@ -1,11 +1,13 @@
 "use client";
 
 import { useAuth } from "@/hooks/AuthProvider";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   GraduationCap, ArrowRight, CheckCircle2, Eye, EyeOff, Loader2,
   Building2, Mail, User, KeyRound, Globe, Sparkles
 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Plan {
   _id: string;
@@ -19,7 +21,7 @@ interface Plan {
 
 function RegisterForm() {
   const { setUser } = useAuth();
-  React.useEffect(() => {
+  useEffect(() => {
     setUser(null);
   }, []);
   const searchParams = useSearchParams();
