@@ -124,10 +124,14 @@ export default function SchoolLoginPage() {
 
             {schoolInfo ? (
               <>
-                {schoolInfo.logo && (
+                {schoolInfo.logo ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto mb-4 border border-white/10 bg-white/5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={schoolInfo.logo} alt={`${schoolInfo.name} Logo`} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto mb-4 border border-white/10 bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                    <span className="text-3xl font-black text-white">{schoolInfo.name.charAt(0).toUpperCase()}</span>
                   </div>
                 )}
                 <h1 className="text-2xl font-black text-foreground">{schoolInfo.name}</h1>
