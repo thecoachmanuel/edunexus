@@ -22,7 +22,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
     if (!user) {
       // No session — go to this slug's login page
-      router.replace(`/${urlSlug}/login`);
+      router.replace(`/${urlSlug}`);
       return;
     }
 
@@ -34,7 +34,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     if (userSchoolSlug && userSchoolSlug !== urlSlug) {
       axios.post("/api/users/logout").catch(() => {}).finally(() => {
         toast.error("Session mismatch. Please log in to this school portal.");
-        router.replace(`/${urlSlug}/login`);
+        router.replace(`/${urlSlug}`);
       });
       return;
     }

@@ -103,14 +103,14 @@ export default function SchoolLoginPage() {
   // Show full-screen loader while auth is initialising
   if (authLoading || schoolLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex">
+        <div className="min-h-screen bg-background flex">
       {/* Left pane — login form */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">

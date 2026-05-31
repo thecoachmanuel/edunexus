@@ -3,7 +3,7 @@ import { GraduationCap, ArrowRight } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 text-white">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 text-foreground">
       <div className="max-w-md text-center">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/20 flex items-center justify-center mx-auto mb-8">
           <GraduationCap className="w-8 h-8 text-violet-400" />

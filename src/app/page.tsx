@@ -75,9 +75,9 @@ export default function LandingPage() {
     new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(kobo / 100);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0f] text-slate-900 dark:text-white overflow-x-hidden transition-colors duration-300">
+        <div className="min-h-screen bg-slate-50 dark:bg-background text-slate-900 dark:text-foreground overflow-x-hidden transition-colors duration-300">
       {/* === NAVBAR === */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-white/5 bg-slate-50/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl">
+            <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-white/5 bg-slate-50/80 dark:bg-background/80 backdrop-blur-xl">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 font-bold text-xl">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
@@ -117,7 +117,7 @@ export default function LandingPage() {
           </div>
         </nav>
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0f] px-4 py-4 space-y-3">
+                    <div className="md:hidden border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-background px-4 py-4 space-y-3">
             <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-600 dark:text-white/70">Features</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-600 dark:text-white/70">Pricing</a>
             <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-600 dark:text-white/70">Testimonials</a>

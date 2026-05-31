@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { GraduationCap, CheckCircle2, XCircle, Loader2, ArrowRight } from "lucide-react";
@@ -15,6 +15,12 @@ function VerifyContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
   const [slug, setSlug] = useState("");
+
+  useEffect(() => {
+    if (status === "success" && slug) {
+      router.replace(`/${slug}`);
+    }
+  }, [status, slug]);
 
   useEffect(() => {
     if (!token || !school) {
@@ -36,7 +42,7 @@ function VerifyContent() {
   }, [token, school]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <Link href="/" className="flex items-center justify-center gap-2 font-bold text-xl mb-12">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
@@ -61,8 +67,8 @@ function VerifyContent() {
             <p className="text-white/50 mb-8">{message}</p>
             {slug && (
               <Link
-                href={`/${slug}/login`}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-violet-500/25"
+                href={`/${slug}`}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-foreground font-bold hover:opacity-90 transition-all shadow-lg shadow-violet-500/25"
               >
                 Go to Your School Login <ArrowRight className="w-4 h-4" />
               </Link>
@@ -89,7 +95,7 @@ function VerifyContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-violet-400" /></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-violet-400" /></div>}>
       <VerifyContent />
     </Suspense>
   );

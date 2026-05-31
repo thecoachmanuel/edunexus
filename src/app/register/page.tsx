@@ -80,14 +80,21 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
           <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-8 h-8 text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-black text-white mb-3">Check Your Email!</h2>
-          <p className="text-white/50 mb-4">{success}</p>
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6 text-sm text-amber-200">
+          <h2 className="text-2xl font-black text-foreground mb-3">Check Your Email!</h2>
+          <p className="text-foreground/50 mb-4">{success}</p>
+          
+            Please check your <strong>inbox</strong> or <strong>spam folder</strong> for the verification link to activate your account.
+          </div>
+          <p className="text-sm text-foreground/30">
+            Your school portal will be at: <span className="text-violet-400 font-mono">/{form.slug}</span>
+          </p>
+          <Link href="/" className="inline-block mt-8 text-sm text-foreground/40 hover:text-foreground transition-colors">
+          
             Please check your <strong>inbox</strong> or <strong>spam folder</strong> for the verification link to activate your account.
           </div>
           <p className="text-sm text-white/30">
@@ -103,7 +110,7 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex">
+        <div className="min-h-screen bg-background text-foreground flex">
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 border-r border-white/5 bg-gradient-to-b from-violet-900/20 to-transparent">
         <Link href="/" className="flex items-center gap-2.5 font-bold text-xl">
@@ -322,7 +329,7 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-violet-400" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-violet-400" /></div>}>
       <RegisterForm />
     </Suspense>
   );

@@ -22,7 +22,7 @@ export default function FindSchoolLogin() {
     try {
       // Check if school exists
       await axios.get(`/api/schools/${slug.trim()}`);
-      router.push(`/${slug.trim()}/login`);
+      router.push(`/${slug.trim()}`);
     } catch (err: any) {
       if (err.response?.status === 404) {
         setError("School not found. Please check the spelling.");
@@ -34,7 +34,7 @@ export default function FindSchoolLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4">>
       <div className="w-full max-w-md">
         <Link href="/" className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
