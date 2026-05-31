@@ -93,7 +93,7 @@ function RegisterForm() {
           </p>
 
 
-          <Link href="/" className="inline-block mt-8 text-sm text-white/40 hover:text-white transition-colors">
+          <Link href="/" className="inline-block mt-8 text-sm text-foreground/40 hover:text-foreground transition-colors">
             ← Back to homepage
           </Link>
         </div>
@@ -107,7 +107,7 @@ function RegisterForm() {
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 border-r border-white/5 bg-gradient-to-b from-violet-900/20 to-transparent">
         <Link href="/" className="flex items-center gap-2.5 font-bold text-xl">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-white" />
+            <GraduationCap className="w-5 h-5 text-foreground" />
           </div>
           EduNexus
         </Link>
@@ -129,7 +129,7 @@ function RegisterForm() {
               "Dedicated onboarding support",
               "Pay in Naira (₦) monthly",
             ].map((item, i) => (
-              <li key={i} className="flex items-center gap-3 text-white/60 text-sm">
+              <li key={i} className="flex items-center gap-3 text-foreground/60 text-sm">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 {item}
               </li>
@@ -137,10 +137,10 @@ function RegisterForm() {
           </ul>
         </div>
 
-        <div className="flex items-center gap-2 text-white/20 text-xs">
+        <div className="flex items-center gap-2 text-foreground/20 text-xs">
           <span>© {new Date().getFullYear()} EduNexus</span>
           <span>·</span>
-          <a href="#" className="hover:text-white/40 transition-colors">Privacy</a>
+          <a href="#" className="hover:text-foreground/40 transition-colors">Privacy</a>
           <span>·</span>
           <a href="#" className="hover:text-white/40 transition-colors">Terms</a>
         </div>
@@ -152,7 +152,7 @@ function RegisterForm() {
           {/* Mobile logo */}
           <Link href="/" className="flex lg:hidden items-center gap-2 font-bold text-lg mb-8">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
-              <GraduationCap className="w-4 h-4 text-white" />
+              <GraduationCap className="w-4 h-4 text-foreground" />
             </div>
             EduNexus
           </Link>

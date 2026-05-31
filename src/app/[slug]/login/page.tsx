@@ -180,7 +180,7 @@ export default function SchoolLoginPage() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-sm hover:opacity-90 disabled:opacity-60 transition-all shadow-lg shadow-violet-500/25 mt-2"
+              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-foreground font-bold text-sm hover:opacity-90 disabled:opacity-60 transition-all shadow-lg shadow-violet-500/25 mt-2"
             >
               {pending ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</>
@@ -206,7 +206,7 @@ export default function SchoolLoginPage() {
             </div>
           )}
 
-          <div className="mt-8 text-center text-xs text-white/30 space-y-2">
+          <div className="mt-8 text-center text-xs text-foreground/30 space-y-2">
             <p>
               Powered by{" "}
               <Link href="/" className="text-violet-400 hover:underline">
@@ -228,13 +228,13 @@ export default function SchoolLoginPage() {
             <School className="w-10 h-10 text-violet-400" />
           </div>
           <div>
-            <h2 className="text-3xl font-black text-white leading-tight">
+            <h2 className="text-3xl font-black text-foreground leading-tight">
               Welcome to <br />
               <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
                 {schoolInfo ? schoolInfo.name : "Your School"}
               </span>
             </h2>
-            <p className="mt-4 text-white/40 text-sm max-w-xs mx-auto leading-relaxed">
+            <p className="mt-4 text-foreground/40 text-sm max-w-xs mx-auto leading-relaxed">
               {schoolInfo ? `Welcome to the secure portal for ${schoolInfo.name}. Please sign in to access your dashboard.` : "Welcome to the secure portal. Please sign in to access your dashboard."}
             </p>
           </div>
