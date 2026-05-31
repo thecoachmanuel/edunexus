@@ -4,6 +4,7 @@ export interface IPlan extends Document {
   name: string;
   slug: string;
   monthlyPriceKobo: number;
+  annualPriceKobo?: number;
   paystackPlanCode?: string;
   features: {
     maxStudents: number;
@@ -26,6 +27,7 @@ const planSchema = new Schema<IPlan>(
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
     monthlyPriceKobo: { type: Number, required: true },
+    annualPriceKobo: { type: Number },
     paystackPlanCode: { type: String },
     features: {
       maxStudents: { type: Number, default: 300 }, // -1 for unlimited
