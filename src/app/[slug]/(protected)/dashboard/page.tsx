@@ -31,14 +31,15 @@ export default function Dashboard() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
+  const userSlug = user?.schoolContext?.slug ?? user?.school;
   // Ensure user belongs to this slug
   useEffect(() => {
-    if (user && user.slug !== slug) {
+    if (user && userSlug !== slug) {
       // Clear stale auth and redirect to login
       setUser(null);
       router.replace(`/${slug}/login`);
     }
-  }, [user, slug, router, setUser]);
+  }, [user, userSlug, slug, router, setUser]);
 
   const { data: statsData, isLoading: loading } = useSWR(user ? `/dashboard/stats?slug=${slug}` : null);
 
