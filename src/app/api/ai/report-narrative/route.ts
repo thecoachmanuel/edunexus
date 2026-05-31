@@ -11,6 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as
 
 export async function POST(req: NextRequest) {
   let reportCardId: string | null = null;
+  let authUser: any = null;
   try {
     const body = await req.json();
     reportCardId = body.reportCardId;
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
-    const authUser = await getAuthUser(req, ["admin", "teacher"]);
+    authUser = await getAuthUser(req, ["admin", "teacher"]);
     if (!authUser) {
       return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }
@@ -127,7 +128,7 @@ Write a personal teacher's comment (3–5 sentences) for this student's report c
     
     // Deterministic Rule-Based Fallback
     try {
-      const fallbackReport = await ReportCard.findOne({ _id: reportCardId, school: authUser.schoolContext?._id }).populate("student", "name").lean() as any;
+      const fallbackReport = await ReportCard.findOne({ _id: reportCardId, ...(authUser?.schoolContext?._id ? { school: authUser.schoolContext._id } : {}) }).populate("student", "name").lean() as any;
       const fName = fallbackReport?.student?.name?.split(" ")[0] || "The student";
       const fAvg = fallbackReport?.averageScore || 0;
       
