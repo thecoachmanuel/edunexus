@@ -18,7 +18,7 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>;
 
 export default function SchoolLoginPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, setUser } = useAuth();
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
@@ -67,9 +67,13 @@ export default function SchoolLoginPage() {
       // If there's a stale session from another school, clear it first
       const userSlug = (user as any)?.schoolContext?.slug as string | undefined;
       if (userSlug && userSlug !== slug) {
+        // clear auth context and logout server side
+        setUser(null);
         await axios.post("/api/users/logout").catch(() => {});
       }
 
+      // clear auth context before new login to avoid stale data
+      setUser(null);
       await axios.post("/api/users/login", {
         email: data.email,
         password: data.password,

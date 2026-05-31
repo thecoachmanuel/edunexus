@@ -87,10 +87,8 @@ function RegisterForm() {
           </div>
           <h2 className="text-2xl font-black text-foreground mb-3">Check Your Email!</h2>
           <p className="text-foreground/50 mb-4">{success}</p>
-
-          <p className="text-sm text-foreground/30">
-            Your school portal will be at: <span className="text-violet-400 font-mono">/{form.slug}</span>
-          </p>
+          <p className="text-sm text-foreground/30">Schools, please check your email inbox or spam folder to verify your account.</p>
+          <p className="text-sm text-foreground/30">Your school portal will be at: <span className="text-violet-400 font-mono">/{form.slug}</span></p>
 
 
           <Link href="/" className="inline-block mt-8 text-sm text-foreground/40 hover:text-foreground transition-colors">
