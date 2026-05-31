@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Find all attendance records where this student appears
-    const records = await Attendance.find({ "records.student": targetStudentId })
+    const records = await Attendance.find({ school: authUser.schoolContext?._id, "records.student": targetStudentId })
       .sort({ date: 1 })
       .lean();
 

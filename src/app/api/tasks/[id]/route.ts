@@ -12,7 +12,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
 
     const resolvedParams = await params;
-    const task = await Task.findByIdAndUpdate(resolvedParams.id, body, { new: true });
+    const task = await Task.findOneAndUpdate(
+      { _id: resolvedParams.id, school: user.schoolContext?._id },
+      body,
+      { new: true }
+    );
     if (!task) return NextResponse.json({ message: "Task not found" }, { status: 404 });
 
     return NextResponse.json({ task, message: "Task updated successfully" });
@@ -28,7 +32,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     await connectDB();
     const resolvedParams = await params;
-    const task = await Task.findByIdAndDelete(resolvedParams.id);
+    const task = await Task.findOneAndDelete({ _id: resolvedParams.id, school: user.schoolContext?._id });
     if (!task) return NextResponse.json({ message: "Task not found" }, { status: 404 });
 
     return NextResponse.json({ message: "Task deleted successfully" });

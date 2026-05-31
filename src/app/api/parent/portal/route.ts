@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const childrenData = await Promise.all(
       children.map(async (child: any) => {
         // 1. Attendance summary
-        const attendances = await Attendance.find({ "records.student": child._id }).lean();
+        const attendances = await Attendance.find({ school: child.school, "records.student": child._id }).lean();
         let totalDays = 0, presentDays = 0;
         attendances.forEach((a: any) => {
           const rec = a.records.find((r: any) => r.student.toString() === child._id.toString());
@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
 
         // 2. Quizzes (Upcoming, Missing, Completed)
         const allQuizzes = await Exam.find({
+          school: child.school,
           class: child.studentClass?._id,
         })
           .sort({ dueDate: 1 })
@@ -70,7 +71,7 @@ export async function GET(req: NextRequest) {
         const completedQuizzes = childSubmissions.slice(0, 3);
 
         // 3. Fee summary
-        const fees = await StudentFee.find({ student: child._id })
+        const fees = await StudentFee.find({ school: child.school, student: child._id })
           .populate("feeStructure", "name dueDate")
           .sort({ createdAt: -1 })
           .limit(5)
@@ -82,7 +83,7 @@ export async function GET(req: NextRequest) {
         const hasPending = fees.some((f: any) => f.status !== "paid");
 
         // 4. Latest report card
-        const latestReport = await ReportCard.findOne({ student: child._id })
+        const latestReport = await ReportCard.findOne({ school: child.school, student: child._id })
           .sort({ createdAt: -1 })
           .populate("grades.subject", "name")
           .lean();

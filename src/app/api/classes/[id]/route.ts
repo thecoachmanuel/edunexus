@@ -13,10 +13,11 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const body = await req.json();
-    const updatedClass = await Class.findByIdAndUpdate(params.id, body, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedClass = await Class.findOneAndUpdate(
+      { _id: params.id, school: authUser.schoolContext?._id },
+      body,
+      { new: true, runValidators: true }
+    );
     if (!updatedClass) return NextResponse.json({ message: "Class not found" }, { status: 404 });
     return NextResponse.json(updatedClass);
   } catch (error) {
@@ -32,7 +33,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
     const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
-    const deletedClass = await Class.findByIdAndDelete(params.id);
+    const deletedClass = await Class.findOneAndDelete({ _id: params.id, school: authUser.schoolContext?._id });
     if (!deletedClass) return NextResponse.json({ message: "Class not found" }, { status: 404 });
     return NextResponse.json({ message: "Class removed" });
   } catch (error) {

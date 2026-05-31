@@ -115,7 +115,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 }
 
-// DELETE /api/superadmin/schools/[id] — Soft delete (deactivate)
+// DELETE /api/superadmin/schools/[id] — Soft delete or Hard delete
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
@@ -123,6 +123,33 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
+    const action = req.nextUrl.searchParams.get("action");
+
+    if (action === "hard_delete") {
+      const User = require("@/lib/models/user").default;
+      const Class = require("@/lib/models/class").default;
+      const Exam = require("@/lib/models/exam").default;
+      const Submission = require("@/lib/models/submission").default;
+      const Attendance = require("@/lib/models/attendance").default;
+      const ReportCard = require("@/lib/models/reportCard").default;
+      const ActivityLog = require("@/lib/models/activitieslog").default;
+
+      // Delete all tenant data
+      await Promise.all([
+        User.deleteMany({ school: id }),
+        Class.deleteMany({ school: id }),
+        Exam.deleteMany({ school: id }),
+        Submission.deleteMany({ school: id }),
+        Attendance.deleteMany({ school: id }),
+        ReportCard.deleteMany({ school: id }),
+        ActivityLog.deleteMany({ school: id }),
+        School.findByIdAndDelete(id)
+      ]);
+
+      return NextResponse.json({ message: "School permanently deleted" });
+    }
+
+    // Default: Soft delete
     await School.findByIdAndUpdate(id, { isActive: false });
     return NextResponse.json({ message: "School deactivated" });
   } catch (error) {

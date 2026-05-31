@@ -48,23 +48,24 @@ export async function POST(req: NextRequest) {
     if (authUser.role === "admin") {
       const [totalStudents, totalTeachers, activeExams, upcomingEvents, pendingTasks] =
         await Promise.all([
-          User.countDocuments({ role: "student" }),
-          User.countDocuments({ role: "teacher" }),
-          Exam.countDocuments({ isActive: true }),
-          Event.countDocuments({ startDate: { $gte: new Date() } }),
-          Task.countDocuments({ status: { $ne: "Done" } }),
+          User.countDocuments({ school: authUser.schoolContext?._id, role: "student" }),
+          User.countDocuments({ school: authUser.schoolContext?._id, role: "teacher" }),
+          Exam.countDocuments({ school: authUser.schoolContext?._id, isActive: true }),
+          Event.countDocuments({ school: authUser.schoolContext?._id, startDate: { $gte: new Date() } }),
+          Task.countDocuments({ school: authUser.schoolContext?._id, status: { $ne: "Done" } }),
         ]);
 
       contextData = `Role: Administrator. System snapshot: ${totalStudents} students, ${totalTeachers} teachers, ${activeExams} active quizzes running, ${upcomingEvents} upcoming events scheduled, and ${pendingTasks} overall pending kanban tasks.`;
 
     } else if (authUser.role === "teacher") {
       const [myClassesCount, myExams, myTasks, myEvents] = await Promise.all([
-        Class.countDocuments({ classTeacher: authUser._id }),
-        Exam.find({ teacher: authUser._id }).select("_id").lean(),
-        Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } }),
-        Event.countDocuments({ startDate: { $gte: new Date() } }),
+        Class.countDocuments({ school: authUser.schoolContext?._id, classTeacher: authUser._id }),
+        Exam.find({ school: authUser.schoolContext?._id, teacher: authUser._id }).select("_id").lean(),
+        Task.countDocuments({ school: authUser.schoolContext?._id, assignee: authUser._id, status: { $ne: "Done" } }),
+        Event.countDocuments({ school: authUser.schoolContext?._id, startDate: { $gte: new Date() } }),
       ]);
       const pendingGrading = await Submission.countDocuments({
+        school: authUser.schoolContext?._id,
         exam: { $in: myExams.map((e) => e._id) },
         score: 0,
       });
@@ -73,9 +74,9 @@ export async function POST(req: NextRequest) {
 
     } else if (authUser.role === "student") {
       const [upcomingExams, studentAttendance, myTasks] = await Promise.all([
-        Exam.countDocuments({ class: authUser.studentClass, isActive: true, dueDate: { $gte: new Date() } }),
-        Attendance.find({ "records.student": authUser._id }).lean(),
-        Task.countDocuments({ assignee: authUser._id, status: { $ne: "Done" } }),
+        Exam.countDocuments({ school: authUser.schoolContext?._id, class: authUser.studentClass, isActive: true, dueDate: { $gte: new Date() } }),
+        Attendance.find({ school: authUser.schoolContext?._id, "records.student": authUser._id }).lean(),
+        Task.countDocuments({ school: authUser.schoolContext?._id, assignee: authUser._id, status: { $ne: "Done" } }),
       ]);
 
       let totalMyRecords = 0;

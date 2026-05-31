@@ -11,7 +11,9 @@ export async function GET(req: NextRequest) {
     const academicYear = searchParams.get("academicYear");
     const classId = searchParams.get("class");
     
+    const authUser = await getAuthUser(req);
     let query: any = {};
+    if (authUser?.schoolContext?._id) query.school = authUser.schoolContext._id;
     if (academicYear) query.academicYear = academicYear;
     if (classId) query.class = classId;
 
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Timetable already exists for this class and year" }, { status: 400 });
     }
 
-    const timetable = await Timetable.create({ class: classId, academicYear, schedule });
+    const timetable = await Timetable.create({ school: authUser.schoolContext?._id, class: classId, academicYear, schedule });
     return NextResponse.json(timetable, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: "Server Error", error }, { status: 500 });

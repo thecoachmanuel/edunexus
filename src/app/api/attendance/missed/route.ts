@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "classId and academicYearId are required" }, { status: 400 });
     }
 
-    const year = await AcademicYear.findById(yearId).lean();
+    const year = await AcademicYear.findOne({ _id: yearId, school: authUser.schoolContext?._id }).lean();
     if (!year) {
       return NextResponse.json({ message: "Invalid academic year" }, { status: 400 });
     }
@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch all attendance dates for this class
     const attendances = await Attendance.find({
+      school: authUser.schoolContext?._id,
       class: classId,
       academicYear: yearId,
       date: { $gte: startOfDay(startDate), $lte: endOfDay(endDate) }

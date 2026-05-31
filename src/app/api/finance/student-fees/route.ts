@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search");
     const status = searchParams.get("status");
 
-    let query: any = {};
+    let query: any = { school: authUser.schoolContext?._id };
     if (authUser.role === "student") {
       query.student = authUser._id;
     } else if (authUser.role === "parent") {
@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
     if (search) {
       // Find students whose name matches the search
       const matchingStudents = await User.find({
+        school: authUser.schoolContext?._id,
         role: "student",
         name: { $regex: search, $options: "i" }
       }).select("_id").lean();
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
     
     // Check if it's a bulk assignment by class
     if (data.assignToClass && data.classId && data.feeStructureId && data.totalAmount) {
-      const students = await User.find({ role: "student", studentClass: data.classId }).select("_id").lean();
+      const students = await User.find({ school: authUser.schoolContext?._id, role: "student", studentClass: data.classId }).select("_id").lean();
       
       if (students.length === 0) {
         return NextResponse.json({ message: "No students found in this class" }, { status: 404 });
@@ -90,6 +91,7 @@ export async function POST(req: NextRequest) {
 
       // Prepare fees to insert
       const fees = students.map((s) => ({
+        school: authUser.schoolContext?._id,
         student: s._id,
         feeStructure: data.feeStructureId,
         class: data.classId,
@@ -109,6 +111,7 @@ export async function POST(req: NextRequest) {
     if (data.students && Array.isArray(data.students)) {
       const fees = data.students.map((studentId: string) => ({
         ...data,
+        school: authUser.schoolContext?._id,
         student: studentId,
         students: undefined,
         amountPaid: 0,
@@ -119,7 +122,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Bulk assigned successfully", count: createdFees.length }, { status: 201 });
     }
 
-    const studentFee = await StudentFee.create(data);
+    const studentFee = await StudentFee.create({ ...data, school: authUser.schoolContext?._id });
     return NextResponse.json(studentFee, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: "Server Error", error }, { status: 500 });

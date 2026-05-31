@@ -19,10 +19,10 @@ export async function GET(req: NextRequest) {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const query: any = { date: { $gte: sevenDaysAgo } };
+    const query: any = { school: (user as any).school, date: { $gte: sevenDaysAgo } };
     
     if (user.role === "teacher") {
-      const myClasses = await Class.find({ classTeacher: user._id }).select("_id").lean();
+      const myClasses = await Class.find({ school: (user as any).school, classTeacher: user._id }).select("_id").lean();
       query.class = { $in: myClasses.map(c => c._id) };
     } else if (user.role === "student") {
       query["records.student"] = user._id;

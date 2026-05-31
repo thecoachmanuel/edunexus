@@ -16,8 +16,10 @@ export async function GET(req: NextRequest) {
 
     const limit = 20;
 
-    // Admins see all activity. Others see only their own.
-    const query = user.role === "admin" ? {} : { user: user._id };
+    // Admins see all activity within their school. Others see only their own.
+    const query = user.role === "admin"
+      ? { school: (user as any).school }
+      : { school: (user as any).school, user: user._id };
 
     const logs = await ActivityLog.find(query)
       .populate("user", "name role")

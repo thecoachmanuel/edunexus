@@ -24,8 +24,8 @@ export async function GET(
       return NextResponse.json({ message: "Exam not found" }, { status: 404 });
     }
 
-    // 1. Get all students in this exam's class
-    const allStudents = await User.find({ role: "student", studentClass: exam.class })
+    // 1. Get all students in this exam's class (scoped to the exam's school)
+    const allStudents = await User.find({ school: (exam as any).school, role: "student", studentClass: exam.class })
       .select("name email _id")
       .lean();
 

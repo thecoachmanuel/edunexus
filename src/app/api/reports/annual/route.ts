@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "academicYearId is required" }, { status: 400 });
     }
 
-    const filter: any = { academicYear: academicYearId };
+    const filter: any = { school: authUser.schoolContext?._id, academicYear: academicYearId };
     if (classId) filter.class = classId;
     
     // Security: Students can only see their own, parents can only see their children's

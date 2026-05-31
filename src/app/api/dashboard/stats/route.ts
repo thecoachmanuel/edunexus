@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     if (!user) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     let stats = {};
-    const activityQuery = user.role === "admin" ? {} : { user: user._id };
+    const activityQuery = user.role === "admin" ? { school: user.school } : { user: user._id, school: user.school };
     const recentActivities = await ActivityLog.find(activityQuery)
       .sort({ createdAt: -1 })
       .limit(10)
@@ -33,14 +33,14 @@ export async function GET(req: NextRequest) {
 
     // --- Calculate Leaderboard Data ---
     // 1. Get all classes
-    const classes = await Class.find().select("name").lean();
+    const classes = await Class.find({ school: user.school }).select("name").lean();
     
     // 2. Calculate average score per class
     // We can use ReportCard to get the overall average score for each class
-    const reportCards = await ReportCard.find().select("class averageScore").lean();
+    const reportCards = await ReportCard.find({ school: user.school }).select("class averageScore").lean();
     
     // 3. Calculate attendance per class
-    const allAttendanceLogs = await Attendance.find().select("class records").lean();
+    const allAttendanceLogs = await Attendance.find({ school: user.school }).select("class records").lean();
     
     const leaderboardMap = new Map();
     classes.forEach(c => {
@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const upcomingEvents = await Event.find({ startDate: { $gte: new Date() } })
+    const upcomingEvents = await Event.find({ school: user.school, startDate: { $gte: new Date() } })
       .sort({ startDate: 1 })
       .limit(4)
       .lean();
@@ -128,16 +128,16 @@ export async function GET(req: NextRequest) {
     startOfWeek.setDate(startOfWeek.getDate() - 7);
 
     if (user.role === "admin") {
-      const totalStudents = await User.countDocuments({ role: "student" });
-      const newStudentsThisWeek = await User.countDocuments({ role: "student", createdAt: { $gte: startOfWeek } });
+      const totalStudents = await User.countDocuments({ school: user.school, role: "student" });
+      const newStudentsThisWeek = await User.countDocuments({ school: user.school, role: "student", createdAt: { $gte: startOfWeek } });
 
-      const totalTeachers = await User.countDocuments({ role: "teacher" });
-      const newTeachersThisWeek = await User.countDocuments({ role: "teacher", createdAt: { $gte: startOfWeek } });
+      const totalTeachers = await User.countDocuments({ school: user.school, role: "teacher" });
+      const newTeachersThisWeek = await User.countDocuments({ school: user.school, role: "teacher", createdAt: { $gte: startOfWeek } });
 
-      const activeQuizzes = await Exam.countDocuments({ isActive: true });
-      const newQuizzesThisWeek = await Exam.countDocuments({ isActive: true, createdAt: { $gte: startOfWeek } });
+      const activeQuizzes = await Exam.countDocuments({ school: user.school, isActive: true });
+      const newQuizzesThisWeek = await Exam.countDocuments({ school: user.school, isActive: true, createdAt: { $gte: startOfWeek } });
       
-      const allAttendance = await Attendance.find({}).lean();
+      const allAttendance = await Attendance.find({ school: user.school }).lean();
       let totalRecords = 0;
       let presentRecords = 0;
       let weekTotal = 0;
@@ -168,14 +168,14 @@ export async function GET(req: NextRequest) {
         recentActivity: formattedActivity, upcomingClasses, leaderboard 
       };
     } else if (user.role === "teacher") {
-      const myClassesCount = await Class.countDocuments({ classTeacher: user._id });
-      const newClassesThisWeek = await Class.countDocuments({ classTeacher: user._id, createdAt: { $gte: startOfWeek } });
-      const myExams = await Exam.find({ teacher: user._id }).select("_id").lean();
+      const myClassesCount = await Class.countDocuments({ school: user.school, classTeacher: user._id });
+      const newClassesThisWeek = await Class.countDocuments({ school: user.school, classTeacher: user._id, createdAt: { $gte: startOfWeek } });
+      const myExams = await Exam.find({ school: user.school, teacher: user._id }).select("_id").lean();
       const myExamIds = myExams.map((exam) => exam._id);
       const pendingGrading = await Submission.countDocuments({ exam: { $in: myExamIds }, score: 0 });
       
       const currentDay = new Date().toLocaleDateString("en-US", { weekday: "long" });
-      const timetables = await Timetable.find({ "schedule.periods.teacher": user._id })
+      const timetables = await Timetable.find({ school: user.school, "schedule.periods.teacher": user._id })
         .populate("class", "name")
         .lean();
         
@@ -205,10 +205,10 @@ export async function GET(req: NextRequest) {
         recentActivity: formattedActivity, upcomingClasses, leaderboard 
       };
     } else if (user.role === "student") {
-      const nextExam = await Exam.findOne({ class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 }).lean();
-      const pendingQuizzes = await Exam.countDocuments({ class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });
+      const nextExam = await Exam.findOne({ school: user.school, class: user.studentClass, dueDate: { $gte: new Date() } }).sort({ dueDate: 1 }).lean();
+      const pendingQuizzes = await Exam.countDocuments({ school: user.school, class: user.studentClass, isActive: true, dueDate: { $gte: new Date() } });
 
-      const studentAttendance = await Attendance.find({ "records.student": user._id }).lean();
+      const studentAttendance = await Attendance.find({ school: user.school, "records.student": user._id }).lean();
       let totalMyRecords = 0;
       let myPresentRecords = 0;
       studentAttendance.forEach((att: any) => {

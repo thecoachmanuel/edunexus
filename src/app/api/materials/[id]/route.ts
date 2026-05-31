@@ -14,10 +14,11 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const body = await req.json();
-    const updatedMaterial = await Material.findByIdAndUpdate(params.id, body, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedMaterial = await Material.findOneAndUpdate(
+      { _id: params.id, school: authUser.schoolContext?._id },
+      body,
+      { new: true, runValidators: true }
+    );
 
     if (!updatedMaterial) return NextResponse.json({ message: "Material not found" }, { status: 404 });
 
@@ -41,7 +42,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
     const authUser = await getAuthUser(req, ["admin", "teacher"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
-    const deletedMaterial = await Material.findByIdAndDelete(params.id);
+    const deletedMaterial = await Material.findOneAndDelete({ _id: params.id, school: authUser.schoolContext?._id });
     if (!deletedMaterial) return NextResponse.json({ message: "Material not found" }, { status: 404 });
 
     await logActivity({

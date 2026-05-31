@@ -9,10 +9,10 @@ export async function GET(req: NextRequest) {
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     await connectDB();
-    // Admin sees all tasks, teachers/others see tasks assigned to them or created by them
-    let query: any = {};
+    // Admin sees all tasks within school, teachers/others see tasks assigned to them or created by them
+    let query: any = { school: user.schoolContext?._id };
     if (user.role !== "admin") {
-      query = { $or: [{ assignee: user._id }, { createdBy: user._id }] };
+      query = { school: user.schoolContext?._id, $or: [{ assignee: user._id }, { createdBy: user._id }] };
     }
 
     const tasks = await Task.find(query)
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
 
     const task = await Task.create({
       ...body,
+      school: user.schoolContext?._id,
       createdBy: user._id,
     });
 

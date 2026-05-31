@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
 
     // Populate class, teacher, subject for rich data
-    const allTimetables = await Timetable.find({ academicYear: academicYearId, term })
+    const allTimetables = await Timetable.find({ school: authUser.schoolContext?._id, academicYear: academicYearId, term })
       .populate("class", "name")
       .populate({
         path: "schedule.periods.teacher",

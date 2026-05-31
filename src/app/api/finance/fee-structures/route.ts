@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
-    const feeStructures = await FeeStructure.find({})
+    const feeStructures = await FeeStructure.find({ school: authUser.schoolContext?._id })
       .populate("class", "name")
       .populate("academicYear", "name")
       .sort({ createdAt: -1 })
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const data = await req.json();
-    const feeStructure = await FeeStructure.create(data);
+    const feeStructure = await FeeStructure.create({ ...data, school: authUser.schoolContext?._id });
 
     return NextResponse.json(feeStructure, { status: 201 });
   } catch (error) {

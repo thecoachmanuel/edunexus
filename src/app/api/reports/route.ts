@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     const classId = searchParams.get("classId");
     const studentId = searchParams.get("studentId");
 
-    const filter: any = {};
+    const filter: any = { school: authUser.schoolContext?._id };
     if (classId) filter.class = classId;
     
     // Security: Students can only see their own, parents can only see their children's
@@ -77,14 +77,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get all students in the class
-    const students = await User.find({ role: "student", studentClass: classId }).lean();
+    const students = await User.find({ school: authUser.schoolContext?._id, role: "student", studentClass: classId }).lean();
 
     if (students.length === 0) {
       return NextResponse.json({ message: "No students found in this class" }, { status: 404 });
     }
 
     // 2. Fetch all exams for this class to map submissions to subjects
-    const classExams = await Exam.find({ class: classId }).lean();
+    const classExams = await Exam.find({ school: authUser.schoolContext?._id, class: classId }).lean();
     const examMap = new Map();
     classExams.forEach((exam) => {
       examMap.set(exam._id.toString(), exam.subject.toString());
@@ -143,6 +143,7 @@ export async function POST(req: NextRequest) {
 
       // Create or Update Report Card
       const reportData = {
+        school: authUser.schoolContext?._id,
         student: student._id,
         class: classId,
         academicYear: academicYearId,
@@ -183,7 +184,7 @@ export async function DELETE(req: NextRequest) {
     const body = await req.json();
     const { ids, classId, term } = body;
 
-    let filter: any = {};
+    let filter: any = { school: authUser.schoolContext?._id };
     
     if (ids && Array.isArray(ids) && ids.length > 0) {
       filter._id = { $in: ids };

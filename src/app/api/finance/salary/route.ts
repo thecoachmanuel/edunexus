@@ -15,10 +15,11 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search");
     const status = searchParams.get("status");
 
-    const query: any = {};
+    const query: any = { school: authUser.schoolContext?._id };
 
     if (search) {
       const matchingStaff = await User.find({
+        school: authUser.schoolContext?._id,
         role: { $in: ["teacher", "admin"] },
         name: { $regex: search, $options: "i" }
       }).select("_id").lean();
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     data.netSalary = (data.basicSalary || 0) + (data.allowances || 0) - (data.deductions || 0);
     
-    const salary = await Salary.create(data);
+    const salary = await Salary.create({ ...data, school: authUser.schoolContext?._id });
 
     return NextResponse.json(salary, { status: 201 });
   } catch (error) {

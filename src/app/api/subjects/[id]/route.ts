@@ -16,8 +16,8 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const { name, code, teacher, isActive } = await req.json();
-    const updatedSubject = await Subject.findByIdAndUpdate(
-      params.id,
+    const updatedSubject = await Subject.findOneAndUpdate(
+      { _id: params.id, school: authUser.schoolContext?._id },
       { name, code, isActive, teacher: Array.isArray(teacher) ? teacher : [] },
       { new: true, runValidators: true }
     );
@@ -46,7 +46,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
     const authUser = await getAuthUser(req, ["admin"]);
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
-    const deletedSubject = await Subject.findByIdAndDelete(params.id);
+    const deletedSubject = await Subject.findOneAndDelete({ _id: params.id, school: authUser.schoolContext?._id });
     if (!deletedSubject) return NextResponse.json({ message: "Subject not found" }, { status: 404 });
     return NextResponse.json({ message: "Subject deleted successfully" });
   } catch (error) {

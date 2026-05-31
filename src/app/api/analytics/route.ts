@@ -14,9 +14,9 @@ export async function GET(req: NextRequest) {
     if (!authUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     // 1. Enrollment Data
-    const students = await User.countDocuments({ role: "student" });
-    const teachers = await User.countDocuments({ role: "teacher" });
-    const parents = await User.countDocuments({ role: "parent" });
+    const students = await User.countDocuments({ school: authUser.schoolContext?._id, role: "student" });
+    const teachers = await User.countDocuments({ school: authUser.schoolContext?._id, role: "teacher" });
+    const parents = await User.countDocuments({ school: authUser.schoolContext?._id, role: "parent" });
     
     const enrollmentData = [
       { name: "Students", value: students, fill: "#10b981" }, // Emerald
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
     // Aggregate Expenses
     const expenses = await Expense.aggregate([
-      { $match: { date: { $gte: sixMonthsAgo } } },
+      { $match: { school: authUser.schoolContext?._id, date: { $gte: sixMonthsAgo } } },
       { 
         $group: { 
           _id: { year: { $year: "$date" }, month: { $month: "$date" } }, 
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     // Aggregate Fee Revenue (from transactions)
     const fees = await StudentFee.aggregate([
       { $unwind: "$transactions" },
-      { $match: { "transactions.date": { $gte: sixMonthsAgo } } },
+      { $match: { school: authUser.schoolContext?._id, "transactions.date": { $gte: sixMonthsAgo } } },
       { 
         $group: { 
           _id: { year: { $year: "$transactions.date" }, month: { $month: "$transactions.date" } }, 
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 3. Academic Data (Subject performance from Report Cards)
-    const reportCards = await ReportCard.find().populate("grades.subject", "name").lean();
+    const reportCards = await ReportCard.find({ school: authUser.schoolContext?._id }).populate("grades.subject", "name").lean();
     
     const subjectScores: Record<string, { total: number, count: number }> = {};
     

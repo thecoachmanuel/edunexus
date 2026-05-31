@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Class not found" }, { status: 404 });
     }
 
-    const allTeachers = await User.find({ role: "teacher" }).lean();
+    const allTeachers = await User.find({ school: authUser.schoolContext?._id, role: "teacher" }).lean();
     const classSubjectIds = classData.subjects.map((sub: any) =>
       sub._id.toString()
     );
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     // --- Step 2: Fetch existing timetables — build a compact clash summary ---
     // Do NOT send full documents to AI (they are huge and blow context limits).
     // Instead build a minimal map: { teacherId -> [ { day, startTime, endTime } ] }
-    const allTimetables = await Timetable.find({ academicYear: academicYearId, term }).lean();
+    const allTimetables = await Timetable.find({ school: authUser.schoolContext?._id, academicYear: academicYearId, term }).lean();
     const teacherClashMap: Record<string, { day: string; startTime: string; endTime: string }[]> = {};
     for (const tt of allTimetables) {
       if (String(tt.class) === String(classId)) continue; // skip the class we're generating for
@@ -324,8 +324,9 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
     // --- Step 7: Save (atomic upsert) ---
     console.log("[Timetable] Saving sanitized schedule with", finalSanitizedSchedule.length, "days...");
     const updatedTimetable = await Timetable.findOneAndUpdate(
-      { class: classId, academicYear: academicYearId, term },
+      { school: authUser.schoolContext?._id, class: classId, academicYear: academicYearId, term },
       {
+        school: authUser.schoolContext?._id,
         class: classId,
         academicYear: academicYearId,
         term,

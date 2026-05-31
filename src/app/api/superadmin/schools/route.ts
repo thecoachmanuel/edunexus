@@ -3,6 +3,8 @@ import { connectDB } from "@/lib/db";
 import { getSuperAuthUser } from "@/middleware/superAuth";
 import School from "@/lib/models/school";
 import Subscription from "@/lib/models/subscription";
+import Plan from "@/lib/models/plan";
+import User from "@/lib/models/user";
 
 // GET /api/superadmin/schools — List all schools with subscription details
 export async function GET(req: NextRequest) {
@@ -49,6 +51,66 @@ export async function GET(req: NextRequest) {
       schools: filtered,
       pagination: { total, page, limit, pages: Math.ceil(total / limit) },
     });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    await connectDB();
+    const superAdmin = await getSuperAuthUser(req, ["super_admin"]);
+    if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    const body = await req.json();
+    const { name, slug, adminEmail, adminPassword, planSlug, adminPhone } = body;
+
+    if (!name || !slug || !adminEmail || !adminPassword || !planSlug) {
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+    }
+
+    // Check if slug or email exists
+    const existingSchool = await School.findOne({ slug });
+    if (existingSchool) return NextResponse.json({ message: "Slug already in use" }, { status: 400 });
+
+    const existingUser = await User.findOne({ email: adminEmail });
+    if (existingUser) return NextResponse.json({ message: "Admin email already in use" }, { status: 400 });
+
+    const plan = await Plan.findOne({ slug: planSlug, isActive: true });
+    if (!plan) return NextResponse.json({ message: "Plan not found" }, { status: 404 });
+
+    const school = await School.create({
+      name,
+      slug,
+      email: adminEmail,
+      phone: adminPhone || "",
+      isVerified: true,
+      isActive: true,
+      isTrialActive: false,
+    });
+
+    const subscription = await Subscription.create({
+      school: school._id,
+      plan: plan._id,
+      status: "active",
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days default
+    });
+
+    school.subscription = subscription._id;
+    await school.save();
+
+    await User.create({
+      school: school._id,
+      name: "School Admin",
+      email: adminEmail,
+      password: adminPassword,
+      phone: adminPhone || "",
+      role: "admin",
+      isActive: true,
+    });
+
+    return NextResponse.json({ message: "School created successfully", school }, { status: 201 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });

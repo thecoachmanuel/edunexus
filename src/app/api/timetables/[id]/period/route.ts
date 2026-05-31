@@ -26,6 +26,7 @@ export async function PATCH(
     // 1. Check for teacher clash if teacherId is provided
     if (teacherId && !force) {
       const clash = await Timetable.findOne({
+        school: authUser.schoolContext?._id,
         class: { $ne: classId }, // Exclude the current class
         "schedule.day": day,
         "schedule.periods": {
@@ -53,7 +54,7 @@ export async function PATCH(
 
     // 2. Perform the update
     // We need to update the specific period in the nested schedule array
-    const timetable = await Timetable.findOne({ class: classId });
+    const timetable = await Timetable.findOne({ school: authUser.schoolContext?._id, class: classId });
     if (!timetable) {
       return NextResponse.json({ message: "Timetable not found" }, { status: 404 });
     }

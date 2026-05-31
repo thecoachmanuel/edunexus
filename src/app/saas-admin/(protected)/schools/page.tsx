@@ -5,7 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Search, ToggleLeft, ToggleRight, ExternalLink
+  Search, ToggleLeft, ToggleRight, ExternalLink, Plus, Trash2
 } from "lucide-react";
 
 interface School {
@@ -26,6 +26,33 @@ export default function SchoolsManagement() {
   const [allSchools, setAllSchools] = useState<School[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "", slug: "", adminEmail: "", adminPassword: "", adminPhone: "", planSlug: "starter"
+  });
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("/api/superadmin/schools", formData);
+      setAllSchools([res.data.school, ...allSchools]);
+      setIsCreateModalOpen(false);
+      setFormData({ name: "", slug: "", adminEmail: "", adminPassword: "", adminPhone: "", planSlug: "starter" });
+      alert("School created successfully!");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to create school");
+    }
+  };
+
+  const handleHardDelete = async (schoolId: string) => {
+    if (!confirm("Are you sure you want to permanently delete this school and ALL its data? This cannot be undone!")) return;
+    try {
+      await axios.delete(`/api/superadmin/schools/${schoolId}?action=hard_delete`);
+      setAllSchools((s) => s.filter((sc) => sc._id !== schoolId));
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to delete school");
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,7 +135,34 @@ export default function SchoolsManagement() {
           />
         </div>
         <span className="text-white/40 text-sm whitespace-nowrap">{filteredSchools.length} schools</span>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Create School</span>
+        </button>
       </div>
+
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-md">
+            <h2 className="text-xl font-bold text-white mb-4">Create New School</h2>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <input required type="text" placeholder="School Name" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+              <input required type="text" placeholder="URL Slug (e.g. myschool)" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} />
+              <input required type="email" placeholder="Admin Email" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.adminEmail} onChange={e => setFormData({ ...formData, adminEmail: e.target.value })} />
+              <input required type="text" placeholder="Admin Password" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.adminPassword} onChange={e => setFormData({ ...formData, adminPassword: e.target.value })} />
+              <input required type="text" placeholder="Admin Phone" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.adminPhone} onChange={e => setFormData({ ...formData, adminPhone: e.target.value })} />
+              <input required type="text" placeholder="Plan Slug (e.g. starter)" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.planSlug} onChange={e => setFormData({ ...formData, planSlug: e.target.value })} />
+              <div className="flex items-center gap-3 mt-6">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="flex-1 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5">Cancel</button>
+                <button type="submit" className="flex-1 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700">Create</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="sm:hidden space-y-3">
         {filteredSchools.map((school) => (
@@ -161,6 +215,13 @@ export default function SchoolsManagement() {
                 <ExternalLink className="w-3 h-3" />
                 Open Portal
               </Link>
+              <button
+                onClick={() => handleHardDelete(school._id)}
+                className="p-2 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
+                title="Hard Delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         ))}
@@ -229,6 +290,13 @@ export default function SchoolsManagement() {
                         className="text-xs px-2.5 py-1.5 rounded-lg border border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all whitespace-nowrap"
                       >
                         +14d Trial
+                      </button>
+                      <button
+                        onClick={() => handleHardDelete(school._id)}
+                        className="p-1.5 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
+                        title="Hard Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

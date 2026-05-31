@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
 
     // 1. Fetch Target Timetable
-    const existingTimetable = await Timetable.findOne({ class: classId, academicYear: academicYearId, term }).lean();
+    const existingTimetable = await Timetable.findOne({ school: authUser.schoolContext?._id, class: classId, academicYear: academicYearId, term }).lean();
     if (!existingTimetable) {
       return NextResponse.json({ message: "Timetable not found for class" }, { status: 404 });
     }
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const classData = await ClassModel.findById(classId).lean();
 
     // 2. Build Teacher Clash Map
-    const allTimetables = await Timetable.find({ academicYear: academicYearId, term }).lean();
+    const allTimetables = await Timetable.find({ school: authUser.schoolContext?._id, academicYear: academicYearId, term }).lean();
     const teacherClashMap: Record<string, { day: string; startTime: string; endTime: string }[]> = {};
     for (const tt of allTimetables) {
       if (String(tt.class) === String(classId)) continue; 
@@ -175,7 +175,7 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 
     // 5. Save
     await Timetable.findOneAndUpdate(
-      { class: classId, academicYear: academicYearId, term },
+      { school: authUser.schoolContext?._id, class: classId, academicYear: academicYearId, term },
       { schedule: finalSanitizedSchedule },
       { new: true }
     );

@@ -3,6 +3,8 @@ import { connectDB } from "@/lib/db";
 import School from "@/lib/models/school";
 import Plan from "@/lib/models/plan";
 import Subscription from "@/lib/models/subscription";
+import SchoolSettings from "@/lib/models/schoolSettings";
+import AcademicYear from "@/lib/models/academicYear";
 import User from "@/lib/models/user";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -12,7 +14,7 @@ export async function POST(req: Request) {
   try {
     await connectDB();
     const body = await req.json();
-    const { schoolName, slug, adminName, adminPassword, planSlug } = body;
+    const { schoolName, slug, adminName, adminPassword, planSlug, contactNumber } = body;
     const email = body.email?.toLowerCase().trim();
 
     // Validate slug format
@@ -77,6 +79,33 @@ export async function POST(req: Request) {
       password: adminPassword,
       role: "admin",
       isActive: true,
+    });
+
+    // Automatically create School Settings
+    await SchoolSettings.create({
+      school: school._id,
+      schoolName,
+      whatsappNumber: contactNumber || "",
+      accountName: schoolName,
+      schoolMotto: "Excellence · Integrity · Innovation"
+    });
+
+    // Automatically create a default Academic Year so the dashboard is accessible immediately
+    const today = new Date();
+    const nextYear = new Date();
+    nextYear.setFullYear(today.getFullYear() + 1);
+    await AcademicYear.create({
+      school: school._id,
+      name: `${today.getFullYear()}/${nextYear.getFullYear()}`,
+      fromYear: today,
+      toYear: nextYear,
+      isCurrent: true,
+      activeTerm: "Term 1",
+      terms: [
+        { term: "Term 1", startDate: today, endDate: new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000) },
+        { term: "Term 2", startDate: new Date(today.getTime() + 100 * 24 * 60 * 60 * 1000), endDate: new Date(today.getTime() + 190 * 24 * 60 * 60 * 1000) },
+        { term: "Term 3", startDate: new Date(today.getTime() + 200 * 24 * 60 * 60 * 1000), endDate: new Date(today.getTime() + 290 * 24 * 60 * 60 * 1000) },
+      ],
     });
 
     // Send verification email

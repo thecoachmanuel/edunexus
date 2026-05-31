@@ -7,25 +7,8 @@ import axios from "axios";
 import {
   GraduationCap, CheckCircle2, ArrowRight, Zap, Users, BarChart3,
   BookOpen, Clock, Shield, Star, ChevronDown, Menu, X, Building2,
-  Sparkles, TrendingUp, Award, Moon, Sun
+  Sparkles, TrendingUp, Award
 } from "lucide-react";
-import { useTheme } from "@/components/provider/theme";
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  
-  return (
-    <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white dark:focus-visible:ring-white/30"
-      aria-label="Toggle theme"
-    >
-      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
-    </button>
-  );
-}
 
 
 const FEATURES = [
@@ -93,7 +76,6 @@ export default function LandingPage() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle />
             <Link
               href="/register"
               className="px-5 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-violet-500/25"
@@ -110,7 +92,6 @@ export default function LandingPage() {
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle />
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-600 dark:text-white/70 p-2">
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>

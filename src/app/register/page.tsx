@@ -43,6 +43,7 @@ function RegisterForm() {
     email: "",
     adminName: "",
     adminPassword: "",
+    contactNumber: "",
   });
 
   const [slugEdited, setSlugEdited] = useState(false);
@@ -251,6 +252,23 @@ function RegisterForm() {
                   onChange={handleChange}
                   required
                   placeholder="Full Name"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/8 bg-white/[0.03] text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/[0.05] transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Contact Number */}
+            <div>
+              <label className="block text-xs font-semibold text-white/50 mb-2 uppercase tracking-wider">Contact Number</label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20">📞</span>
+                <input
+                  name="contactNumber"
+                  type="tel"
+                  value={form.contactNumber}
+                  onChange={handleChange}
+                  required
+                  placeholder="+234 800 000 0000"
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/8 bg-white/[0.03] text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/[0.05] transition-all"
                 />
               </div>

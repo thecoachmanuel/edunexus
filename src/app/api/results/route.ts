@@ -14,7 +14,7 @@ async function regenerateReportCards(
   academicYearId: string,
   term: string
 ) {
-  const config = await GradingConfig.findOne({ academicYear: academicYearId, term }).lean();
+  const config = await GradingConfig.findOne({ school: classId ? (await (await import("@/lib/models/class")).default.findById(classId).lean() as any)?.school : undefined, academicYear: academicYearId, term }).lean();
   const defaultConfig = {
     quizWeight: 10, quizMaxScore: 100,
     caWeight: 20, caMaxScore: 20,
@@ -124,7 +124,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Teachers only see results for their subjects
-    const filter: any = { class: classId, academicYear: academicYearId, term };
+    const filter: any = { school: authUser.schoolContext?._id, class: classId, academicYear: academicYearId, term };
     if (authUser.role === "teacher") {
       const teacherSubjects = (authUser as any).teacherSubject || [];
       filter.subject = { $in: teacherSubjects };
@@ -136,7 +136,7 @@ export async function GET(req: NextRequest) {
       .sort({ "student.name": 1 })
       .lean();
 
-    const config = await GradingConfig.findOne({ academicYear: academicYearId, term }).lean();
+    const config = await GradingConfig.findOne({ school: authUser.schoolContext?._id, academicYear: academicYearId, term }).lean();
 
     return NextResponse.json({ results, config });
   } catch (error) {
@@ -183,9 +183,10 @@ export async function PUT(req: NextRequest) {
 
       return {
         updateOne: {
-          filter: { student: r.studentId, subject: r.subjectId, academicYear: academicYearId, term },
+          filter: { school: authUser.schoolContext?._id, student: r.studentId, subject: r.subjectId, academicYear: academicYearId, term },
           update: {
             $set: {
+              school: authUser.schoolContext?._id,
               student: r.studentId,
               subject: r.subjectId,
               class: classId,
@@ -248,7 +249,7 @@ export async function POST(req: NextRequest) {
 
     // Get all exams (quizzes) for this class matching the term and academicYear
     // NOTE: This requires exams to have been generated with the term and academicYear attached.
-    const exams = await Exam.find({ class: classId, academicYear: academicYearId, term }).lean();
+    const exams = await Exam.find({ school: authUser.schoolContext?._id, class: classId, academicYear: academicYearId, term }).lean();
     if (exams.length === 0) {
       return NextResponse.json({ message: "No quizzes found for this class in the selected term", populated: 0 });
     }
@@ -257,7 +258,7 @@ export async function POST(req: NextRequest) {
     const examSubjectMap = new Map(exams.map((e: any) => [e._id.toString(), e.subject.toString()]));
 
     // Get all students in the class
-    const students = await User.find({ role: "student", studentClass: classId }).lean();
+    const students = await User.find({ school: authUser.schoolContext?._id, role: "student", studentClass: classId }).lean();
     let populated = 0;
 
     for (const student of students) {

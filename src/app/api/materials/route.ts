@@ -18,7 +18,11 @@ export async function GET(req: NextRequest) {
     const subjectId = searchParams.get("subjectId");
     const search = searchParams.get("search");
 
+    const authUser = await getAuthUser(req);
     const query: any = {};
+    if (authUser?.schoolContext?._id) {
+      query.school = authUser.schoolContext._id;
+    }
     if (classId) query.classId = classId;
     if (subjectId) query.subjectId = subjectId;
     if (search) {
@@ -62,6 +66,7 @@ export async function POST(req: NextRequest) {
     const { title, description, type, url, classId, subjectId } = await req.json();
 
     const newMaterial = await Material.create({
+      school: authUser.schoolContext?._id,
       title,
       description,
       type,

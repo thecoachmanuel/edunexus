@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const date = new Date(dateParam);
     date.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
 
-    const attendanceRecord = await Attendance.findOne({ class: classId, date })
+    const attendanceRecord = await Attendance.findOne({ school: authUser.schoolContext?._id, class: classId, date })
       .populate("recordedBy", "name")
       .populate("records.student", "name")
       .lean();
@@ -51,8 +51,9 @@ export async function POST(req: NextRequest) {
 
     // Update or Insert the attendance record
     const attendanceRecord = await Attendance.findOneAndUpdate(
-      { class: classId, date },
+      { school: authUser.schoolContext?._id, class: classId, date },
       {
+        school: authUser.schoolContext?._id,
         class: classId,
         academicYear: academicYearId,
         date,

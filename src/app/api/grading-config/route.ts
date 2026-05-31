@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const academicYearId = searchParams.get("academicYearId");
     const term = searchParams.get("term");
 
-    const filter: any = {};
+    const filter: any = { school: authUser.schoolContext?._id };
     if (academicYearId) filter.academicYear = academicYearId;
     if (term) filter.term = term;
 
@@ -68,8 +68,9 @@ export async function POST(req: NextRequest) {
     }
 
     const config = await GradingConfig.findOneAndUpdate(
-      { academicYear: academicYearId, term },
+      { school: authUser.schoolContext?._id, academicYear: academicYearId, term },
       {
+        school: authUser.schoolContext?._id,
         academicYear: academicYearId,
         term,
         quizWeight: quizWeight ?? 10,

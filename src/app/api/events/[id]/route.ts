@@ -14,7 +14,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
 
     const resolvedParams = await params;
-    const event = await Event.findByIdAndUpdate(resolvedParams.id, body, { new: true });
+    const event = await Event.findOneAndUpdate(
+      { _id: resolvedParams.id, school: user.schoolContext?._id },
+      body,
+      { new: true }
+    );
     if (!event) return NextResponse.json({ message: "Event not found" }, { status: 404 });
 
     return NextResponse.json({ event, message: "Event updated successfully" });
@@ -32,7 +36,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     await connectDB();
     const resolvedParams = await params;
-    const event = await Event.findByIdAndDelete(resolvedParams.id);
+    const event = await Event.findOneAndDelete({ _id: resolvedParams.id, school: user.schoolContext?._id });
     if (!event) return NextResponse.json({ message: "Event not found" }, { status: 404 });
 
     return NextResponse.json({ message: "Event deleted successfully" });

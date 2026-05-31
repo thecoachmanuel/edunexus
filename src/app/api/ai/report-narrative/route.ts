@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch the full report card with populated data
-    const report = await ReportCard.findById(reportCardId)
+    const report = await ReportCard.findOne({ _id: reportCardId, school: authUser.schoolContext?._id })
       .populate("student", "name")
       .populate("class", "name")
       .populate("grades.subject", "name")
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
     // Fetch student attendance rate
     const studentId = report.student._id;
     const attendanceLogs = await Attendance.find({
+      school: authUser.schoolContext?._id,
       "records.student": studentId,
       academicYear: report.academicYear._id,
     }).lean();
@@ -126,7 +127,7 @@ Write a personal teacher's comment (3–5 sentences) for this student's report c
     
     // Deterministic Rule-Based Fallback
     try {
-      const fallbackReport = await ReportCard.findById(reportCardId).populate("student", "name").lean() as any;
+      const fallbackReport = await ReportCard.findOne({ _id: reportCardId, school: authUser.schoolContext?._id }).populate("student", "name").lean() as any;
       const fName = fallbackReport?.student?.name?.split(" ")[0] || "The student";
       const fAvg = fallbackReport?.averageScore || 0;
       

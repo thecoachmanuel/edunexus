@@ -24,14 +24,14 @@ export async function GET(req: NextRequest) {
     }
 
     // Determine scope: admin sees all students
-    let studentQuery: any = { role: "student" };
+    let studentQuery: any = { school: authUser.schoolContext?._id, role: "student" };
     if (authUser.role === "teacher") {
-      const myClasses = await Class.find({ classTeacher: authUser._id }).select("_id students").lean();
+      const myClasses = await Class.find({ school: authUser.schoolContext?._id, classTeacher: authUser._id }).select("_id students").lean();
       const studentIds = myClasses.flatMap((c: any) => c.students || []);
       if (studentIds.length === 0) {
         return NextResponse.json({ students: [], summary: { highRisk: 0, atRisk: 0, stable: 0, total: 0 } });
       }
-      studentQuery = { _id: { $in: studentIds }, role: "student" };
+      studentQuery = { school: authUser.schoolContext?._id, _id: { $in: studentIds }, role: "student" };
     }
 
     const students = await User.find(studentQuery)
@@ -50,19 +50,22 @@ export async function GET(req: NextRequest) {
 
     // Bulk fetch attendance (last 4 weeks)
     const recentAttendance = await Attendance.find({
+      school: authUser.schoolContext?._id,
       "records.student": { $in: studentIds },
       date: { $gte: fourWeeksAgo },
     }).lean() as any[];
 
     // Bulk fetch ALL report cards for these students (to check grade trends)
     const allReportCards = await ReportCard.find({
+      school: authUser.schoolContext?._id,
       student: { $in: studentIds },
     }).sort({ createdAt: -1 }).lean() as any[];
 
     // Bulk fetch all exams and submissions
-    const allExams = await Exam.find({ isActive: false }).select("_id class").lean() as any[];
+    const allExams = await Exam.find({ school: authUser.schoolContext?._id, isActive: false }).select("_id class").lean() as any[];
     const allExamIds = allExams.map((e: any) => e._id);
     const allSubmissions = await Submission.find({
+      school: authUser.schoolContext?._id,
       student: { $in: studentIds },
       exam: { $in: allExamIds },
     }).select("student exam score").lean() as any[];
