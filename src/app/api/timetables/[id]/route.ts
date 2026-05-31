@@ -30,6 +30,7 @@ export async function GET(
 
     const query: any = { school: authUser.schoolContext?._id, class: classId };
     if (term) query.term = term;
+    const timetable = await Timetable.findOne(query)
       .sort({ updatedAt: -1 })
       .populate("academicYear")
       .populate("schedule.periods.subject")
