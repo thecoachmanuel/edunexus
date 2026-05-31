@@ -16,7 +16,12 @@ export async function GET(req: NextRequest) {
     const limit = limitParam ? parseInt(limitParam) : (pageParam ? 10 : 10000);
     const search = searchParams.get("search");
 
+    const authUser = await getAuthUser(req);
     const query: any = {};
+    if (authUser?.schoolContext?._id) {
+      query.school = authUser.schoolContext._id;
+    }
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -55,11 +60,12 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, code, teacher, isActive } = await req.json();
-    const subjectExists = await subject.findOne({ code }).lean();
+    const subjectExists = await subject.findOne({ code, school: authUser.schoolContext?._id }).lean();
     if (subjectExists) {
       return NextResponse.json({ message: "Subject code already exists" }, { status: 400 });
     }
     const newSubject = await subject.create({
+      school: authUser.schoolContext?._id,
       name,
       code,
       isActive,

@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Extend Vercel function timeout for AI generation
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Class from "@/lib/models/class";

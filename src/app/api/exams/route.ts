@@ -18,6 +18,9 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search") || "";
 
     let query: any = {};
+    if (authUser?.schoolContext?._id) {
+      query.school = authUser.schoolContext._id;
+    }
 
     if (classId) query.class = classId;
     if (authUser?.role === "student") {

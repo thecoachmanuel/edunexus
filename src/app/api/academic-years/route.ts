@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import AcademicYear from "@/lib/models/academicYear";
+import { getAuthUser } from "@/middleware/auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,7 +15,12 @@ export async function GET(req: NextRequest) {
     const limit = limitParam ? parseInt(limitParam) : (pageParam ? 10 : 10000);
     const search = searchParams.get("search");
 
+    const authUser = await getAuthUser(req);
     const query: any = {};
+    if (authUser?.schoolContext?._id) {
+      query.school = authUser.schoolContext._id;
+    }
+
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
@@ -43,6 +49,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
+    const authUser = await getAuthUser(req, ["admin"]);
+    if (!authUser) {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
+
     const { name, isCurrent, term, activeTerm, terms, fromYear: inputFromYear, toYear: inputToYear } = await req.json();
 
     const currentTerm = activeTerm || term || "Term 1";
@@ -54,16 +65,17 @@ export async function POST(req: NextRequest) {
       toYear = terms[terms.length - 1].endDate;
     }
 
-    const existingYear = await AcademicYear.findOne({ name }).lean();
+    const existingYear = await AcademicYear.findOne({ name, school: authUser.schoolContext?._id }).lean();
     if (existingYear) {
       return NextResponse.json({ message: "Academic Year with this name already exists" }, { status: 400 });
     }
     
     if (isCurrent) {
-      await AcademicYear.updateMany({ _id: { $ne: null } }, { isCurrent: false });
+      await AcademicYear.updateMany({ school: authUser.schoolContext?._id }, { isCurrent: false });
     }
     
     const academicYear = await AcademicYear.create({
+      school: authUser.schoolContext?._id,
       name,
       fromYear,
       toYear,

@@ -229,13 +229,13 @@ export default function SchoolLoginPage() {
           </div>
           <div>
             <h2 className="text-3xl font-black text-white leading-tight">
-              Your School.<br />Your Data.<br />
+              Welcome to <br />
               <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
-                Completely Isolated.
+                {schoolInfo ? schoolInfo.name : "Your School"}
               </span>
             </h2>
             <p className="mt-4 text-white/40 text-sm max-w-xs mx-auto leading-relaxed">
-              EduNexus uses strict multi-tenant isolation — every school has its own secure, private environment.
+              {schoolInfo ? `Welcome to the secure portal for ${schoolInfo.name}. Please sign in to access your dashboard.` : "Welcome to the secure portal. Please sign in to access your dashboard."}
             </p>
           </div>
         </div>

@@ -11,7 +11,9 @@ import { sendEmail } from "@/lib/email";
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { schoolName, slug, email, adminName, adminPassword, planSlug } = await req.json();
+    const body = await req.json();
+    const { schoolName, slug, adminName, adminPassword, planSlug } = body;
+    const email = body.email?.toLowerCase().trim();
 
     // Validate slug format
     if (!/^[a-z0-9-]+$/.test(slug)) {

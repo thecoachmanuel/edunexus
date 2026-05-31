@@ -14,12 +14,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
-    const school = await School.findById(id)
-      .populate({ path: "subscription", populate: { path: "plan" } })
-      .lean();
+    const [school, studentCount] = await Promise.all([
+      School.findById(id).populate({ path: "subscription", populate: { path: "plan" } }).lean(),
+      require("@/lib/models/user").default.countDocuments({ school: id, role: "student" })
+    ]);
 
     if (!school) return NextResponse.json({ message: "School not found" }, { status: 404 });
-    return NextResponse.json({ school });
+    return NextResponse.json({ school, studentCount });
   } catch (error) {
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }

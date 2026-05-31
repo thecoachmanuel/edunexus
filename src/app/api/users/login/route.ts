@@ -8,7 +8,9 @@ import jwt from "jsonwebtoken";
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { email, password, slug } = await req.json();
+    const reqJson = await req.json();
+    const email = reqJson.email?.toLowerCase().trim();
+    const { password, slug } = reqJson;
 
     // Find school by slug to scope the login
     let school: any = null;

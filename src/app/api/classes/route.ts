@@ -21,6 +21,12 @@ export async function GET(req: NextRequest) {
 
     const authUser = await getAuthUser(req);
     const query: any = {};
+    
+    // Ensure multitenant isolation
+    if (authUser?.schoolContext?._id) {
+      query.school = authUser.schoolContext._id;
+    }
+
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
@@ -64,7 +70,12 @@ export async function POST(req: NextRequest) {
 
     const { name, academicYear, classTeacher, capacity } = await req.json();
 
-    const existingClass = await Class.findOne({ name, academicYear }).lean();
+    const existingClass = await Class.findOne({ 
+      name, 
+      academicYear,
+      school: authUser.schoolContext?._id 
+    }).lean();
+    
     if (existingClass) {
       return NextResponse.json(
         { message: "Class with this name already exists for the specified academic year." },
@@ -73,6 +84,7 @@ export async function POST(req: NextRequest) {
     }
 
     const newClass = await Class.create({
+      school: authUser.schoolContext?._id,
       name,
       academicYear,
       classTeacher,

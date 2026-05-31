@@ -12,6 +12,9 @@ export async function GET(req: NextRequest) {
     
     // Filter events by audience if not admin
     let query: any = {};
+    if (user?.schoolContext?._id) {
+      query.school = user.schoolContext._id;
+    }
     if (user.role !== "admin") {
       const allowedAudiences = ["All"];
       if (user.role === "teacher") allowedAudiences.push("Teachers");
@@ -41,6 +44,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const event = await Event.create({
+      school: user.schoolContext?._id,
       ...body,
       createdBy: user._id,
     });

@@ -4,24 +4,13 @@ import { connectDB } from "@/lib/db";
 import User from "@/lib/models/user";
 import Class from "@/lib/models/class";
 import Subject from "@/lib/models/subject";
-import jwt from "jsonwebtoken";
-import { logActivity } from "@/lib/utils/activitieslog"; // I will move it to lib/utils
-
-const protectAdmin = async (req: NextRequest) => {
-  const token = req.cookies.get("jwt")?.value;
-  if (!token) return null;
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
-    const user = await User.findById(decoded.userId).select("-password").lean();
-    if (user && (user.role === "admin" || user.role === "teacher")) return user;
-  } catch (e) {}
-  return null;
-};
+import { getAuthUser } from "@/middleware/auth";
+import { logActivity } from "@/lib/utils/activitieslog";
 
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
-    const adminUser = await protectAdmin(req);
+    const adminUser = await getAuthUser(req, ["admin", "teacher"]);
     if (!adminUser) return NextResponse.json({ message: "Not authorized" }, { status: 401 });
 
     const searchParams = req.nextUrl.searchParams;
@@ -35,6 +24,9 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
     const filter: any = {};
+    if (adminUser.schoolContext?._id) {
+      filter.school = adminUser.schoolContext._id;
+    }
 
     if (role && role !== "all" && role !== "") {
       filter.role = role;
