@@ -181,7 +181,7 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
     const activeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     let attempts = 0;
-    const maxAttempts = 3;
+    const maxAttempts = 2; // Reduced from 3 to prevent Vercel 60s timeout
     let currentPrompt = prompt;
     let finalSanitizedSchedule: any = null;
 
@@ -196,7 +196,7 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
           const generateWithTimeout = Promise.race([
             activeModel.generateContent(currentPrompt),
             new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error("AI request timed out after 90 seconds.")), 90000)
+              setTimeout(() => reject(new Error("AI request timed out after 25 seconds.")), 25000)
             ),
           ]);
 
@@ -269,10 +269,10 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
         } catch (err: any) {
           console.error(`[Timetable] Attempt ${attempts} failed:`, err.message);
           
-          // If we hit a rate limit (429) or quota error, back off heavily before retrying
+          // If we hit a rate limit (429) or quota error, back off
           if (err.message.toLowerCase().includes("quota") || err.message.includes("429") || err.message.includes("503")) {
-            console.log("[Timetable] AI Quota/Rate Limit hit. Backing off for 15 seconds...");
-            await new Promise(resolve => setTimeout(resolve, 15000));
+            console.log("[Timetable] AI Quota/Rate Limit hit. Backing off for 5 seconds...");
+            await new Promise(resolve => setTimeout(resolve, 5000));
           }
           
           if (attempts === maxAttempts) {
@@ -368,7 +368,7 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
     console.error("TIMETABLE GENERATE ERROR", errMessage);
 
     if (isTimeout) {
-      return NextResponse.json({ message: errMessage }, { status: 504 });
+      return NextResponse.json({ message: "Timetable generation took too long due to complex clash constraints. Try reducing the number of periods or try again." }, { status: 504 });
     }
     if (isOverloaded) {
       return NextResponse.json(
