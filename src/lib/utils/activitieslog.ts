@@ -1,4 +1,5 @@
 import ActivitiesLog from "@/lib/models/activitieslog";
+import User from "@/lib/models/user";
 
 export const logActivity = async ({
   userId,
@@ -10,7 +11,11 @@ export const logActivity = async ({
   details?: string;
 }) => {
   try {
+    const user = await User.findById(userId).select("school").lean() as any;
+    if (!user || !user.school) return;
+
     await ActivitiesLog.create({
+      school: user.school,
       user: userId,
       action,
       details,

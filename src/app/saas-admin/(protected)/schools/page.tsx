@@ -28,7 +28,7 @@ export default function SchoolsManagement() {
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "", slug: "", adminEmail: "", adminPassword: "", adminPhone: "", planSlug: "starter"
+    name: "", slug: "", adminName: "", adminEmail: "", adminPassword: "", adminPhone: "", planSlug: "starter"
   });
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -37,7 +37,7 @@ export default function SchoolsManagement() {
       const res = await axios.post("/api/superadmin/schools", formData);
       setAllSchools([res.data.school, ...allSchools]);
       setIsCreateModalOpen(false);
-      setFormData({ name: "", slug: "", adminEmail: "", adminPassword: "", adminPhone: "", planSlug: "starter" });
+      setFormData({ name: "", slug: "", adminName: "", adminEmail: "", adminPassword: "", adminPhone: "", planSlug: "starter" });
       alert("School created successfully!");
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to create school");
@@ -151,10 +151,16 @@ export default function SchoolsManagement() {
             <form onSubmit={handleCreate} className="space-y-4">
               <input required type="text" placeholder="School Name" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
               <input required type="text" placeholder="URL Slug (e.g. myschool)" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} />
+              <input required type="text" placeholder="Admin Name" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.adminName} onChange={e => setFormData({ ...formData, adminName: e.target.value })} />
               <input required type="email" placeholder="Admin Email" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.adminEmail} onChange={e => setFormData({ ...formData, adminEmail: e.target.value })} />
               <input required type="text" placeholder="Admin Password" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.adminPassword} onChange={e => setFormData({ ...formData, adminPassword: e.target.value })} />
               <input required type="text" placeholder="Admin Phone" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.adminPhone} onChange={e => setFormData({ ...formData, adminPhone: e.target.value })} />
-              <input required type="text" placeholder="Plan Slug (e.g. starter)" className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.planSlug} onChange={e => setFormData({ ...formData, planSlug: e.target.value })} />
+              <select required className="w-full p-2.5 rounded-lg border border-white/10 bg-white/5 text-white" value={formData.planSlug} onChange={e => setFormData({ ...formData, planSlug: e.target.value })}>
+                <option value="starter">Starter Plan</option>
+                <option value="growth">Growth Plan</option>
+                <option value="premium">Premium Plan</option>
+                <option value="enterprise">Enterprise Plan</option>
+              </select>
               <div className="flex items-center gap-3 mt-6">
                 <button type="button" onClick={() => setIsCreateModalOpen(false)} className="flex-1 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5">Cancel</button>
                 <button type="submit" className="flex-1 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700">Create</button>

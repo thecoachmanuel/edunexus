@@ -12,11 +12,13 @@ const subjectSchema = new Schema(
   {
     school: { type: Schema.Types.ObjectId, ref: "School", required: true },
     name: { type: String, required: true },
-    code: { type: String, required: true, unique: true },
+    code: { type: String, required: true },
     teacher: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
+
+subjectSchema.index({ school: 1, code: 1 }, { unique: true });
 
 export default (mongoose.models.Subject || mongoose.model<ISubject>("Subject", subjectSchema));

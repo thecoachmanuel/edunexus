@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = `
-      You are an AI Academic Advisor for a school management system called Edunexus.
+      You are the AI Academic Advisor for ${authUser.schoolContext?.name || "this school"}.
       You are speaking directly to a user. Here is their context: ${contextData}
       
       Generate a single, brief, professional, and highly insightful academic tip or observation based on their role. 

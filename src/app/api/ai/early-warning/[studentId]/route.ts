@@ -91,7 +91,7 @@ Class: ${student.studentClass?.name || "Unknown"}
 Attendance rate (last 4 weeks): ${attRate}%
 ${subjectContext}
 
-This student has been flagged by the EduNexus Early Warning System as potentially at risk of academic failure.
+This student has been flagged by the ${authUser.schoolContext?.name || "School"}'s Early Warning System as potentially at risk of academic failure.
 
 Generate a specific, actionable 3-point intervention plan for this student. Requirements:
 1. Be practical and realistic for a Nigerian school setting (limited resources, large class sizes).
