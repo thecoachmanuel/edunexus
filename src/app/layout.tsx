@@ -20,7 +20,6 @@ export default function RootLayout({
       <body className="antialiased font-sans bg-background text-foreground">
         <ThemeProvider
           defaultTheme="dark"
-          forcedTheme="dark"
           storageKey="vite-ui-theme"
         >
           <SWRProvider>

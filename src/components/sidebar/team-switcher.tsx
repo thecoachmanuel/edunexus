@@ -49,20 +49,20 @@ export function TeamSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-auto flex flex-col items-start py-3 relative"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-12 items-center justify-center rounded-lg overflow-hidden mb-2">
                 {activeTeam.logoUrl ? (
                   <img src={activeTeam.logoUrl} alt="Logo" className="w-full h-full object-cover" />
                 ) : (
-                  <activeTeam.logo className="size-4" />
+                  <activeTeam.logo className="size-6" />
                 )}
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
+              <div className="grid flex-1 text-left text-sm leading-tight w-full pr-6">
+                <span className="truncate font-bold text-base">{activeTeam.name}</span>
                 <span className="truncate text-xs">{yearName}</span>
               </div>
-              <ChevronsUpDown className="ml-auto" />
+              <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

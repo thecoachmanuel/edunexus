@@ -131,7 +131,7 @@ export default function SchoolLoginPage() {
                   </div>
                 )}
                 <h1 className="text-2xl font-black text-foreground">{schoolInfo.name}</h1>
-                <p className="text-foreground/40 text-sm mt-1">Staff &amp; Admin Portal</p>
+                <p className="text-foreground/40 text-sm mt-1">Staff, Student &amp; Admin Portal</p>
               </>
             ) : (
               <>

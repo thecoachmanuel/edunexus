@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Theme = "dark" | "light" | "system";
 
@@ -30,8 +31,12 @@ export function ThemeProvider({
   forcedTheme,
   ...props
 }: ThemeProviderProps) {
+  const pathname = usePathname();
+  const isSaas = pathname === "/" || pathname.startsWith("/saas-admin");
+  const effectiveForcedTheme = forcedTheme || (isSaas ? "dark" : undefined);
+
   const [theme, setTheme] = useState<Theme>(() => {
-    if (forcedTheme) return forcedTheme;
+    if (effectiveForcedTheme) return effectiveForcedTheme;
     if (typeof window !== "undefined") {
       return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
     }
@@ -43,7 +48,7 @@ export function ThemeProvider({
 
     root.classList.remove("light", "dark");
 
-    const effectiveTheme = forcedTheme || theme;
+    const effectiveTheme = effectiveForcedTheme || theme;
 
     if (effectiveTheme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -56,7 +61,7 @@ export function ThemeProvider({
     }
 
     root.classList.add(effectiveTheme);
-  }, [theme, forcedTheme]);
+  }, [theme, effectiveForcedTheme]);
 
   const value = {
     theme,
