@@ -86,7 +86,10 @@ function RegisterForm() {
             <CheckCircle2 className="w-8 h-8 text-emerald-400" />
           </div>
           <h2 className="text-2xl font-black text-white mb-3">Check Your Email!</h2>
-          <p className="text-white/50 mb-6">{success}</p>
+          <p className="text-white/50 mb-4">{success}</p>
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6 text-sm text-amber-200">
+            Please check your <strong>inbox</strong> or <strong>spam folder</strong> for the verification link to activate your account.
+          </div>
           <p className="text-sm text-white/30">
             Your school portal will be at:{" "}
             <span className="text-violet-400 font-mono">/{form.slug}/login</span>
