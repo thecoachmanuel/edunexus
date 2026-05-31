@@ -13,7 +13,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const ticket = await SupportTicket.findByIdAndUpdate(
       id,
-      { assignedTo: superAdmin.user._id },
+      { assignedTo: superAdmin.superAdminId },
       { new: true }
     ).populate("assignedTo", "name email");
 

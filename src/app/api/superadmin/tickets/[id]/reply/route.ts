@@ -16,9 +16,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const message = {
       sender: "human_agent",
-      senderName: superAdmin.user.name,
+      senderName: superAdmin.superAdmin.name,
       content,
-      agentId: superAdmin.user._id,
+      agentId: superAdmin.superAdminId,
       timestamp: new Date(),
       isRead: false,
     };

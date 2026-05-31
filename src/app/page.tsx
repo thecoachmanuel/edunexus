@@ -7,8 +7,26 @@ import axios from "axios";
 import {
   GraduationCap, CheckCircle2, ArrowRight, Zap, Users, BarChart3,
   BookOpen, Clock, Shield, Star, ChevronDown, Menu, X, Building2,
-  Sparkles, TrendingUp, Award
+  Sparkles, TrendingUp, Award, Moon, Sun
 } from "lucide-react";
+import { useTheme } from "@/components/provider/theme";
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  
+  return (
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="p-2 rounded-lg text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+      aria-label="Toggle theme"
+    >
+      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <span className="sr-only">Toggle theme</span>
+    </button>
+  );
+}
+
 
 const FEATURES = [
   { icon: Users, title: "Student Management", desc: "Complete student profiles, enrollment tracking, and parent portals all in one place." },
@@ -57,49 +75,53 @@ export default function LandingPage() {
     new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(kobo / 100);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0f] text-slate-900 dark:text-white overflow-x-hidden transition-colors duration-300">
       {/* === NAVBAR === */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 dark:border-white/5 bg-slate-50/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 font-bold text-xl">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">EduNexus</span>
+            <span className="bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-white/70 bg-clip-text text-transparent">EduNexus</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8 text-sm text-white/60">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#testimonials" className="hover:text-white transition-colors">Testimonials</a>
+          <div className="hidden md:flex items-center gap-8 text-sm text-slate-600 dark:text-white/60">
+            <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-slate-900 dark:hover:text-white transition-colors">Pricing</a>
+            <a href="#testimonials" className="hover:text-slate-900 dark:hover:text-white transition-colors">Testimonials</a>
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <Link
               href="/register"
               className="px-5 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-violet-500/25"
             >
               Start Free Trial
             </Link>
-            <div className="text-white/20">|</div>
+            <div className="text-slate-300 dark:text-white/20">|</div>
             <Link
               href="/login"
-              className="text-white/60 hover:text-white text-sm font-medium transition-colors"
+              className="text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white text-sm font-medium transition-colors"
             >
               School Login
             </Link>
           </div>
 
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white/70">
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-600 dark:text-white/70 p-2">
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </nav>
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/5 bg-[#0a0a0f] px-4 py-4 space-y-3">
-            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white/70">Features</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white/70">Pricing</a>
-            <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white/70">Testimonials</a>
-            <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-center font-semibold text-sm">Start Free Trial</Link>
+          <div className="md:hidden border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0f] px-4 py-4 space-y-3">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-600 dark:text-white/70">Features</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-600 dark:text-white/70">Pricing</a>
+            <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-600 dark:text-white/70">Testimonials</a>
+            <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-center font-semibold text-sm">Start Free Trial</Link>
           </div>
         )}
       </header>
@@ -123,7 +145,7 @@ export default function LandingPage() {
             </span>
           </h1>
 
-          <p className="text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-xl text-slate-900 dark:text-slate-500 dark:text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed">
             The all-in-one school management platform with AI-powered tools for academics, finance, attendance, and more. Join hundreds of Nigerian schools already on EduNexus.
           </p>
 
@@ -137,14 +159,14 @@ export default function LandingPage() {
             </Link>
             <a
               href="#features"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-white/10 text-white/70 font-semibold text-base hover:border-white/20 hover:text-white transition-all"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-300 dark:text-white/70 font-semibold text-base hover:border-slate-300 dark:border-white/20 hover:text-slate-900 dark:text-white transition-all"
             >
               Explore Features
               <ChevronDown className="w-4 h-4" />
             </a>
           </div>
 
-          <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-white/40">
+          <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-slate-900 dark:text-slate-600 dark:text-white/40">
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> No credit card required</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> 14-day free trial</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Set up in 2 minutes</span>
@@ -154,7 +176,7 @@ export default function LandingPage() {
       </section>
 
       {/* === STATS === */}
-      <section className="py-16 px-4 sm:px-6 border-y border-white/5">
+      <section className="py-16 px-4 sm:px-6 border-y border-slate-150 dark:border-white/5">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
             { value: "500+", label: "Schools Onboarded" },
@@ -164,7 +186,7 @@ export default function LandingPage() {
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-3xl font-black bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">{stat.value}</div>
-              <div className="text-sm text-white/40 mt-1">{stat.label}</div>
+              <div className="text-sm text-slate-900 dark:text-slate-600 dark:text-white/40 mt-1">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -178,16 +200,16 @@ export default function LandingPage() {
               <Zap className="w-3 h-3" /> Everything You Need
             </div>
             <h2 className="text-4xl font-black mb-4">All-in-one platform</h2>
-            <p className="text-white/40 max-w-xl mx-auto">Every tool your school needs, deeply integrated and beautifully designed.</p>
+            <p className="text-slate-900 dark:text-slate-600 dark:text-white/40 max-w-xl mx-auto">Every tool your school needs, deeply integrated and beautifully designed.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f, i) => (
-              <div key={i} className="group p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/30 hover:bg-violet-500/5 transition-all duration-300">
+              <div key={i} className="group p-6 rounded-2xl border border-slate-150 dark:border-white/5 bg-slate-100 dark:bg-white/[0.02] hover:border-violet-500/30 hover:bg-violet-500/5 transition-all duration-300">
                 <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 transition-colors">
                   <f.icon className="w-5 h-5 text-violet-400" />
                 </div>
                 <h3 className="font-bold text-base mb-2">{f.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{f.desc}</p>
+                <p className="text-sm text-slate-900 dark:text-slate-600 dark:text-white/40 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -195,7 +217,7 @@ export default function LandingPage() {
       </section>
 
       {/* === TESTIMONIALS === */}
-      <section id="testimonials" className="py-24 px-4 sm:px-6 bg-white/[0.01] border-y border-white/5">
+      <section id="testimonials" className="py-24 px-4 sm:px-6 bg-slate-100 dark:bg-white/[0.01] border-y border-slate-150 dark:border-white/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs font-medium mb-4">
@@ -205,16 +227,16 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="p-6 rounded-2xl border border-white/5 bg-white/[0.02]">
+              <div key={i} className="p-6 rounded-2xl border border-slate-150 dark:border-white/5 bg-slate-100 dark:bg-white/[0.02]">
                 <div className="flex gap-1 mb-4">
                   {[...Array(t.rating)].map((_, j) => (
                     <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-white/70 text-sm leading-relaxed mb-5 italic">"{t.text}"</p>
+                <p className="text-slate-900 dark:text-slate-300 dark:text-white/70 text-sm leading-relaxed mb-5 italic">"{t.text}"</p>
                 <div>
                   <div className="font-semibold text-sm">{t.name}</div>
-                  <div className="text-white/40 text-xs mt-0.5">{t.role}</div>
+                  <div className="text-slate-900 dark:text-slate-600 dark:text-white/40 text-xs mt-0.5">{t.role}</div>
                 </div>
               </div>
             ))}
@@ -230,14 +252,14 @@ export default function LandingPage() {
               <TrendingUp className="w-3 h-3" /> Simple Pricing
             </div>
             <h2 className="text-4xl font-black mb-4">Pay in Naira, no surprises</h2>
-            <p className="text-white/40">All plans include a 14-day free trial. No credit card required.</p>
+            <p className="text-slate-900 dark:text-slate-600 dark:text-white/40">All plans include a 14-day free trial. No credit card required.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan) => (
               <div key={plan._id} className={`relative p-7 rounded-2xl border flex flex-col ${plan.isHighlighted
                   ? "border-violet-500/50 bg-gradient-to-b from-violet-500/10 to-indigo-500/5 shadow-xl shadow-violet-500/10"
-                  : "border-white/5 bg-white/[0.02]"
+                  : "border-slate-150 dark:border-white/5 bg-slate-100 dark:bg-white/[0.02]"
                 }`}>
                 {plan.isHighlighted && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-xs font-bold">
@@ -248,7 +270,7 @@ export default function LandingPage() {
                   <h3 className="text-lg font-bold mb-1">{plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-1">
                     <span className="text-4xl font-black">{formatPrice(plan.monthlyPriceKobo)}</span>
-                    <span className="text-white/40 text-sm">/month</span>
+                    <span className="text-slate-900 dark:text-slate-600 dark:text-white/40 text-sm">/month</span>
                   </div>
                   {plan.trialAllowed && (
                     <p className="text-emerald-400 text-xs font-medium mb-5">✅ {plan.trialDays}-day free trial included</p>
@@ -265,8 +287,8 @@ export default function LandingPage() {
                     { label: "Priority Support", enabled: plan.features.prioritySupport },
                     { label: "Dedicated Account Manager", enabled: plan.features.dedicatedSupport },
                   ].map((item, i) => (
-                    <li key={i} className={`flex items-center gap-2.5 text-sm ${item.enabled ? "text-white/80" : "text-white/20 line-through"}`}>
-                      <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${item.enabled ? "text-emerald-400" : "text-white/20"}`} />
+                    <li key={i} className={`flex items-center gap-2.5 text-sm ${item.enabled ? "text-slate-900 dark:text-slate-200 dark:text-white/80" : "text-slate-900 dark:text-slate-800 dark:text-white/20 line-through"}`}>
+                      <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${item.enabled ? "text-emerald-400" : "text-slate-900 dark:text-slate-800 dark:text-white/20"}`} />
                       {item.label}
                     </li>
                   ))}
@@ -275,8 +297,8 @@ export default function LandingPage() {
                 <Link
                   href={`/register?plan=${plan.slug}`}
                   className={`block text-center py-3 rounded-xl font-bold text-sm transition-all ${plan.isHighlighted
-                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-90 shadow-lg shadow-violet-500/25"
-                      : "border border-white/10 text-white/70 hover:border-white/20 hover:text-white"
+                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-slate-900 dark:text-white hover:opacity-90 shadow-lg shadow-violet-500/25"
+                      : "border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-300 dark:text-white/70 hover:border-slate-300 dark:border-white/20 hover:text-slate-900 dark:text-white"
                     }`}
                 >
                   {plan.trialAllowed ? "Start Free Trial" : "Get Started"}
@@ -293,7 +315,7 @@ export default function LandingPage() {
           <div className="p-12 rounded-3xl border border-violet-500/20 bg-gradient-to-b from-violet-500/10 to-transparent">
             <Building2 className="w-12 h-12 text-violet-400 mx-auto mb-6" />
             <h2 className="text-4xl font-black mb-4">Ready to transform your school?</h2>
-            <p className="text-white/50 mb-8">Join hundreds of Nigerian schools running smarter on EduNexus. Start your 14-day free trial today — no credit card needed.</p>
+            <p className="text-slate-900 dark:text-slate-500 dark:text-white/50 mb-8">Join hundreds of Nigerian schools running smarter on EduNexus. Start your 14-day free trial today — no credit card needed.</p>
             <Link
               href="/register"
               className="inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-base hover:opacity-90 transition-all shadow-2xl shadow-violet-500/30"
@@ -305,19 +327,19 @@ export default function LandingPage() {
       </section>
 
       {/* === FOOTER === */}
-      <footer className="border-t border-white/5 py-10 px-4 sm:px-6">
+      <footer className="border-t border-slate-150 dark:border-white/5 py-10 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-white/40 text-sm">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-slate-600 dark:text-white/40 text-sm">
             <div className="w-5 h-5 rounded bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
-              <GraduationCap className="w-3 h-3 text-white" />
+              <GraduationCap className="w-3 h-3 text-slate-900 dark:text-white" />
             </div>
             <span>© {new Date().getFullYear()} EduNexus. All rights reserved.</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-white/30">
-            <a href="#" className="hover:text-white/60 transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white/60 transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white/60 transition-colors">Contact</a>
-            <span className="text-white/10">|</span>
+          <div className="flex items-center gap-6 text-sm text-slate-900 dark:text-slate-700 dark:text-white/30">
+            <a href="#" className="hover:text-slate-900 dark:text-slate-400 dark:text-white/60 transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-slate-900 dark:text-slate-400 dark:text-white/60 transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-slate-900 dark:text-slate-400 dark:text-white/60 transition-colors">Contact</a>
+            <span className="text-slate-900 dark:text-slate-900 dark:text-white/10">|</span>
             <Link href="/saas-admin/login" className="hover:text-violet-400 transition-colors">Super Admin</Link>
           </div>
         </div>
