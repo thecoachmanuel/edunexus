@@ -5,6 +5,8 @@ import School from "@/lib/models/school";
 import Subscription from "@/lib/models/subscription";
 import Plan from "@/lib/models/plan";
 import User from "@/lib/models/user";
+import SchoolSettings from "@/lib/models/schoolSettings";
+import AcademicYear from "@/lib/models/academicYear";
 
 // GET /api/superadmin/schools — List all schools with subscription details
 export async function GET(req: NextRequest) {
@@ -108,6 +110,33 @@ export async function POST(req: NextRequest) {
       phone: adminPhone || "",
       role: "admin",
       isActive: true,
+    });
+
+    // Auto-create default SchoolSettings scoped to this school
+    await SchoolSettings.create({
+      school: school._id,
+      schoolName: name,
+      whatsappNumber: adminPhone || "",
+      accountName: name,
+      schoolMotto: "Excellence · Integrity · Innovation",
+    });
+
+    // Auto-create default AcademicYear so the admin can access dashboard immediately
+    const today = new Date();
+    const nextYr = new Date();
+    nextYr.setFullYear(today.getFullYear() + 1);
+    await AcademicYear.create({
+      school: school._id,
+      name: `${today.getFullYear()}/${nextYr.getFullYear()}`,
+      fromYear: today,
+      toYear: nextYr,
+      isCurrent: true,
+      activeTerm: "Term 1",
+      terms: [
+        { term: "Term 1", startDate: today, endDate: new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000) },
+        { term: "Term 2", startDate: new Date(today.getTime() + 100 * 24 * 60 * 60 * 1000), endDate: new Date(today.getTime() + 190 * 24 * 60 * 60 * 1000) },
+        { term: "Term 3", startDate: new Date(today.getTime() + 200 * 24 * 60 * 60 * 1000), endDate: new Date(today.getTime() + 290 * 24 * 60 * 60 * 1000) },
+      ],
     });
 
     return NextResponse.json({ message: "School created successfully", school }, { status: 201 });
