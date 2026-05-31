@@ -44,7 +44,7 @@ export default function SaasAdminLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen bg-[#060610] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* === MOBILE SIDEBAR OVERLAY === */}
       {sidebarOpen && (
         <div
@@ -56,7 +56,7 @@ export default function SaasAdminLayout({ children }: { children: React.ReactNod
       {/* === SIDEBAR === */}
       <aside
         className={`
-          fixed top-0 bottom-0 left-0 z-50 w-60 border-r border-white/5 bg-[#0a0a18] flex flex-col
+          fixed top-0 bottom-0 left-0 z-50 w-60 border-r border-foreground/5 bg-card flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
@@ -69,7 +69,7 @@ export default function SaasAdminLayout({ children }: { children: React.ReactNod
             </div>
             <div>
               <div className="text-sm font-bold leading-tight">EduNexus</div>
-              <div className="text-[10px] text-white/30">Admin Console</div>
+              <div className="text-[10px] text-foreground/30">Admin Console</div>
             </div>
           </Link>
           <button
@@ -119,7 +119,7 @@ export default function SaasAdminLayout({ children }: { children: React.ReactNod
       {/* === MAIN CONTENT === */}
       <main className="lg:ml-60 min-h-screen flex flex-col">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 border-b border-white/5 bg-[#060610]/90 backdrop-blur-xl px-4 sm:px-6 h-14 flex items-center justify-between shrink-0">
+        <header className="sticky top-0 z-30 border-b border-foreground/5 bg-background/90 backdrop-blur-xl px-4 sm:px-6 h-14 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -144,7 +144,7 @@ export default function SaasAdminLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* === MOBILE BOTTOM NAV === */}
-        <nav className="lg:hidden sticky bottom-0 z-30 border-t border-white/5 bg-[#060610]/95 backdrop-blur-xl flex overflow-x-auto">
+        <nav className="lg:hidden sticky bottom-0 z-30 border-t border-foreground/5 bg-background/95 backdrop-blur-xl flex overflow-x-auto">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (

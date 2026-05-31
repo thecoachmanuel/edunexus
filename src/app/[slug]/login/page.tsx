@@ -123,13 +123,13 @@ export default function SchoolLoginPage() {
                 <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl font-black text-violet-400 shadow-inner">
                   {schoolInfo.name.charAt(0)}
                 </div>
-                <h1 className="text-2xl font-black text-white">{schoolInfo.name}</h1>
-                <p className="text-white/40 text-sm mt-1">Staff &amp; Admin Portal</p>
+                <h1 className="text-2xl font-black text-foreground">{schoolInfo.name}</h1>
+                <p className="text-foreground/40 text-sm mt-1">Staff &amp; Admin Portal</p>
               </>
             ) : (
               <>
-                <h1 className="text-2xl font-black text-white">School Login</h1>
-                <p className="text-white/40 text-sm mt-1 font-mono">/{slug}</p>
+                <h1 className="text-2xl font-black text-foreground">School Login</h1>
+                <p className="text-foreground/40 text-sm mt-1 font-mono">/{slug}</p>
               </>
             )}
           </div>
@@ -137,7 +137,7 @@ export default function SchoolLoginPage() {
           {/* Form */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-foreground/50 mb-1.5 uppercase tracking-wider">
                 Email Address
               </label>
               <input
@@ -145,7 +145,7 @@ export default function SchoolLoginPage() {
                 type="email"
                 placeholder="you@school.edu"
                 autoComplete="email"
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder:text-white/25 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-background/5 border border-foreground/10 text-foreground placeholder:text-foreground/25 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
               />
               {form.formState.errors.email && (
                 <p className="text-red-400 text-xs mt-1">{form.formState.errors.email.message}</p>
@@ -153,7 +153,7 @@ export default function SchoolLoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-foreground/50 mb-1.5 uppercase tracking-wider">
                 Password
               </label>
               <div className="relative">
@@ -162,12 +162,12 @@ export default function SchoolLoginPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full px-4 py-3 pr-11 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder:text-white/25 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                  className="w-full px-4 py-3 pr-11 rounded-xl bg-background/5 border border-foreground/10 text-foreground placeholder:text-foreground/25 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
