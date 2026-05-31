@@ -68,12 +68,11 @@ export async function POST(req: Request) {
     await school.save();
 
     // Create admin user
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
     await User.create({
       school: school._id,
       name: adminName,
       email,
-      password: hashedPassword,
+      password: adminPassword,
       role: "admin",
       isActive: true,
     });
