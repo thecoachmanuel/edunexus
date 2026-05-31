@@ -22,7 +22,7 @@ export const getAuthUser = async (
   req: NextRequest,
   allowedRoles?: AuthorizedRole[],
   expectedSlug?: string,
-): Promise<(IUser & { subscriptionContext?: ISubscription; schoolContext?: ISchool }) | null> => {
+): Promise<(IUser & { subscriptionContext?: ISubscription; schoolContext?: ISchool; isPaymentRequired?: boolean }) | null> => {
   const token = req.cookies.get("jwt")?.value;
   if (!token) return null;
 
@@ -62,8 +62,27 @@ export const getAuthUser = async (
       return null;
     }
 
+    let isPaymentRequired = false;
+
+    if (school.isTrialActive && school.trialEndsAt && new Date() > school.trialEndsAt) {
+      isPaymentRequired = true;
+    } else if (!school.isTrialActive) {
+      if (!subscription) {
+        isPaymentRequired = true;
+      } else if (
+        subscription.status === "past_due" ||
+        subscription.status === "expired" ||
+        subscription.status === "cancelled"
+      ) {
+        isPaymentRequired = true;
+      } else if (subscription.currentPeriodEnd && new Date() > subscription.currentPeriodEnd) {
+        isPaymentRequired = true;
+      }
+    }
+
     user.schoolContext = school;
     user.subscriptionContext = subscription;
+    user.isPaymentRequired = isPaymentRequired;
 
     return user;
   } catch (error) {

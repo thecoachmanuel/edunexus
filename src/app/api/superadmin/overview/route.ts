@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/db";
 import { getSuperAuthUser } from "@/middleware/superAuth";
 import School from "@/lib/models/school";
 import Subscription from "@/lib/models/subscription";
-import InvoiceLog from "@/lib/models/invoiceLog";
+import SaaSTransaction from "@/lib/models/saasTransaction";
 import User from "@/lib/models/user";
 
 // GET /api/superadmin/overview — Dashboard stats
@@ -26,9 +26,9 @@ export async function GET(req: NextRequest) {
       Subscription.countDocuments({ status: "active" }),
       Subscription.countDocuments({ status: "trialing" }),
       Subscription.countDocuments({ status: "past_due" }),
-      InvoiceLog.aggregate([
+      SaaSTransaction.aggregate([
         { $match: { status: "success" } },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
+        { $group: { _id: null, total: { $sum: "$amountKobo" } } },
       ]),
       User.countDocuments(),
       School.find()

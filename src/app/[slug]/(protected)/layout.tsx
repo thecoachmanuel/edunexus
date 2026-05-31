@@ -40,10 +40,18 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     }
     // ──────────────────────────────────────────────────────────────────────────
 
+    // Payment Required Check
+    if (user.schoolContext?.isPaymentRequired) {
+      if (pathname !== `/${urlSlug}/billing`) {
+        router.replace(`/${urlSlug}/billing`);
+      }
+      return;
+    }
+
     // Academic year guard — admins must configure a year before anything works
     if (!year) {
       if (user.role === "admin") {
-        if (pathname !== `/${urlSlug}/settings/academic-years`) {
+        if (pathname !== `/${urlSlug}/settings/academic-years` && pathname !== `/${urlSlug}/billing`) {
           toast.warning("Please configure an active Academic Year first.");
           router.replace(`/${urlSlug}/settings/academic-years`);
         }
@@ -71,8 +79,33 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         {/* Mobile-only sticky top bar with hamburger + page title */}
         <MobileTopbar />
         {/* Push content below the mobile topbar (h-14) only on mobile */}
-        <div className="pt-14 md:pt-0 flex flex-col flex-1 min-h-0 overflow-x-hidden w-full">
-          {children}
+        <div className="pt-14 md:pt-0 flex flex-col flex-1 min-h-0 overflow-x-hidden w-full relative">
+          {user.schoolContext?.isPaymentRequired && pathname !== `/${urlSlug}/billing` ? (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm p-4">
+              <div className="max-w-md w-full text-center space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full border-4 border-red-500 border-t-transparent animate-spin" style={{ animationDuration: '3s' }} />
+                </div>
+                <h2 className="text-2xl font-bold">Subscription Expired</h2>
+                <p className="text-muted-foreground">
+                  Your school's subscription or trial has expired. 
+                  {user.role === "admin" 
+                    ? " Please update your billing information to restore access." 
+                    : " Please contact your school administrator."}
+                </p>
+                {user.role === "admin" && (
+                  <button 
+                    onClick={() => router.push(`/${urlSlug}/billing`)}
+                    className="mt-4 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    Go to Billing
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            children
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

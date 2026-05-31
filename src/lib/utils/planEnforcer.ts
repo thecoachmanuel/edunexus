@@ -29,6 +29,24 @@ export async function getSchoolFeatures(schoolId: string) {
   // Count current students
   const studentCount = await User.countDocuments({ school: schoolId, role: "student" });
 
+  let isPaymentRequired = false;
+
+  if (school.isTrialActive && school.trialEndsAt && new Date() > school.trialEndsAt) {
+    isPaymentRequired = true;
+  } else if (!school.isTrialActive) {
+    if (!school.subscription) {
+      isPaymentRequired = true;
+    } else if (
+      school.subscription.status === "past_due" ||
+      school.subscription.status === "expired" ||
+      school.subscription.status === "cancelled"
+    ) {
+      isPaymentRequired = true;
+    } else if (school.subscription.currentPeriodEnd && new Date() > school.subscription.currentPeriodEnd) {
+      isPaymentRequired = true;
+    }
+  }
+
   return {
     planName: plan?.name || (school.isTrialActive ? "Free Trial" : "No Plan"),
     maxStudents,
@@ -38,5 +56,6 @@ export async function getSchoolFeatures(schoolId: string) {
     hasFeature: (featureKey: string) => features.includes(featureKey),
     isTrial: school.isTrialActive,
     status: school.subscription?.status || (school.isTrialActive ? "trialing" : "inactive"),
+    isPaymentRequired,
   };
 }

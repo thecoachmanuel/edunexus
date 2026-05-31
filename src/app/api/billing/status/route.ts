@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { getAuthUser } from "@/middleware/auth";
 import Subscription from "@/lib/models/subscription";
-import InvoiceLog from "@/lib/models/invoiceLog";
+import SaaSTransaction from "@/lib/models/saasTransaction";
 
 // GET /api/billing/status — Returns the current school's subscription status
 export async function GET(req: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     let invoices: any[] = [];
     if (subscription) {
-      invoices = await InvoiceLog.find({ school: school._id })
+      invoices = await SaaSTransaction.find({ school: school._id })
         .sort({ createdAt: -1 })
         .limit(12)
         .lean();

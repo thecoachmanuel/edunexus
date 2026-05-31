@@ -160,7 +160,7 @@ export default function BillingPage() {
                 {invoices.map((inv: any) => (
                   <tr key={inv._id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4">{new Date(inv.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 font-medium">₦{(inv.amount / 100).toLocaleString()}</td>
+                    <td className="px-6 py-4 font-medium">₦{(inv.amountKobo / 100).toLocaleString()}</td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-medium">
                         {inv.status}

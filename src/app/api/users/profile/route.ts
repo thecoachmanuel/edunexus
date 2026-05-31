@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
           isTrial: planInfo.isTrial,
           status: planInfo.status,
           planName: planInfo.planName,
+          isPaymentRequired: planInfo.isPaymentRequired,
         };
       }
 

@@ -80,6 +80,7 @@ export async function POST(req: NextRequest) {
 
     // Now save to the database
     const newExam = await Exam.create({
+      school: authUser.schoolContext._id,
       title,
       subject,
       class: classId,

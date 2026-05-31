@@ -24,6 +24,7 @@ export interface user {
     isTrial: boolean;
     status: string;
     planName: string;
+    isPaymentRequired?: boolean;
   };
 }
 

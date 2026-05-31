@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { useAuth } from "@/hooks/AuthProvider";
 import { api } from "@/lib/api";
 import UserTable from "@/components/users/UserTable";
 import UserDialog from "@/components/users/UserDialog";
@@ -24,6 +25,7 @@ export default function UserManagementPage({
   title,
   description,
 }: Props) {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -89,10 +91,12 @@ export default function UserManagementPage({
         </div>
         <div className="flex gap-2">
           <Search search={search} setSearch={setSearch} title={`${role}s`} />
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" /> Add{" "}
-            {role.charAt(0).toUpperCase() + role.slice(1)}
-          </Button>
+          {user?.role === "admin" && (
+            <Button onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" /> Add{" "}
+              {role.charAt(0).toUpperCase() + role.slice(1)}
+            </Button>
+          )}
         </div>
       </div>
 
