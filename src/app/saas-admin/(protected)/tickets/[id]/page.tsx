@@ -9,7 +9,10 @@ import {
   CheckCircle2, AlertTriangle, Building2, Loader2, Sparkles
 } from "lucide-react";
 
-export default function TicketDetail({ params }: { params: { id: string } }) {
+import { use } from "react";
+
+export default function TicketDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [ticket, setTicket] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -19,7 +22,7 @@ export default function TicketDetail({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchTicket();
-  }, [params.id]);
+  }, [id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,7 +30,7 @@ export default function TicketDetail({ params }: { params: { id: string } }) {
 
   const fetchTicket = async () => {
     try {
-      const res = await axios.get(`/api/superadmin/tickets/${params.id}`);
+      const res = await axios.get(`/api/superadmin/tickets/${id}`);
       setTicket(res.data.ticket);
     } catch (err: any) {
       if (err.response?.status === 401) router.push("/saas-admin/login");
@@ -39,7 +42,7 @@ export default function TicketDetail({ params }: { params: { id: string } }) {
 
   const handleAssignToMe = async () => {
     try {
-      const res = await axios.post(`/api/superadmin/tickets/${params.id}/assign`);
+      const res = await axios.post(`/api/superadmin/tickets/${id}/assign`);
       setTicket(res.data.ticket);
     } catch (err) {
       alert("Failed to assign ticket");
@@ -48,7 +51,7 @@ export default function TicketDetail({ params }: { params: { id: string } }) {
 
   const handleChangeStatus = async (status: string) => {
     try {
-      const res = await axios.put(`/api/superadmin/tickets/${params.id}`, { status });
+      const res = await axios.put(`/api/superadmin/tickets/${id}`, { status });
       setTicket(res.data.ticket);
     } catch (err) {
       alert("Failed to change status");
@@ -60,7 +63,7 @@ export default function TicketDetail({ params }: { params: { id: string } }) {
     if (!replyText.trim()) return;
     setSending(true);
     try {
-      const res = await axios.post(`/api/superadmin/tickets/${params.id}/reply`, {
+      const res = await axios.post(`/api/superadmin/tickets/${id}/reply`, {
         content: replyText,
       });
       setTicket(res.data.ticket);

@@ -8,29 +8,50 @@ import { toast } from "sonner";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
 import { MobileTopbar } from "@/components/sidebar/MobileTopbar";
 import { useEffect } from "react";
+import axios from "axios";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { loading, user, year } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
+  const urlSlug = params.slug as string;
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace(`/${params.slug}/login`);
-      } else if (!year) {
-        if (user.role === "admin") {
-          if (pathname !== `/${params.slug}/settings/academic-years`) {
-            toast.warning("Please configure an active Academic Year first.");
-            router.replace(`/${params.slug}/settings/academic-years`);
-          }
-        } else {
-          router.replace(`/${params.slug}/login`);
+    if (loading) return;
+
+    if (!user) {
+      // No session — go to this slug's login page
+      router.replace(`/${urlSlug}/login`);
+      return;
+    }
+
+    // ─── TENANT ISOLATION CHECK ────────────────────────────────────────────────
+    // If the authenticated user belongs to a DIFFERENT school, force-logout and
+    // redirect to the requested school's login page so they can authenticate
+    // with the correct credentials. This prevents cross-tenant data leakage.
+    const userSchoolSlug = user?.schoolContext?.slug;
+    if (userSchoolSlug && userSchoolSlug !== urlSlug) {
+      axios.post("/api/users/logout").catch(() => {}).finally(() => {
+        toast.error("Session mismatch. Please log in to this school portal.");
+        router.replace(`/${urlSlug}/login`);
+      });
+      return;
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // Academic year guard — admins must configure a year before anything works
+    if (!year) {
+      if (user.role === "admin") {
+        if (pathname !== `/${urlSlug}/settings/academic-years`) {
+          toast.warning("Please configure an active Academic Year first.");
+          router.replace(`/${urlSlug}/settings/academic-years`);
         }
+      } else {
+        router.replace(`/${urlSlug}/login`);
       }
     }
-  }, [loading, user, year, pathname, router, params.slug]);
+  }, [loading, user, year, pathname, router, urlSlug]);
 
   if (loading) {
     return (
@@ -40,9 +61,8 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!user || (!year && user.role !== "admin")) {
-    return null; // Will redirect in useEffect
-  }
+  if (!user) return null;
+  if (!year && user.role !== "admin") return null;
 
   return (
     <SidebarProvider>
@@ -58,4 +78,3 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     </SidebarProvider>
   );
 }
-

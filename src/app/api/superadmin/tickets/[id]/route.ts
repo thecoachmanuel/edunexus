@@ -4,13 +4,14 @@ import { getSuperAuthUser } from "@/middleware/superAuth";
 import SupportTicket from "@/lib/models/supportTicket";
 
 // GET /api/superadmin/tickets/[id]
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const superAdmin = await getSuperAuthUser(req);
     if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-    const ticket = await SupportTicket.findById(params.id)
+    const ticket = await SupportTicket.findById(id)
       .populate("school", "name slug email")
       .populate("assignedTo", "name email");
 
@@ -24,8 +25,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // PUT /api/superadmin/tickets/[id] (Change status)
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const superAdmin = await getSuperAuthUser(req);
     if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -36,7 +38,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     if (status === "resolved") updateData.resolvedAt = new Date();
     if (status === "closed") updateData.closedAt = new Date();
 
-    const ticket = await SupportTicket.findByIdAndUpdate(params.id, updateData, { new: true })
+    const ticket = await SupportTicket.findByIdAndUpdate(id, updateData, { new: true })
       .populate("school", "name slug")
       .populate("assignedTo", "name");
 

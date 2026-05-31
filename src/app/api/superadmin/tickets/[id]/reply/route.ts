@@ -4,8 +4,9 @@ import { getSuperAuthUser } from "@/middleware/superAuth";
 import SupportTicket from "@/lib/models/supportTicket";
 
 // POST /api/superadmin/tickets/[id]/reply
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const superAdmin = await getSuperAuthUser(req);
     if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     };
 
     const ticket = await SupportTicket.findByIdAndUpdate(
-      params.id,
+      id,
       { 
         $push: { messages: message },
         $set: { lastActivityAt: new Date(), status: "open" } // An agent reply means it's back to open/waiting for user

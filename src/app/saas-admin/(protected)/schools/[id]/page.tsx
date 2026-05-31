@@ -9,7 +9,10 @@ import {
   Activity, DollarSign, Calendar
 } from "lucide-react";
 
-export default function SchoolDetail({ params }: { params: { id: string } }) {
+import { use } from "react";
+
+export default function SchoolDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [school, setSchool] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,12 +25,12 @@ export default function SchoolDetail({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchData();
-  }, [params.id]);
+  }, [id]);
 
   const fetchData = async () => {
     try {
       const [schoolRes, plansRes] = await Promise.all([
-        axios.get(`/api/superadmin/schools/${params.id}`),
+        axios.get(`/api/superadmin/schools/${id}`),
         axios.get("/api/superadmin/plans")
       ]);
       setSchool(schoolRes.data.school);
@@ -43,7 +46,7 @@ export default function SchoolDetail({ params }: { params: { id: string } }) {
   const handleToggleActive = async () => {
     setSaving(true);
     try {
-      const res = await axios.patch(`/api/superadmin/schools/${params.id}`, { action: "toggle_active" });
+      const res = await axios.patch(`/api/superadmin/schools/${id}`, { action: "toggle_active" });
       setSchool((prev: any) => ({ ...prev, isActive: res.data.school.isActive }));
     } catch (err) {
       alert("Failed to toggle status");
@@ -56,7 +59,7 @@ export default function SchoolDetail({ params }: { params: { id: string } }) {
     if (!selectedPlanSlug) return;
     setSaving(true);
     try {
-      await axios.patch(`/api/superadmin/schools/${params.id}`, { 
+      await axios.patch(`/api/superadmin/schools/${id}`, { 
         action: "change_plan", 
         planSlug: selectedPlanSlug 
       });
@@ -72,7 +75,7 @@ export default function SchoolDetail({ params }: { params: { id: string } }) {
   const handleExtendTrial = async () => {
     setSaving(true);
     try {
-      await axios.patch(`/api/superadmin/schools/${params.id}`, { 
+      await axios.patch(`/api/superadmin/schools/${id}`, { 
         action: "extend_trial", 
         trialDays: 14 
       });

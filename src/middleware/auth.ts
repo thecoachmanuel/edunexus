@@ -10,11 +10,18 @@ export type AuthorizedRole = "admin" | "teacher" | "student" | "parent";
 /**
  * Verifies the JWT from cookies and returns the authenticated user.
  * The user object will have `school` populated and `subscriptionContext` attached.
- * Returns null if unauthenticated or unauthorized.
+ *
+ * Multi-tenant isolation: If `expectedSlug` is provided, the function also
+ * validates that the authenticated user's school slug matches the slug in the
+ * request URL. Returns null (→ 401) if slugs mismatch, preventing a user from
+ * one school from accessing API endpoints of another school.
+ *
+ * Returns null if unauthenticated, unauthorized, or tenant mismatch.
  */
 export const getAuthUser = async (
   req: NextRequest,
-  allowedRoles?: AuthorizedRole[]
+  allowedRoles?: AuthorizedRole[],
+  expectedSlug?: string,
 ): Promise<(IUser & { subscriptionContext?: ISubscription; schoolContext?: ISchool }) | null> => {
   const token = req.cookies.get("jwt")?.value;
   if (!token) return null;
@@ -35,6 +42,15 @@ export const getAuthUser = async (
 
     const school = await School.findById(schoolId);
     if (!school || !school.isActive) return null;
+
+    // ─── TENANT ISOLATION (API-LEVEL) ────────────────────────────────────────
+    // If the caller provides an expected slug (from the URL), verify it matches
+    // the school that owns this JWT. This prevents request forgery scenarios.
+    if (expectedSlug && school.slug !== expectedSlug) {
+      console.warn(`[Auth] Tenant mismatch: JWT school=${school.slug}, expected=${expectedSlug}`);
+      return null;
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Fetch subscription
     let subscription: ISubscription | undefined = undefined;

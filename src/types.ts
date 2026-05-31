@@ -12,9 +12,19 @@ export interface user {
   name: string;
   email: string;
   role: UserRole;
+  school?: string;
   studentClass?: Class;
   teacherSubject?: subject[];
   children?: user[];
+  schoolContext?: {
+    _id: string;
+    slug: string;
+    name: string;
+    features: string[];
+    isTrial: boolean;
+    status: string;
+    planName: string;
+  };
 }
 
 export interface term {

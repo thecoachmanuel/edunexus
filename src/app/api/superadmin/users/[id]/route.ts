@@ -4,8 +4,9 @@ import { getSuperAuthUser } from "@/middleware/superAuth";
 import SuperAdmin from "@/lib/models/superAdmin";
 
 // PUT /api/superadmin/users/[id]
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const currentAdmin = await getSuperAuthUser(req, ["super_admin"]);
     if (!currentAdmin) return NextResponse.json({ message: "Unauthorized. Requires super_admin role." }, { status: 401 });
@@ -17,7 +18,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       delete body.password; 
     }
 
-    const user = await SuperAdmin.findByIdAndUpdate(params.id, body, { new: true }).select("-password");
+    const user = await SuperAdmin.findByIdAndUpdate(id, body, { new: true }).select("-password");
     if (!user) return NextResponse.json({ message: "User not found" }, { status: 404 });
 
     return NextResponse.json({ message: "User updated successfully", user });
@@ -28,17 +29,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 // DELETE /api/superadmin/users/[id]
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const currentAdmin = await getSuperAuthUser(req, ["super_admin"]);
     if (!currentAdmin) return NextResponse.json({ message: "Unauthorized. Requires super_admin role." }, { status: 401 });
 
-    if (params.id === currentAdmin.user._id.toString()) {
+    if (id === currentAdmin.user._id.toString()) {
       return NextResponse.json({ message: "Cannot delete yourself" }, { status: 400 });
     }
 
-    const user = await SuperAdmin.findByIdAndDelete(params.id);
+    const user = await SuperAdmin.findByIdAndDelete(id);
     if (!user) return NextResponse.json({ message: "User not found" }, { status: 404 });
 
     return NextResponse.json({ message: "User deleted successfully" });

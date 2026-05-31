@@ -4,14 +4,15 @@ import { getSuperAuthUser } from "@/middleware/superAuth";
 import SupportTicket from "@/lib/models/supportTicket";
 
 // POST /api/superadmin/tickets/[id]/assign
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
     const superAdmin = await getSuperAuthUser(req);
     if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const ticket = await SupportTicket.findByIdAndUpdate(
-      params.id,
+      id,
       { assignedTo: superAdmin.user._id },
       { new: true }
     ).populate("assignedTo", "name email");
