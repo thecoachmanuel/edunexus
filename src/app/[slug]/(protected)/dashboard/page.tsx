@@ -33,7 +33,7 @@ export default function Dashboard() {
   const slug = params.slug as string;
   // Ensure user belongs to this slug
   useEffect(() => {
-    if (user && user.slug !== slug) {
+    if (user && (user as any).schoolContext?.slug !== slug) {
       // Clear stale auth and redirect to login
       setUser(null);
       router.replace(`/${slug}/login`);
