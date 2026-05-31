@@ -11,11 +11,18 @@ export async function POST(req: Request) {
     const { email, password, slug } = await req.json();
 
     // Find school by slug to scope the login
+    let school: any = null;
     let schoolId: string | undefined;
     if (slug) {
-      const school = await School.findOne({ slug, isActive: true });
+      school = await School.findOne({ slug });
       if (!school) {
-        return NextResponse.json({ message: "School not found or inactive." }, { status: 404 });
+        return NextResponse.json({ message: "School not found. Please check your school URL." }, { status: 404 });
+      }
+      if (!school.isActive) {
+        return NextResponse.json({ message: "This school account has been suspended. Please contact EduNexus support." }, { status: 403 });
+      }
+      if (!school.isVerified) {
+        return NextResponse.json({ message: "Your school email has not been verified yet. Please check your inbox (including spam/junk) for the verification link." }, { status: 403 });
       }
       schoolId = school._id.toString();
     }

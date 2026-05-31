@@ -26,6 +26,9 @@ export default function SchoolLoginPage() {
   const [schoolInfo, setSchoolInfo] = useState<{ name: string; logo?: string } | null>(null);
   const [schoolLoading, setSchoolLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isVerifyError, setIsVerifyError] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -58,6 +61,8 @@ export default function SchoolLoginPage() {
   }, [user, authLoading, slug, router]);
 
   const onSubmit = async (data: LoginValues) => {
+    setLoginError(null);
+    setIsVerifyError(false);
     try {
       // If there's a stale session from another school, clear it first
       const userSlug = (user as any)?.schoolContext?.slug as string | undefined;
@@ -76,7 +81,22 @@ export default function SchoolLoginPage() {
       window.location.href = `/${slug}/dashboard`;
     } catch (err: any) {
       const msg = err.response?.data?.message || "Invalid email or password.";
-      toast.error(msg);
+      setLoginError(msg);
+      if (msg.toLowerCase().includes("verified")) {
+        setIsVerifyError(true);
+      }
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResending(true);
+    try {
+      await axios.post("/api/schools/resend-verification", { slug });
+      toast.success("Verification email resent! Please check your inbox and spam folder.");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to resend. Please try again.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -169,6 +189,22 @@ export default function SchoolLoginPage() {
               )}
             </button>
           </form>
+
+          {/* Persistent login error banner */}
+          {loginError && (
+            <div className="mt-5 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-300 text-center">
+              <p>{loginError}</p>
+              {isVerifyError && (
+                <button
+                  onClick={handleResendVerification}
+                  disabled={resending}
+                  className="mt-3 text-xs text-violet-400 hover:underline disabled:opacity-50"
+                >
+                  {resending ? "Resending..." : "Resend verification email →"}
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="mt-8 text-center text-xs text-white/30 space-y-2">
             <p>
