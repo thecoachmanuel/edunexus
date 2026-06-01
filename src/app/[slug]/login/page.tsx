@@ -229,20 +229,20 @@ export default function SchoolLoginPage() {
       </div>
 
       {/* Right pane — decorative (desktop only) */}
-      <div className="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-br from-violet-900/30 via-indigo-900/20 to-[#0a0a0f] relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 items-center justify-center bg-[#0a0a0f] bg-gradient-to-br from-violet-900/30 via-indigo-900/20 to-transparent relative overflow-hidden">
         {/* Decorative background blobs */}
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-indigo-600/10 rounded-full blur-3xl" />
 
         <div className="relative text-center space-y-6 px-12">
           <div>
-            <h2 className="text-3xl font-black text-foreground leading-tight">
+            <h2 className="text-3xl font-black text-white leading-tight">
               Welcome to <br />
               <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
                 {schoolInfo ? schoolInfo.name : "Your School"}
               </span>
             </h2>
-            <p className="mt-4 text-foreground/40 text-sm max-w-xs mx-auto leading-relaxed">
+            <p className="mt-4 text-white/60 text-sm max-w-xs mx-auto leading-relaxed">
               {schoolInfo ? `Welcome to the secure portal for ${schoolInfo.name}. Please sign in to access your dashboard.` : "Welcome to the secure portal. Please sign in to access your dashboard."}
             </p>
           </div>
