@@ -33,6 +33,7 @@ export default function SuperAdminOverview() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentSchools, setRecentSchools] = useState<School[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function SuperAdminOverview() {
         const overview = await axios.get("/api/superadmin/overview");
         setStats(overview.data.stats);
         setRecentSchools(overview.data.recentSchools);
+        setRecentTransactions(overview.data.recentTransactions || []);
       } catch (err: any) {
         if (err.response?.status === 401) router.push("/saas-admin/login");
       } finally {
@@ -138,6 +140,55 @@ export default function SuperAdminOverview() {
                   {school.subscription?.status || "No sub"}
                 </span>
                 <span className="text-white/30 text-xs">{school.subscription?.plan?.name || "—"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+        <div className="px-4 sm:px-6 py-4 border-b border-white/5 flex items-center justify-between">
+          <h2 className="font-bold text-sm sm:text-base">Recent Transactions</h2>
+          <Link
+            href="/saas-admin/transactions"
+            className="text-xs text-violet-400 hover:underline flex items-center gap-1"
+          >
+            View all <ArrowUpRight className="w-3 h-3" />
+          </Link>
+        </div>
+
+        <div className="sm:hidden divide-y divide-white/5">
+          {recentTransactions.map((tx: any) => (
+            <div key={tx._id} className="p-4 space-y-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="font-semibold text-sm">{tx.school?.name || "Unknown"}</div>
+                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full border font-medium ${statusBadge(tx.status)}`}>
+                  {tx.status}
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <div className="text-white/40 text-xs">{tx.type?.replace("_", " ")}</div>
+                <div className="font-bold text-sm text-emerald-400">{formatNGN(tx.amountKobo)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden sm:block divide-y divide-white/5">
+          {recentTransactions.map((tx: any) => (
+            <div key={tx._id} className="px-6 py-4 flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-sm">{tx.school?.name || "Unknown"}</div>
+                <div className="text-white/40 text-xs mt-0.5">{tx.reference} · {new Date(tx.createdAt).toLocaleDateString()}</div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="font-bold text-emerald-400">{formatNGN(tx.amountKobo)}</div>
+                  <div className="text-white/40 text-[10px] uppercase tracking-wider">{tx.type?.replace("_", " ")}</div>
+                </div>
+                <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${statusBadge(tx.status)}`}>
+                  {tx.status}
+                </span>
               </div>
             </div>
           ))}

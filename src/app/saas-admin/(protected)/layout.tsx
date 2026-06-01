@@ -5,12 +5,13 @@ import axios from "axios";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  Building2, Ticket, BarChart3, Shield, LogOut, X, Menu, CreditCard, Users, Settings
+  Building2, Ticket, BarChart3, Shield, LogOut, X, Menu, CreditCard, Users, Settings, Receipt
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { id: "dashboard", href: "/saas-admin/dashboard", label: "Overview", icon: BarChart3 },
   { id: "schools", href: "/saas-admin/schools", label: "Schools", icon: Building2 },
+  { id: "transactions", href: "/saas-admin/transactions", label: "Transactions", icon: Receipt },
   { id: "plans", href: "/saas-admin/plans", label: "Plans", icon: CreditCard },
   { id: "support", href: "/saas-admin/support", label: "Support", icon: Ticket },
   { id: "users", href: "/saas-admin/users", label: "Users", icon: Users },

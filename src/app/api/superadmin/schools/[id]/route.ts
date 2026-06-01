@@ -6,7 +6,7 @@ import Subscription from "@/lib/models/subscription";
 import Plan from "@/lib/models/plan";
 import { sendEmail } from "@/lib/email";
 
-// GET /api/superadmin/schools/[id] — Get one school with full details
+// GET /api/superadmin/schools/[id] — Get one school with full details + usage
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
@@ -14,14 +14,43 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!superAdmin) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
-    const [school, studentCount] = await Promise.all([
+    const User = require("@/lib/models/user").default;
+    const SaaSTransaction = require("@/lib/models/saasTransaction").default;
+    const Class = require("@/lib/models/class").default;
+    const mongoose = require("mongoose");
+
+    let schoolId: any;
+    try { schoolId = new mongoose.Types.ObjectId(id); } catch { return NextResponse.json({ message: "Invalid ID" }, { status: 400 }); }
+
+    const [school, studentCount, teacherCount, adminCount, classCount, revenueAgg, recentTransactions] = await Promise.all([
       School.findById(id).populate({ path: "subscription", populate: { path: "plan" } }).lean(),
-      require("@/lib/models/user").default.countDocuments({ school: id, role: "student" })
+      User.countDocuments({ school: id, role: "student" }),
+      User.countDocuments({ school: id, role: "teacher" }),
+      User.countDocuments({ school: id, role: "admin" }),
+      Class.countDocuments({ school: id }),
+      SaaSTransaction.aggregate([
+        { $match: { school: schoolId, status: "success" } },
+        { $group: { _id: null, total: { $sum: "$amountKobo" } } },
+      ]),
+      SaaSTransaction.find({ school: id })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean(),
     ]);
 
     if (!school) return NextResponse.json({ message: "School not found" }, { status: 404 });
-    return NextResponse.json({ school, studentCount });
+
+    return NextResponse.json({
+      school,
+      studentCount,
+      teacherCount,
+      adminCount,
+      classCount,
+      totalRevenueKobo: revenueAgg[0]?.total || 0,
+      recentTransactions,
+    });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

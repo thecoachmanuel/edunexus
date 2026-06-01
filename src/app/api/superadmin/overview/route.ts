@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
       totalRevenue,
       totalUsers,
       recentSchools,
+      recentTransactions,
     ] = await Promise.all([
       School.countDocuments(),
       Subscription.countDocuments({ status: "active" }),
@@ -37,6 +38,11 @@ export async function GET(req: NextRequest) {
         .populate({ path: "subscription", populate: { path: "plan", select: "name" } })
         .select("name slug email isVerified isTrialActive createdAt")
         .lean(),
+      SaaSTransaction.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("school", "name slug")
+        .lean(),
     ]);
 
     return NextResponse.json({
@@ -49,6 +55,7 @@ export async function GET(req: NextRequest) {
         totalUsers,
       },
       recentSchools,
+      recentTransactions,
     });
   } catch (error) {
     console.error(error);
