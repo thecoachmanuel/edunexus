@@ -18,6 +18,10 @@ export interface ISchool extends Document {
   trialEndsAt?: Date;
   isTrialActive: boolean;
   subscription?: mongoose.Types.ObjectId;
+  aiTimetableUsage?: {
+    date: Date;
+    count: number;
+  };
 }
 
 const schoolSchema = new Schema<ISchool>(
@@ -39,6 +43,10 @@ const schoolSchema = new Schema<ISchool>(
     trialEndsAt: { type: Date },
     isTrialActive: { type: Boolean, default: false },
     subscription: { type: Schema.Types.ObjectId, ref: "Subscription" },
+    aiTimetableUsage: {
+      date: { type: Date },
+      count: { type: Number, default: 0 },
+    },
   },
   { timestamps: true }
 );

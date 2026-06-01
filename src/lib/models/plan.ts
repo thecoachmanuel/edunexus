@@ -11,6 +11,7 @@ export interface IPlan extends Document {
     lmsEnabled: boolean;
     financeEnabled: boolean;
     aiTimetableEnabled: boolean;
+    aiTimetableDailyLimit: number;
     advancedAnalytics: boolean;
     prioritySupport: boolean;
     dedicatedSupport: boolean;
@@ -34,6 +35,7 @@ const planSchema = new Schema<IPlan>(
       lmsEnabled: { type: Boolean, default: false },
       financeEnabled: { type: Boolean, default: false },
       aiTimetableEnabled: { type: Boolean, default: true },
+      aiTimetableDailyLimit: { type: Number, default: 5 },
       advancedAnalytics: { type: Boolean, default: false },
       prioritySupport: { type: Boolean, default: false },
       dedicatedSupport: { type: Boolean, default: false },

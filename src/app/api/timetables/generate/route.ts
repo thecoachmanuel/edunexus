@@ -199,7 +199,7 @@ RESPOND WITH ONLY THIS JSON STRUCTURE (no markdown, no explanation):
     // ── Step 4: Call Gemini (single attempt, JSON mode forced) ────────────────
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       generationConfig: { responseMimeType: "application/json" },
     });
 

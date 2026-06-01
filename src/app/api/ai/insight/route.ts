@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
       const result = await model.generateContent(prompt);
       const textResponse = result.response.text();
       return NextResponse.json({ text: textResponse });

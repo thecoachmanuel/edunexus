@@ -52,6 +52,8 @@ interface Props {
   selectedClass: string;
   setSelectedClass: (classId: string) => void;
   onSettingsChange?: (data: { yearId: string; settings: GenSettings }) => void;
+  onBulkGenerate?: (yearId: string, settings: GenSettings) => Promise<void>;
+  isBulkGenerating?: boolean;
 }
 const GeneratorControls = ({
   onGenerate,
@@ -60,6 +62,8 @@ const GeneratorControls = ({
   selectedClass,
   setSelectedClass,
   onSettingsChange,
+  onBulkGenerate,
+  isBulkGenerating,
 }: Props) => {
   const { user } = useAuth();
   const hideGenerate = user?.role !== "admin";
@@ -158,6 +162,23 @@ const GeneratorControls = ({
   const handleClassSelect = (val: string) => {
     setSelectedClass(val);
     onClassChange(val);
+  };
+
+  const handleBulkGenerateClick = () => {
+    if (!selectedYear || !selectedTerm) {
+      toast.error("Please select an Academic Year and Term");
+      return;
+    }
+    if (onBulkGenerate) {
+      onBulkGenerate(selectedYear, {
+        startTime,
+        endTime,
+        periods: parseInt(periods, 10) || 5,
+        periodDuration: parseInt(periodDuration, 10) || 45,
+        breaks,
+        term: selectedTerm,
+      });
+    }
   };
 
   return (
@@ -355,21 +376,33 @@ const GeneratorControls = ({
               ))}
             </div>
 
-              <Button
-                className="w-full mt-2"
-                onClick={handleGenerateClick}
-                disabled={isGenerating || !selectedClass || !selectedYear}
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing Schedule...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" /> Generate with AI
-                  </>
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                <Button
+                  className="flex-1"
+                  variant="outline"
+                  onClick={handleGenerateClick}
+                  disabled={isGenerating || isBulkGenerating || !selectedClass || !selectedYear}
+                >
+                  {isGenerating ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing...</>
+                  ) : (
+                    <><Sparkles className="mr-2 h-4 w-4" /> Generate Single Class</>
+                  )}
+                </Button>
+                {onBulkGenerate && (
+                  <Button
+                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                    onClick={handleBulkGenerateClick}
+                    disabled={isGenerating || isBulkGenerating || !selectedYear}
+                  >
+                    {isBulkGenerating ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Bulk Generating...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4 text-amber-200" /> Bulk Generate All</>
+                    )}
+                  </Button>
                 )}
-              </Button>
+              </div>
             </>
           )}
       </CardContent>

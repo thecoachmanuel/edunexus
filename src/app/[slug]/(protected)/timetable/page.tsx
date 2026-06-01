@@ -30,6 +30,7 @@ const Timetable = () => {
   const [scheduleData, setScheduleData] = useState<schedule[]>([]);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isBulkGenerating, setIsBulkGenerating] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [viewMode, setViewMode] = useState<"class" | "teacher" | "audit">("class");
@@ -148,6 +149,34 @@ const Timetable = () => {
 
 
 
+  const handleBulkGenerate = async (
+    yearId: string,
+    settings: GenSettings
+  ) => {
+    try {
+      if (!confirm("This will generate schedules for ALL classes in the school. Continue?")) return;
+      
+      setLastUsedSettings({ yearId, settings });
+      setIsBulkGenerating(true);
+      setSelectedTerm(settings.term);
+
+      const { data } = await api.post("/timetables/bulk-generate", {
+        academicYearId: yearId,
+        term: settings.term,
+        settings,
+      });
+
+      toast.success(data.message || `Timetables generated for ${data.count} classes!`);
+      if (selectedClass) {
+        await fetchTimetable(selectedClass, "class", settings.term);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Bulk generation failed");
+    } finally {
+      setIsBulkGenerating(false);
+    }
+  };
+
   const handleRegenerateWithWeights = async (weights: Record<string, number>) => {
     const baseSettings = lastUsedSettings || currentSettings;
     if (!baseSettings) {
@@ -232,8 +261,10 @@ const Timetable = () => {
         <div className="print:hidden">
           <GeneratorControls
             onGenerate={handleGenerate}
-            onClassChange={(classId) => fetchTimetable(classId, "class")}
+            onBulkGenerate={handleBulkGenerate}
             isGenerating={isGenerating}
+            isBulkGenerating={isBulkGenerating}
+            onClassChange={(classId) => fetchTimetable(classId, "class")}
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
             onSettingsChange={handleSettingsChange}

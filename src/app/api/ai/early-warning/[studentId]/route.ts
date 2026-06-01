@@ -103,7 +103,7 @@ Generate a specific, actionable 3-point intervention plan for this student. Requ
 7. Speak professionally to the teacher/admin reading this.
 `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     const result = await model.generateContent(prompt);
     const plan = result.response.text().trim();
 

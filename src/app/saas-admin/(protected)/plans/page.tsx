@@ -16,6 +16,7 @@ interface Plan {
     lmsEnabled: boolean;
     financeEnabled: boolean;
     aiTimetableEnabled: boolean;
+    aiTimetableDailyLimit: number;
     advancedAnalytics: boolean;
     prioritySupport: boolean;
     dedicatedSupport: boolean;
@@ -102,7 +103,7 @@ export default function PlansManagement() {
               _id: "", name: "", slug: "", monthlyPriceKobo: 0,
               features: {
                 maxStudents: 300, lmsEnabled: false, financeEnabled: false,
-                aiTimetableEnabled: true, advancedAnalytics: false,
+                aiTimetableEnabled: true, aiTimetableDailyLimit: 5, advancedAnalytics: false,
                 prioritySupport: false, dedicatedSupport: false
               },
               isActive: true, isHighlighted: false, trialAllowed: true, trialDays: 14
@@ -161,7 +162,7 @@ export default function PlansManagement() {
                 <span className="font-semibold text-white">{plan.features.maxStudents === -1 ? "Unlimited" : plan.features.maxStudents}</span>
               </div>
               {[
-                { key: "aiTimetableEnabled", label: "AI Timetable" },
+                { key: "aiTimetableEnabled", label: `AI Timetable (${plan.features.aiTimetableDailyLimit || 5}/day)` },
                 { key: "lmsEnabled", label: "LMS Module" },
                 { key: "financeEnabled", label: "Finance Module" },
                 { key: "advancedAnalytics", label: "Advanced Analytics" },
@@ -230,9 +231,15 @@ export default function PlansManagement() {
               <div className="border-t border-white/5 pt-6">
                 <h4 className="font-semibold mb-4 text-sm">Plan Features</h4>
                 
-                <div className="mb-4">
-                  <label className="block text-xs font-semibold text-white/50 mb-1">Max Students (-1 for unlimited)</label>
-                  <input type="number" value={editingPlan.features.maxStudents} onChange={e => setEditingPlan({...editingPlan, features: {...editingPlan.features, maxStudents: parseInt(e.target.value)}})} className="w-32 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm" />
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/50 mb-1">Max Students (-1 for unlimited)</label>
+                    <input type="number" value={editingPlan.features.maxStudents} onChange={e => setEditingPlan({...editingPlan, features: {...editingPlan.features, maxStudents: parseInt(e.target.value)}})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-white/50 mb-1">AI Timetable Daily Limit</label>
+                    <input type="number" value={editingPlan.features.aiTimetableDailyLimit || 5} onChange={e => setEditingPlan({...editingPlan, features: {...editingPlan.features, aiTimetableDailyLimit: parseInt(e.target.value)}})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm" />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

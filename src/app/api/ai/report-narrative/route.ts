@@ -115,7 +115,7 @@ Write a personal teacher's comment (3–5 sentences) for this student's report c
 8. Write in continuous prose — no bullet points.
 `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     const result = await model.generateContent(prompt);
     const narrative = result.response.text().trim();
 

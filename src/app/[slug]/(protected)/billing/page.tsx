@@ -6,7 +6,8 @@ import {
   CreditCard, CheckCircle2, AlertTriangle, Clock, Download, Loader2, Building2,
   Calendar, ToggleLeft, ToggleRight, Plus, Minus
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 interface BillingInfo {
   school: {
@@ -25,9 +26,12 @@ interface BillingInfo {
 
 export default function BillingPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = params?.slug as string;
+  const reference = searchParams?.get("reference") || searchParams?.get("trxref");
 
   const [data, setData] = useState<BillingInfo | null>(null);
+  const [verifying, setVerifying] = useState(!!reference);
   const [loading, setLoading] = useState(true);
   const [payLoading, setPayLoading] = useState(false);
   const [cycle, setCycle] = useState<"monthly" | "annual">("monthly");
@@ -38,15 +42,37 @@ export default function BillingPage() {
   const [previewDays, setPreviewDays] = useState<number | null>(null);
 
   useEffect(() => {
-    axios.get("/api/billing/status")
-      .then(res => setData(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    const loadData = () => {
+      axios.get("/api/billing/status")
+        .then(res => setData(res.data))
+        .catch(console.error)
+        .finally(() => setLoading(false));
 
-    axios.get("/api/plans")
-      .then(res => setPlans(res.data?.plans || []))
-      .catch(() => {});
-  }, []);
+      axios.get("/api/plans")
+        .then(res => setPlans(res.data?.plans || []))
+        .catch(() => {});
+    };
+
+    if (reference) {
+      // Proactively verify transaction to ensure instant dashboard updates
+      axios.get(`/api/billing/verify?reference=${reference}`)
+        .then(() => {
+          toast.success("Payment verified successfully!");
+          // Remove reference from URL to prevent infinite verification loops
+          window.history.replaceState(null, "", `/${slug}/billing`);
+        })
+        .catch(err => {
+          console.error("Verification failed", err);
+          toast.error("Verification pending. If payment was successful, it will reflect shortly.");
+        })
+        .finally(() => {
+          setVerifying(false);
+          loadData();
+        });
+    } else {
+      loadData();
+    }
+  }, [reference, slug]);
 
   const formatNGN = (kobo: number) =>
     new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(kobo / 100);
@@ -80,8 +106,13 @@ export default function BillingPage() {
     }
   };
 
-  if (loading) {
-    return <div className="p-8 flex items-center justify-center min-h-[50vh]"><Loader2 className="w-8 h-8 animate-spin text-violet-500" /></div>;
+  if (loading || verifying) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <Loader2 className="w-10 h-10 animate-spin text-violet-500" />
+        {verifying && <p className="text-muted-foreground font-medium animate-pulse">Verifying your payment securely...</p>}
+      </div>
+    );
   }
 
   if (!data) return <div className="p-8">Failed to load billing information.</div>;

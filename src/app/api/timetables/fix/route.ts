@@ -91,7 +91,7 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 
     // 4. Call Gemini with Retries
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
-    const activeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const activeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
     let attempts = 0;
     const maxAttempts = 3;
