@@ -87,7 +87,7 @@ export default function ExpensesPage() {
                 <TableCell>{e.title}</TableCell>
                 <TableCell className="capitalize">{e.category}</TableCell>
                 <TableCell>₦{e.amount}</TableCell>
-                <TableCell>{typeof e.recordedBy === "object" ? e.recordedBy.name : "Admin"}</TableCell>
+                <TableCell>{typeof e.recordedBy === "object" && e.recordedBy ? (e.recordedBy as any).name : "Admin"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

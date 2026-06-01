@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const existingUser = await User.findOne({ email, school: authUser.schoolContext?._id });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json({ message: "User already exists" }, { status: 400 });
+      return NextResponse.json({ message: "Email is already registered to an existing user" }, { status: 400 });
     }
 
     const newUser = await User.create({

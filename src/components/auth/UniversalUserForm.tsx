@@ -209,9 +209,10 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
         toast.success("User updated successfully");
         if (onSuccess) onSuccess();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      toast.error("An error occurred. Please try again.");
+      const msg = error?.response?.data?.message || "An error occurred. Please try again.";
+      toast.error(msg);
     }
   }
 

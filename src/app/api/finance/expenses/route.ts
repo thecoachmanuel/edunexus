@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search");
     const category = searchParams.get("category");
 
-    const query: any = {};
+    const query: any = { school: authUser.schoolContext?._id };
 
     if (search) {
       query.$or = [
@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
 
     const data = await req.json();
     data.recordedBy = authUser._id;
+    data.school = authUser.schoolContext?._id;
     const expense = await Expense.create(data);
 
     return NextResponse.json(expense, { status: 201 });

@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/db";
 import crypto from "crypto";
 import School from "@/lib/models/school";
 import Subscription from "@/lib/models/subscription";
-import InvoiceLog from "@/lib/models/invoiceLog";
+import SaaSTransaction from "@/lib/models/saasTransaction";
 import Plan from "@/lib/models/plan";
 import { sendEmail } from "@/lib/email";
 
@@ -72,16 +72,17 @@ export async function POST(req: NextRequest) {
       school.trialEndsAt = undefined;
       await school.save();
 
-      // Log invoice
-      await InvoiceLog.create({
+      // Log SaaS Transaction
+      await SaaSTransaction.create({
         school: schoolId,
         subscription: subscription._id,
-        amount,
+        amountKobo: amount,
         currency: "NGN",
+        reference,
         status: "success",
-        paystackReference: reference,
-        paystackEvent: eventType,
-        rawPayload: data,
+        type: subscription.renewalCount > 1 ? "renewal" : "new_subscription",
+        description: `Payment for ${plan?.name || "Subscription"}`,
+        paystackCustomerCode: customer?.customer_code,
         paidAt: new Date(),
       });
 
