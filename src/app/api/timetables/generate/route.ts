@@ -162,6 +162,7 @@ ${isUsingFallbackTeachers ? "3. No teacher-subject mapping available — assign 
 6. Avoid teacher clashes using the TEACHER CLASH MAP above.
 7. CRITICAL: Every period in a single day MUST have a UNIQUE startTime and endTime. Do NOT schedule multiple subjects/teachers for the exact same time slot in this class.
 8. IMPORTANT: "subject" and "teacher" values MUST be the exact 24-character hex ObjectId strings from the "id" fields in RESOURCES. Do NOT use names.
+9. IF YOU CANNOT RESOLVE A TEACHER CLASH, set "teacher" to null rather than generating an invalid schedule.
 
 OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 {
@@ -178,7 +179,10 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 
     // --- Step 4: Call Gemini with Retries ---
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY as string);
-    const activeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const activeModel = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    });
 
     let attempts = 0;
     const maxAttempts = 2; // Reduced from 3 to prevent Vercel 60s timeout
