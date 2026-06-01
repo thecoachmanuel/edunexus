@@ -169,7 +169,7 @@ EXAMPLE OUTPUT FORMAT:
     }
 
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-    const baseStartTime = new Date(\`2000-01-01T\${startTime}:00\`);
+    const baseStartTime = new Date(`2000-01-01T${startTime}:00`);
     const periodDuration = Number(settings.periodDuration) || 45;
 
     const bulkOps = [];
