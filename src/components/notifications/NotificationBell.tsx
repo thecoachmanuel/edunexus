@@ -6,6 +6,7 @@ import { Bell, X, CheckCheck, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Notification {
   _id: string;
@@ -39,6 +40,7 @@ function actionIcon(action: string): string {
 }
 
 export function NotificationBell() {
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [readIds, setReadIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
@@ -90,9 +92,10 @@ export function NotificationBell() {
       </PopoverTrigger>
 
       <PopoverContent
-        align="start"
-        side="right"
-        className="w-[340px] sm:w-[380px] p-0 flex flex-col overflow-hidden border-border rounded-2xl shadow-2xl"
+        align={isMobile ? "center" : "start"}
+        side={isMobile ? "bottom" : "right"}
+        sideOffset={isMobile ? 12 : 4}
+        className="w-[calc(100vw-32px)] sm:w-[380px] p-0 flex flex-col overflow-hidden border-border rounded-2xl shadow-2xl"
       >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
