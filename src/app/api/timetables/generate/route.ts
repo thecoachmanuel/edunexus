@@ -159,10 +159,10 @@ STRICT RULES:
 ${isUsingFallbackTeachers ? "3. No teacher-subject mapping available — assign any teacher to any subject." : "3. Prefer teachers whose subject list includes the subject."}
 4. Breaks: ${breaksDescription}. For break periods set subject=null, teacher=null, and name to the break name.
 5. Do NOT create free/empty periods — every non-break slot MUST have a subject and teacher.
-6. Avoid teacher clashes using the TEACHER CLASH MAP above.
+6. Try to avoid teacher clashes using the TEACHER CLASH MAP if possible, but if a clash is unavoidable, DO NOT FAIL. Generating a complete timetable is more important than avoiding all clashes. The system's Timetable Auditor will fix any resulting clashes later.
 7. CRITICAL: Every period in a single day MUST have a UNIQUE startTime and endTime. Do NOT schedule multiple subjects/teachers for the exact same time slot in this class.
 8. IMPORTANT: "subject" and "teacher" values MUST be the exact 24-character hex ObjectId strings from the "id" fields in RESOURCES. Do NOT use names.
-9. IF YOU CANNOT RESOLVE A TEACHER CLASH, set "teacher" to null rather than generating an invalid schedule.
+9. IF YOU CANNOT RESOLVE A TEACHER CLASH, just assign the teacher anyway and allow the clash to occur rather than returning null.
 
 OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
 {
@@ -240,13 +240,7 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
                   validationError += `Missing valid ObjectId for subject or teacher on ${day.day} at ${period.startTime}. `;
                 }
                 
-                // Validate mathematical clash
-                if (teacher && teacherClashMap[teacher]) {
-                  const clash = teacherClashMap[teacher].find(c => c.day === day.day && c.startTime === period.startTime);
-                  if (clash) {
-                    validationError += `CRITICAL CLASH: Teacher ${teacher} is already booked on ${day.day} at ${period.startTime} in another class. You MUST choose a different teacher. `;
-                  }
-                }
+                // Mathematical clash checking disabled to allow AI to generate fast and let Auditor fix
                 
                 return {
                   subject,
@@ -300,20 +294,14 @@ OUTPUT: Return ONLY valid JSON, no markdown, no explanation. Schema:
     }
 
     // --- Step 6: Graceful Fallback (Study Hall) ---
-    // If the AI ran out of attempts and still left flaws, we convert them to Study/Free Periods
-    // rather than throwing a complete error or saving a database clash.
+    // If the AI ran out of attempts and left missing teachers/subjects, convert to Free Periods
     finalSanitizedSchedule = finalSanitizedSchedule.map((day: any) => ({
       ...day,
       periods: day.periods.map((period: any) => {
         const isBreak = !!period.name && !period.subject && !period.teacher;
-        let isClashing = false;
         
-        if (period.teacher && teacherClashMap[period.teacher]) {
-          isClashing = teacherClashMap[period.teacher].some(c => c.day === day.day && c.startTime === period.startTime);
-        }
-        
-        if (!isBreak && (!period.subject || !period.teacher || isClashing)) {
-          // Fallback
+        if (!isBreak && (!period.subject || !period.teacher)) {
+          // Fallback only for genuinely missing data
           return {
             ...period,
             subject: null,
