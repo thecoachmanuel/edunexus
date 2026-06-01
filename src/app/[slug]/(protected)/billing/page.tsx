@@ -6,7 +6,7 @@ import {
   CreditCard, CheckCircle2, AlertTriangle, Clock, Download, Loader2, Building2,
   Calendar, ToggleLeft, ToggleRight, Plus, Minus
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 interface BillingInfo {
