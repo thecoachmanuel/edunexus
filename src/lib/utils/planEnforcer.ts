@@ -18,7 +18,7 @@ export async function getSchoolFeatures(schoolId: string) {
   let features = ["attendance", "grading", "basic_reports"];
 
   if (plan) {
-    maxStudents = plan.maxStudents;
+    maxStudents = plan.features?.maxStudents === -1 ? 10000 : (plan.features?.maxStudents || 500);
     features = plan.features || [];
   } else if (school.isTrialActive) {
     // Generous trial limits

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     if (eventType === "charge.success") {
       const { metadata, amount, reference, customer } = data;
-      const { schoolId, planId } = metadata || {};
+      const { schoolId, planId, daysToAdd } = metadata || {};
 
       if (!schoolId) return NextResponse.json({ message: "No schoolId in metadata" }, { status: 200 });
 
@@ -38,15 +38,21 @@ export async function POST(req: NextRequest) {
 
       const plan = await Plan.findById(planId);
 
-      // Update or create subscription
+      const actualDays = daysToAdd ? Number(daysToAdd) : 30;
       const now = new Date();
-      const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
       let subscription = school.subscription
         ? await Subscription.findById(school.subscription)
         : null;
 
       if (subscription) {
+        // If they already have an active subscription, add time to the existing end date
+        const baseDate = subscription.currentPeriodEnd && subscription.currentPeriodEnd > now
+          ? subscription.currentPeriodEnd
+          : now;
+        
+        const periodEnd = new Date(baseDate.getTime() + actualDays * 24 * 60 * 60 * 1000);
+
         subscription.status = "active";
         subscription.plan = planId;
         subscription.currentPeriodStart = now;
@@ -55,6 +61,7 @@ export async function POST(req: NextRequest) {
         subscription.renewalCount += 1;
         await subscription.save();
       } else {
+        const periodEnd = new Date(now.getTime() + actualDays * 24 * 60 * 60 * 1000);
         subscription = await Subscription.create({
           school: schoolId,
           plan: planId,
@@ -86,7 +93,6 @@ export async function POST(req: NextRequest) {
         paidAt: new Date(),
       });
 
-      // Send payment receipt email
       await sendEmail({
         to: school.email,
         subject: "Payment Confirmed — EduNexus Subscription",
@@ -94,7 +100,7 @@ export async function POST(req: NextRequest) {
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #4f46e5;">Payment Confirmed ✅</h1>
             <p>Your payment of <strong>₦${(amount / 100).toLocaleString()}</strong> for the <strong>${plan?.name || "EduNexus"}</strong> plan has been received.</p>
-            <p>Your subscription is now active until <strong>${periodEnd.toLocaleDateString("en-NG")}</strong>.</p>
+            <p>Your subscription has been extended successfully.</p>
             <p>Reference: <code>${reference}</code></p>
             <hr style="border-color: #eee; margin: 24px 0;" />
             <p style="color: #6b7280; font-size: 14px;">Thank you for choosing EduNexus. If you have questions, reply to this email or open a support ticket from your dashboard.</p>
