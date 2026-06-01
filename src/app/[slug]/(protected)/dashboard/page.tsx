@@ -89,6 +89,7 @@ export default function Dashboard() {
             <>
               <Button 
                 variant="outline" 
+                className="h-auto py-3 px-4 flex flex-col items-center gap-2 border-indigo-100 bg-indigo-50/50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800"
                 onClick={() => router.push(`/${slug}/lms/quizzes`)}
               >
                 <ClipboardEdit className="h-5 w-5" />
@@ -97,7 +98,7 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 className="h-auto py-3 px-4 flex flex-col items-center gap-2 border-blue-100 bg-blue-50/50 hover:bg-blue-100 text-blue-700 hover:text-blue-800"
-                onClick={() => router.push("/academics/attendance")}
+                onClick={() => router.push(`/${slug}/academics/attendance`)}
               >
                 <CalendarCheck className="h-5 w-5" />
                 <span className="text-xs font-semibold">Mark Attendance</span>
@@ -105,7 +106,7 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 className="h-auto py-3 px-4 flex flex-col items-center gap-2 border-purple-100 bg-purple-50/50 hover:bg-purple-100 text-purple-700 hover:text-purple-800"
-                onClick={() => router.push("/lms/materials")}
+                onClick={() => router.push(`/${slug}/lms/materials`)}
               >
                 <FileUp className="h-5 w-5" />
                 <span className="text-xs font-semibold">Upload Material</span>

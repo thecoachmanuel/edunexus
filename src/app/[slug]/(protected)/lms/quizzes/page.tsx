@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import type { exam } from "@/types";
 import { toast } from "sonner";
 import QuizGenerator from "@/components/lms/QuizGenerator";
@@ -153,6 +154,7 @@ const Quizzes = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const router = useRouter();
+  const params = useParams();
 
   // Debounce search input
   const handleSearch = useCallback((value: string) => {
