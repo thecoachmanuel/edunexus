@@ -6,7 +6,7 @@ import {
 } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { type ComponentProps } from "react";
+import { type ComponentProps, type ReactNode } from "react";
 
 // Extend standard Input props but override specific ones we handle manually
 interface CustomInputProps<T extends FieldValues>
@@ -15,6 +15,7 @@ interface CustomInputProps<T extends FieldValues>
   name: Path<T>; // Ensures type safety for the field name
   label: string;
   description?: string;
+  startIcon?: ReactNode;
 }
 
 export function CustomInput<T extends FieldValues>({
@@ -23,6 +24,7 @@ export function CustomInput<T extends FieldValues>({
   label,
   description,
   disabled,
+  startIcon,
   ...props
 }: CustomInputProps<T>) {
   return (
@@ -36,6 +38,7 @@ export function CustomInput<T extends FieldValues>({
             {...field} 
             value={field.value ?? ""} 
             disabled={disabled}
+            startIcon={startIcon}
             {...props} 
           />
 

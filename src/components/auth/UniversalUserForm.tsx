@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 // import { useAuth } from "@/hooks/AuthProvider";
 import { CustomMultiSelect } from "@/components/global/CustomMultiSelect";
+import { AtSign, Lock, User } from "lucide-react";
 
 export type FormType = "login" | "create" | "update";
 interface Props {
@@ -249,6 +250,7 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
               label="Full Name"
               placeholder="Jane Doe"
               disabled={pending}
+              startIcon={<User className="h-4 w-4" />}
             />
           )}
           {/* role selector */}
@@ -306,6 +308,7 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
               type="email"
               placeholder="johndoe@gmail.com"
               disabled={pending}
+              startIcon={<AtSign className="h-4 w-4" />}
             />
           </div>
           <div className="col-span-2">
@@ -316,6 +319,7 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
               type="password"
               placeholder={isUpdate ? "New Password (Optional)" : "Password"}
               disabled={pending}
+              startIcon={<Lock className="h-4 w-4" />}
             />
           </div>
           {type === "create" && (
@@ -327,6 +331,7 @@ const UniversalUserForm = ({ type, initialData, onSuccess, role }: Props) => {
                 type="password"
                 placeholder={"Confirm Password"}
                 disabled={pending}
+                startIcon={<Lock className="h-4 w-4" />}
               />
             </div>
           )}
