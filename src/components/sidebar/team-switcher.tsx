@@ -54,12 +54,18 @@ export function TeamSwitcher({
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden bg-violet-600">
                 {activeTeam.logoUrl ? (
                   <img src={activeTeam.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                ) : (
+                ) : activeTeam.name ? (
                   <span className="text-lg font-black text-white leading-none">{activeTeam.name.charAt(0).toUpperCase()}</span>
+                ) : (
+                  <span className="w-4 h-4 rounded bg-white/20 animate-pulse block" />
                 )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-bold text-base">{activeTeam.name}</span>
+                {activeTeam.name ? (
+                  <span className="truncate font-bold text-base">{activeTeam.name}</span>
+                ) : (
+                  <span className="h-4 w-28 rounded bg-sidebar-accent animate-pulse block" />
+                )}
                 <span className="truncate text-xs">{yearName}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />

@@ -51,7 +51,7 @@ export interface NavItem {
 export const sidebardata = {
   teams: [
     {
-      name: "Springfield High",
+      name: "",
       logo: School,
     },
   ],
@@ -221,9 +221,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
   const params = useParams();
 
-  // Dynamic School Settings state
+  // Dynamic School Settings state — start empty so we never flash a placeholder
   const [schoolInfo, setSchoolInfo] = useState({
-    name: "Springfield High",
+    name: "",
     logoUrl: "",
   });
 
@@ -233,7 +233,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       .then((res) => {
         if (res.data?.settings) {
           setSchoolInfo({
-            name: res.data.settings.schoolName || "Springfield High",
+            name: res.data.settings.schoolName || "",
             logoUrl: res.data.settings.schoolLogo || "",
           });
         }
