@@ -59,13 +59,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const plan = school.subscription ? (await import("@/lib/models/plan")).default.findById((school.subscription as any).plan || school.subscription) : null;
-    let dailyLimit = 5; // Default fallback
-    if (plan && plan.features?.aiTimetableDailyLimit !== undefined) {
-      dailyLimit = plan.features.aiTimetableDailyLimit;
-    } else if (school.isTrialActive) {
-      dailyLimit = 10; // Generous limit for trial
-    }
+    // Use limit from plan features (resolved by getSchoolFeatures)
+    const dailyLimit = schoolFeatures.dailyTimetableLimit;
 
     if (currentUsage >= dailyLimit) {
       return NextResponse.json(

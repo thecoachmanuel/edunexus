@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
           quantity: qty,
           daysToAdd,
         },
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/${school.slug}/billing?status=callback`,
+        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/${school.slug}/billing`,
       },
       {
         headers: {
