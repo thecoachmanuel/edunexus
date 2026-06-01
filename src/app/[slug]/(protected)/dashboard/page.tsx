@@ -89,8 +89,7 @@ export default function Dashboard() {
             <>
               <Button 
                 variant="outline" 
-                className="h-auto py-3 px-4 flex flex-col items-center gap-2 border-indigo-100 bg-indigo-50/50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800"
-                onClick={() => router.push("/lms/quizzes")}
+                onClick={() => router.push(`/${slug}/lms/quizzes`)}
               >
                 <ClipboardEdit className="h-5 w-5" />
                 <span className="text-xs font-semibold">Create Assignment</span>

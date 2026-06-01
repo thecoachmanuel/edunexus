@@ -55,7 +55,7 @@ const Quiz = () => {
   useEffect(() => {
     if (examError) {
       toast.error("Failed to load exam");
-      router.push("/lms/quizzes");
+      router.push(`/${params.slug}/lms/quizzes`);
     }
   }, [examError, router]);
 
@@ -64,7 +64,7 @@ const Quiz = () => {
       if (!exam) {
         // Only redirect if there's no exam and we're not loading and there's no error (which is handled above)
       } else if (!exam.isActive && !isTeacher) {
-        router.push("/lms/quizzes");
+        router.push(`/${params.slug}/lms/quizzes`);
       }
     }
   }, [loadingExam, exam, isTeacher, router]);
@@ -90,7 +90,7 @@ const Quiz = () => {
         <p className="text-muted-foreground">
           This quiz is currently closed or has expired.
         </p>
-        <Button onClick={() => router.push("/lms/quizzes")}>Back to List</Button>
+        <Button onClick={() => router.push(`/${params.slug}/lms/quizzes`)}>Back to List</Button>
       </div>
     );
   }
@@ -100,7 +100,7 @@ const Quiz = () => {
     try {
       await api.delete(`/exams/${id}`);
       toast.success("Quiz deleted");
-      router.push("/lms/quizzes");
+      router.push(`/${params.slug}/lms/quizzes`);
     } catch (error) {
       toast.error("Failed to delete");
     }
@@ -122,7 +122,7 @@ const Quiz = () => {
         answers: payload,
       });
       toast.success(`Quiz submitted! Score: ${data.score}`);
-      router.push("/lms/quizzes");
+      router.push(`/${params.slug}/lms/quizzes`);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Submission failed");
     } finally {
@@ -165,7 +165,7 @@ const Quiz = () => {
           <div className="bg-card p-4 rounded-lg flex flex-col lg:flex-row lg:items-center justify-between border gap-4">
             <div className="text-lg font-semibold">Teacher Controls</div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => router.push("/lms/quizzes")}>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/${params.slug}/lms/quizzes`)}>
                 Back to List
               </Button>
               {!isEditing && (
@@ -220,7 +220,7 @@ const Quiz = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/lms/quizzes")}
+              onClick={() => router.push(`/${params.slug}/lms/quizzes`)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" /> Back to Quizzes
             </Button>

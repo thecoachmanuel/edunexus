@@ -346,7 +346,7 @@ const Quizzes = () => {
                                 ? "border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950 dark:hover:text-emerald-300"
                                 : ""
                             }`}
-                            onClick={() => router.push(`/lms/quizzes/${exam._id}`)}
+                            onClick={() => router.push(`/${params.slug}/lms/quizzes/${exam._id}`)}
                           >
                             {isTeacher ? "Manage Questions" : exam.hasSubmitted ? "View Results" : "Start Quiz"}
                           </Button>
